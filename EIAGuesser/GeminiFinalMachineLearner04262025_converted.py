@@ -79,12 +79,20 @@ def log_step(name: str):
 log_step("Loading and Preprocessing Input Data")
 
 try:
-    data_dir = os.getcwd()
-    logging.info(f"Data directory is set to: {data_dir}")
-    logging.info("Please ensure Fundy.csv, WEATHER.csv, EIAchanges.csv, PowerGen.xlsx are in this directory.")
+    # Get the directory where the current script is located (EIAGuesser)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Go one level up to the project's root directory (TraderHelper)
+    project_root = os.path.dirname(script_dir)
+    
+    # Set the data directory to be the INFO folder inside the project root
+    data_dir = os.path.join(project_root, 'INFO')
+    
+    logging.info(f"Data directory is set to: {data_dir}") # This will now log the correct INFO path
+    logging.info("Please ensure Fundy.csv, WEATHER.csv, EIAchanges.csv, PowerGen.xlsx are in this directory.") # This log message is still relevant for the INFO dir
 except Exception as e:
-    logging.error(f"Could not set data_dir using os.getcwd(): {e}")
-    logging.error("Please ensure your script has permissions to access the current working directory or set data_dir manually.")
+    # ... (the rest of your existing error handling for data_dir) ...
+    logging.error(f"Could not set data_dir: {e}") # You might want to update this message slightly
     raise
 
 # --- Load Core Files ---
