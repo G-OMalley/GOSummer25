@@ -6,7 +6,7 @@ import questionary
 import os
 from dotenv import load_dotenv
 
-# Load .env credentials
+# Load credentials from .env
 load_dotenv()
 USERNAME = os.getenv("WSI_USERNAME")
 PROFILE = os.getenv("WSI_PROFILE")
@@ -87,7 +87,7 @@ def fetch_year_data(station_id, city_name, year):
     return df[["Date", "Min Temp", "Max Temp", "Avg Temp", "CDD", "HDD", "Month-Day", "City Symbol", "City Title"]]
 
 def fetch_all_years(station_id, city_name):
-    start_year = 2015
+    start_year = 2005
     current_year = datetime.today().year
     all_data = []
 
@@ -103,25 +103,25 @@ def compute_10yr_stats(df):
 
     for idx, row in df.iterrows():
         md = row["Month-Day"]
-        target_year = row["Date"].year
-        prior_years = df[(df["Month-Day"] == md) & (df["Date"].dt.year < target_year)]
+        target_date = row["Date"]
+        prior = df[(df["Month-Day"] == md) & (df["Date"] < target_date)]
 
-        if prior_years.empty:
-            ten_min = ten_max = ten_avg = ten_cdd = ten_hdd = None
+        if prior.empty:
+            ten_min = ten_max = ten_avg = ten_cdd = ten_hdd = 0.0
         else:
-            ten_min = prior_years["Min Temp"].min()
-            ten_max = prior_years["Max Temp"].max()
+            ten_min = prior["Min Temp"].min()
+            ten_max = prior["Max Temp"].max()
             ten_avg = (ten_min + ten_max) / 2
-            ten_cdd = max(0, ten_avg - 65) if pd.notna(ten_avg) else None
-            ten_hdd = max(0, 65 - ten_avg) if pd.notna(ten_avg) else None
+            ten_cdd = max(0, ten_avg - 65)
+            ten_hdd = max(0, 65 - ten_avg)
 
         result_rows.append({
             **row,
-            "10yr Min Temp": round(ten_min, 1) if pd.notna(ten_min) else None,
-            "10yr Max Temp": round(ten_max, 1) if pd.notna(ten_max) else None,
-            "10yr Avg Temp": round(ten_avg, 1) if pd.notna(ten_avg) else None,
-            "10yr CDD": round(ten_cdd, 1) if pd.notna(ten_cdd) else None,
-            "10yr HDD": round(ten_hdd, 1) if pd.notna(ten_hdd) else None,
+            "10yr Min Temp": round(ten_min, 1),
+            "10yr Max Temp": round(ten_max, 1),
+            "10yr Avg Temp": round(ten_avg, 1),
+            "10yr CDD": round(ten_cdd, 1),
+            "10yr HDD": round(ten_hdd, 1)
         })
 
     return pd.DataFrame(result_rows)
@@ -137,11 +137,14 @@ if __name__ == "__main__":
         print("❌ No data found.")
     else:
         final_df = compute_10yr_stats(raw_df)
-        final_df = final_df.drop(columns=["Month-Day"])  # clean up
+        final_df = final_df.drop(columns=["Month-Day"])
+
+        # Filter to display/export only from 2015 onward
+        filtered_df = final_df[final_df["Date"].dt.year >= 2015]
 
         filename = f"{station_id}_weather_with_10yr_{datetime.today().date()}.csv"
-        final_df.to_csv(filename, index=False)
+        filtered_df.to_csv(filename, index=False)
 
         print(f"\n✅ Saved: {filename}")
         print("\n🔎 First row of result:")
-        print(final_df.head(1).to_string(index=False))
+        print(filtered_df.head(1).to_string(index=False))
