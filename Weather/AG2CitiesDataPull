@@ -2,99 +2,146 @@ import requests
 import pandas as pd
 from io import StringIO
 from datetime import datetime
+import questionary
 import os
 from dotenv import load_dotenv
 
-# Load credentials from .env
+# Load .env credentials
 load_dotenv()
 USERNAME = os.getenv("WSI_USERNAME")
 PROFILE = os.getenv("WSI_PROFILE")
 PASSWORD = os.getenv("WSI_PASSWORD")
 
 if not all([USERNAME, PROFILE, PASSWORD]):
-    raise EnvironmentError("❌ Missing WSI credentials in .env")
+    raise EnvironmentError("❌ Missing WSI credentials in .env file.")
 
-# Allowed cities
-CITIES = {
-    "Atlanta GA": "KATL",
-    "Boston MA": "KBOS",
-    "Buffalo NY": "KBUF",
-    "Chicago IL": "KORD",
-    "Denver CO": "KDEN",
-    "Detroit MI": "KDTW",
-    "Houston TX": "KIAH",
-    "John F. Kennedy NY": "KJFK",
-    "Little Rock AR": "KLIT",
-    "Los Angeles CA": "KLAX",
-    "New Orleans LA": "KMSY",
-    "Oklahoma City OK": "KOKC",
-    "Philadelphia PA": "KPHL",
-    "Pittsburgh PA": "KPIT",
-    "Raleigh/Durham NC": "KRDU",
-    "San Francisco CA": "KSFO",
-    "Seattle WA": "KSEA",
-    "Tampa FL": "KTPA",
-    "Washington National DC": "KDCA"
-}
+def get_city_map():
+    url = "https://www.wsitrader.com/Services/CSVDownloadService.svc/GetCityIds"
+    params = {"Account": USERNAME, "Profile": PROFILE, "Password": PASSWORD}
+    response = requests.get(url, params=params)
+    df = pd.read_csv(StringIO(response.text))
+    df.columns = df.columns.str.strip()
+    df = df[["SiteId", "Station Name"]].dropna().drop_duplicates()
+    exclude = ["ZONE", "REGION", "CONSUM", "PRODUCING", "MIDWEST", "PACIFIC",
+               "EAST", "WEST", "CENTRAL", "MOUNTAIN", "AREA", "SOUTH", "NORTH"]
+    df = df[~df["Station Name"].str.upper().str.contains('|'.join(exclude))]
+    return dict(zip(df["Station Name"], df["SiteId"]))
 
-# Select city
-def get_user_input():
-    print("Available Cities:")
-    for i, city in enumerate(CITIES.keys(), start=1):
-        print(f"{i}. {city}")
-    index = input("Select a city number: ").strip()
+def choose_city(city_map):
+    city = questionary.select("🌎 Choose a city:", choices=sorted(city_map.keys())).ask()
+    return city, city_map[city]
 
-    if not index.isdigit() or not (1 <= int(index) <= len(CITIES)):
-        raise ValueError("Invalid city selection.")
+def fetch_year_data(station_id, city_name, year):
+    def fmt(d): return d.strftime("%m/%d/%Y")
+    start_date = datetime(year, 1, 1)
+    end_date = datetime(year, 12, 31)
+    if end_date > datetime.today():
+        end_date = datetime.today()
 
-    city = list(CITIES.keys())[int(index) - 1]
-    station_id = CITIES[city]
+    print(f"📆 Pulling {year} for {city_name} ({station_id})...")
 
-    start_date = input("Enter start date (YYYY-MM-DD): ")
-    end_date = input("Enter end date (YYYY-MM-DD): ")
-
-    try:
-        start_fmt = datetime.strptime(start_date, "%Y-%m-%d").strftime("%m/%d/%Y")
-        end_fmt = datetime.strptime(end_date, "%Y-%m-%d").strftime("%m/%d/%Y")
-    except:
-        raise ValueError("❌ Date must be in YYYY-MM-DD format.")
-
-    return city, station_id, start_fmt, end_fmt
-
-# Request data from AG2 API
-def fetch_weather_data(station_id, start, end):
     url = "https://www.wsitrader.com/Services/CSVDownloadService.svc/GetHistoricalObservations"
     params = {
         "Account": USERNAME,
         "Profile": PROFILE,
         "Password": PASSWORD,
-        "HistoricalProductId": "HISTORICAL_DAILY_OBSERVED",
         "CityIds[]": station_id,
-        "StartDate": start,
-        "EndDate": end,
+        "StartDate": fmt(start_date),
+        "EndDate": fmt(end_date),
+        "HistoricalProductId": "HISTORICAL_DAILY_AVERAGE",
+        "DataTypes[]": "temperature",
         "TempUnits": "F",
         "IsTemp": "true",
-        "IsDisplayDates": "false",
-        "IsDaily": "true"
+        "IsDaily": "true",
+        "IsDisplayDates": "false"
     }
 
-    response = requests.get(url, params=params)
-    if response.status_code != 200:
-        raise Exception(f"❌ API request failed: {response.text}")
+    response = requests.get(url, params=params, timeout=30)
+    df = pd.read_csv(StringIO(response.text))
+    df.columns = df.columns.str.strip()
 
-    return pd.read_csv(StringIO(response.text))
+    if df.empty or len(df.columns) < 3:
+        print(f"⚠️ No data for {year}")
+        return pd.DataFrame()
 
-# Main logic
-def main():
-    city, station_id, start_date, end_date = get_user_input()
-    print(f"\n📍 Fetching weather data for {city} ({station_id}) from {start_date} to {end_date}...")
+    df = df.rename(columns={
+        df.columns[0]: "Date",
+        df.columns[1]: "Min Temp",
+        df.columns[2]: "Max Temp"
+    })
 
-    df = fetch_weather_data(station_id, start_date, end_date)
+    df["Date"] = df["Date"].astype(str) + f" {year}"
+    df["Date"] = pd.to_datetime(df["Date"], format="%d-%b %Y", errors='coerce')
+    df["Min Temp"] = pd.to_numeric(df["Min Temp"], errors='coerce')
+    df["Max Temp"] = pd.to_numeric(df["Max Temp"], errors='coerce')
+    df = df.dropna(subset=["Date"])
 
-    output_file = f"{station_id}_{start_date.replace('/', '-')}_to_{end_date.replace('/', '-')}.csv"
-    df.to_csv(output_file, index=False)
+    df["Avg Temp"] = (df["Min Temp"] + df["Max Temp"]) / 2
+    df["CDD"] = (df["Avg Temp"] - 65).clip(lower=0).round(1)
+    df["HDD"] = (65 - df["Avg Temp"]).clip(lower=0).round(1)
 
-    print(f"✅ Data saved to {output_file}")
+    df["Month-Day"] = df["Date"].dt.strftime("%m-%d")
+    df["City Symbol"] = station_id
+    df["City Title"] = city_name
 
+    return df[["Date", "Min Temp", "Max Temp", "Avg Temp", "CDD", "HDD", "Month-Day", "City Symbol", "City Title"]]
+
+def fetch_all_years(station_id, city_name):
+    start_year = 2015
+    current_year = datetime.today().year
+    all_data = []
+
+    for year in range(start_year, current_year + 1):
+        year_df = fetch_year_data(station_id, city_name, year)
+        if not year_df.empty:
+            all_data.append(year_df)
+
+    return pd.concat(all_data, ignore_index=True) if all_data else pd.DataFrame()
+
+def compute_10yr_stats(df):
+    result_rows = []
+
+    for idx, row in df.iterrows():
+        md = row["Month-Day"]
+        target_year = row["Date"].year
+        prior_years = df[(df["Month-Day"] == md) & (df["Date"].dt.year < target_year)]
+
+        if prior_years.empty:
+            ten_min = ten_max = ten_avg = ten_cdd = ten_hdd = None
+        else:
+            ten_min = prior_years["Min Temp"].min()
+            ten_max = prior_years["Max Temp"].max()
+            ten_avg = (ten_min + ten_max) / 2
+            ten_cdd = max(0, ten_avg - 65) if pd.notna(ten_avg) else None
+            ten_hdd = max(0, 65 - ten_avg) if pd.notna(ten_avg) else None
+
+        result_rows.append({
+            **row,
+            "10yr Min Temp": round(ten_min, 1) if pd.notna(ten_min) else None,
+            "10yr Max Temp": round(ten_max, 1) if pd.notna(ten_max) else None,
+            "10yr Avg Temp": round(ten_avg, 1) if pd.notna(ten_avg) else None,
+            "10yr CDD": round(ten_cdd, 1) if pd.notna(ten_cdd) else None,
+            "10yr HDD": round(ten_hdd, 1) if pd.notna(ten_hdd) else None,
+        })
+
+    return pd.DataFrame(result_rows)
+
+# --- RUN SUPER SCRIPT ---
 if __name__ == "__main__":
-    main()
+    city_map = get_city_map()
+    city_name, station_id = choose_city(city_map)
+
+    raw_df = fetch_all_years(station_id, city_name)
+
+    if raw_df.empty:
+        print("❌ No data found.")
+    else:
+        final_df = compute_10yr_stats(raw_df)
+        final_df = final_df.drop(columns=["Month-Day"])  # clean up
+
+        filename = f"{station_id}_weather_with_10yr_{datetime.today().date()}.csv"
+        final_df.to_csv(filename, index=False)
+
+        print(f"\n✅ Saved: {filename}")
+        print("\n🔎 First row of result:")
+        print(final_df.head(1).to_string(index=False))
