@@ -1,0 +1,100 @@
+import requests
+import pandas as pd
+from io import StringIO
+from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+# Load credentials from .env
+load_dotenv()
+USERNAME = os.getenv("WSI_USERNAME")
+PROFILE = os.getenv("WSI_PROFILE")
+PASSWORD = os.getenv("WSI_PASSWORD")
+
+if not all([USERNAME, PROFILE, PASSWORD]):
+    raise EnvironmentError("❌ Missing WSI credentials in .env")
+
+# Allowed cities
+CITIES = {
+    "Atlanta GA": "KATL",
+    "Boston MA": "KBOS",
+    "Buffalo NY": "KBUF",
+    "Chicago IL": "KORD",
+    "Denver CO": "KDEN",
+    "Detroit MI": "KDTW",
+    "Houston TX": "KIAH",
+    "John F. Kennedy NY": "KJFK",
+    "Little Rock AR": "KLIT",
+    "Los Angeles CA": "KLAX",
+    "New Orleans LA": "KMSY",
+    "Oklahoma City OK": "KOKC",
+    "Philadelphia PA": "KPHL",
+    "Pittsburgh PA": "KPIT",
+    "Raleigh/Durham NC": "KRDU",
+    "San Francisco CA": "KSFO",
+    "Seattle WA": "KSEA",
+    "Tampa FL": "KTPA",
+    "Washington National DC": "KDCA"
+}
+
+# Select city
+def get_user_input():
+    print("Available Cities:")
+    for i, city in enumerate(CITIES.keys(), start=1):
+        print(f"{i}. {city}")
+    index = input("Select a city number: ").strip()
+
+    if not index.isdigit() or not (1 <= int(index) <= len(CITIES)):
+        raise ValueError("Invalid city selection.")
+
+    city = list(CITIES.keys())[int(index) - 1]
+    station_id = CITIES[city]
+
+    start_date = input("Enter start date (YYYY-MM-DD): ")
+    end_date = input("Enter end date (YYYY-MM-DD): ")
+
+    try:
+        start_fmt = datetime.strptime(start_date, "%Y-%m-%d").strftime("%m/%d/%Y")
+        end_fmt = datetime.strptime(end_date, "%Y-%m-%d").strftime("%m/%d/%Y")
+    except:
+        raise ValueError("❌ Date must be in YYYY-MM-DD format.")
+
+    return city, station_id, start_fmt, end_fmt
+
+# Request data from AG2 API
+def fetch_weather_data(station_id, start, end):
+    url = "https://www.wsitrader.com/Services/CSVDownloadService.svc/GetHistoricalObservations"
+    params = {
+        "Account": USERNAME,
+        "Profile": PROFILE,
+        "Password": PASSWORD,
+        "HistoricalProductId": "HISTORICAL_DAILY_OBSERVED",
+        "CityIds[]": station_id,
+        "StartDate": start,
+        "EndDate": end,
+        "TempUnits": "F",
+        "IsTemp": "true",
+        "IsDisplayDates": "false",
+        "IsDaily": "true"
+    }
+
+    response = requests.get(url, params=params)
+    if response.status_code != 200:
+        raise Exception(f"❌ API request failed: {response.text}")
+
+    return pd.read_csv(StringIO(response.text))
+
+# Main logic
+def main():
+    city, station_id, start_date, end_date = get_user_input()
+    print(f"\n📍 Fetching weather data for {city} ({station_id}) from {start_date} to {end_date}...")
+
+    df = fetch_weather_data(station_id, start_date, end_date)
+
+    output_file = f"{station_id}_{start_date.replace('/', '-')}_to_{end_date.replace('/', '-')}.csv"
+    df.to_csv(output_file, index=False)
+
+    print(f"✅ Data saved to {output_file}")
+
+if __name__ == "__main__":
+    main()
