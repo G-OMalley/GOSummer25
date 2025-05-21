@@ -1,2 +1,4 @@
 EIAGuesser/models_v3_hybrid/
 .env
+.DS_Store
+__pycache__/
