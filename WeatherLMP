@@ -1,0 +1,164 @@
+from dotenv import load_dotenv
+import os
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt
+from io import StringIO
+from datetime import datetime
+from pathlib import Path
+import questionary
+
+# --- Load credentials ---
+env_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=env_path)
+USERNAME = os.getenv("WSI_USERNAME")
+PROFILE = os.getenv("WSI_PROFILE")
+PASSWORD = os.getenv("WSI_PASSWORD")
+
+# --- City to ISO and ISO to file mappings ---
+CITY_TO_ISO = {
+    "Abilene": "ERCOT", "Albuquerque": "SPP", "Allentown": "PJM", "Austin": "ERCOT", "Baltimore": "PJM",
+    "Beaumont": "ERCOT", "Bismarck": "MISO", "Boston": "ISO-NE", "Brownsville": "ERCOT", "Buffalo": "NYISO",
+    "Burlington": "ISO-NE", "Cape Girardeau": "MISO", "Charleston": "PJM", "Chicago OHare": "MISO",
+    "Cincinnati": "PJM", "Cleveland": "PJM", "Columbus": "PJM", "Concord": "ISO-NE", "Conroe": "ERCOT",
+    "Corpus Christi": "ERCOT", "Covington": "PJM", "Dallas Fort Worth": "ERCOT", "Dayton": "PJM",
+    "Des Moines": "MISO", "Detroit": "MISO", "Dodge City": "SPP", "Dover": "PJM", "Fargo": "MISO",
+    "Fresno": "CAISO", "Grand Prairie": "ERCOT", "Harrisburg": "PJM", "Hartford": "ISO-NE",
+    "Houston IAH": "ERCOT", "Indianapolis": "MISO", "Jackson": "MISO", "JFK": "NYISO", "Jonesboro": "MISO",
+    "Joplin": "SPP", "KanCty Inl": "SPP", "La Guardia": "NYISO", "Little Rock": "MISO", "Los Angeles": "CAISO",
+    "Louisville": "PJM", "Madison": "MISO", "Memphis": "MISO", "Midland": "ERCOT", "Milwaukee": "MISO",
+    "Minneapolis": "MISO", "Mobile": "MISO", "New Bedford": "ISO-NE", "New Haven": "ISO-NE",
+    "New Orleans": "MISO", "Newark": "PJM", "Norfolk": "PJM", "Ok. City": "SPP", "Omaha": "SPP",
+    "Philadelphia": "PJM", "Pittsburgh": "PJM", "Providence": "ISO-NE", "Richmond": "PJM",
+    "Riverside": "CAISO", "Sacramento": "CAISO", "San Antonio": "ERCOT", "San Diego": "CAISO",
+    "San Francisco": "CAISO", "San Jose": "CAISO", "Scranton": "PJM", "Springfield": "MISO",
+    "St. Joseph": "SPP", "St. Louis": "MISO", "Syracuse": "NYISO", "Topeka": "SPP", "Tulsa": "SPP",
+    "Waco": "ERCOT", "Wash. Dulles": "PJM", "Washington": "PJM", "Wichita": "SPP", "Williamsport": "PJM"
+}
+
+ISO_LMP_FILES = {
+    "CAISO": "CAISOMaxLMP.csv", "ERCOT": "ERCOTMaxLMP.csv", "PJM": "PJMMaxLMP.csv",
+    "MISO": "MISOMaxLMP.csv", "SPP": "SPPMaxLMP.csv", "NYISO": "NYISOMaxLMP.csv", "ISO-NE": "ISONEMaxLMP.csv"
+}
+
+def get_city_map():
+    url = "https://www.wsitrader.com/Services/CSVDownloadService.svc/GetCityIds"
+    params = {"Account": USERNAME, "Profile": PROFILE, "Password": PASSWORD}
+    response = requests.get(url, params=params)
+    df = pd.read_csv(StringIO(response.text))
+    df.columns = df.columns.str.strip()
+    df = df[["SiteId", "Station Name"]].dropna().drop_duplicates()
+    return dict(zip(df["Station Name"], df["SiteId"]))
+
+def fetch_year_data(station_id, city_name, year):
+    def fmt(d): return d.strftime("%m/%d/%Y")
+    start_date = datetime(year, 1, 1)
+    end_date = datetime(year, 12, 31)
+    url = "https://www.wsitrader.com/Services/CSVDownloadService.svc/GetHistoricalObservations"
+    params = {
+        "Account": USERNAME, "Profile": PROFILE, "Password": PASSWORD,
+        "CityIds[]": station_id, "StartDate": fmt(start_date), "EndDate": fmt(end_date),
+        "HistoricalProductId": "HISTORICAL_DAILY_AVERAGE", "DataTypes[]": "temperature",
+        "TempUnits": "F", "IsTemp": "true", "IsDaily": "true", "IsDisplayDates": "false"
+    }
+    response = requests.get(url, params=params, timeout=30)
+    df = pd.read_csv(StringIO(response.text))
+    if df.empty or len(df.columns) < 3:
+        return pd.DataFrame()
+    df.columns = df.columns.str.strip()
+    df = df.rename(columns={df.columns[0]: "Date", df.columns[1]: "Min Temp", df.columns[2]: "Max Temp"})
+    df["Date"] = pd.to_datetime(df["Date"] + f" {year}", format="%d-%b %Y", errors='coerce')
+    df["Min Temp"] = pd.to_numeric(df["Min Temp"], errors='coerce')
+    df["Max Temp"] = pd.to_numeric(df["Max Temp"], errors='coerce')
+    df.dropna(subset=["Date"], inplace=True)
+    df["Avg Temp"] = (df["Min Temp"] + df["Max Temp"]) / 2
+    df["CDD"] = (df["Avg Temp"] - 65).clip(lower=0).round(1)
+    df["HDD"] = (65 - df["Avg Temp"]).clip(lower=0).round(1)
+    df["Month-Day"] = df["Date"].dt.strftime("%m-%d")
+    df["City Symbol"] = station_id
+    df["City Title"] = city_name
+    return df
+
+def fetch_all_years(station_id, city_name, start_year=2005):
+    all_data = []
+    current_year = datetime.today().year
+    for year in range(start_year, current_year + 1):
+        df = fetch_year_data(station_id, city_name, year)
+        if not df.empty:
+            all_data.append(df)
+    return pd.concat(all_data, ignore_index=True) if all_data else pd.DataFrame()
+
+def compute_10yr_stats(df):
+    result_rows = []
+    for idx, row in df.iterrows():
+        md = row["Month-Day"]
+        prior = df[(df["Month-Day"] == md) & (df["Date"] < row["Date"])]
+        if prior.empty:
+            result = {k: 0.0 for k in ["10yr Min Temp", "10yr Max Temp", "10yr Avg Temp", "10yr CDD", "10yr HDD"]}
+        else:
+            tmin = prior["Min Temp"].min()
+            tmax = prior["Max Temp"].max()
+            tavg = (tmin + tmax) / 2
+            result = {
+                "10yr Min Temp": round(tmin, 1),
+                "10yr Max Temp": round(tmax, 1),
+                "10yr Avg Temp": round(tavg, 1),
+                "10yr CDD": round(max(0, tavg - 65), 1),
+                "10yr HDD": round(max(0, 65 - tavg), 1)
+            }
+        result_rows.append({**row, **result})
+    return pd.DataFrame(result_rows)
+
+def load_lmp_data(iso, start_date, end_date):
+    lmp_file = ISO_LMP_FILES.get(iso)
+    base_path = Path(__file__).resolve().parent.parent / "INFO"
+    file_path = base_path / lmp_file
+    if not file_path.exists():
+        print(f"❌ File not found: {file_path}")
+        return pd.DataFrame()
+    df = pd.read_csv(file_path)
+    df.columns = df.columns.str.lower()
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df = df.dropna(subset=["date"])
+    return df[(df["date"] >= start_date) & (df["date"] <= end_date)]
+
+# --- Run Main ---
+city_map = get_city_map()
+city_name = questionary.select("🌎 Choose a city:", choices=sorted(CITY_TO_ISO.keys())).ask()
+station_id = city_map.get(city_name)
+if not station_id:
+    print("❌ Station ID not found.")
+else:
+    start_str = questionary.text("Start date (YYYY-MM-DD):").ask()
+    end_str = questionary.text("End date (YYYY-MM-DD):").ask()
+    start_date = pd.to_datetime(start_str, errors="coerce")
+    end_date = pd.to_datetime(end_str, errors="coerce")
+    iso = CITY_TO_ISO.get(city_name, "UNMAPPED")
+    if iso == "UNMAPPED":
+        print("❌ City not mapped to a supported ISO.")
+    else:
+        weather_df = fetch_all_years(station_id, city_name)
+        if weather_df.empty:
+            print("❌ No weather data.")
+        else:
+            weather_df = compute_10yr_stats(weather_df)
+            weather_df = weather_df[weather_df["Date"].between(start_date, end_date)]
+            lmp_df = load_lmp_data(iso, start_date, end_date)
+            if lmp_df.empty:
+                print("❌ No LMP data.")
+            else:
+                merged = pd.merge(weather_df, lmp_df, left_on="Date", right_on="date", how="inner")
+                choice = questionary.select("📤 Output:", choices=["CSV only", "Chart only", "Both"]).ask()
+                if choice in ("CSV only", "Both"):
+                    output_csv = f"{iso}_{station_id}_Merged_{start_str}_to_{end_str}.csv"
+                    merged.to_csv(output_csv, index=False)
+                    print(f"✅ CSV saved to: {output_csv}")
+                if choice in ("Chart only", "Both"):
+                    plt.figure(figsize=(12, 6))
+                    plt.plot(merged["Date"], merged["max_lmp"], marker="o")
+                    plt.title(f"{iso} Max LMPs vs. Date for {city_name}")
+                    plt.xlabel("Date")
+                    plt.ylabel("Max LMP ($/MWh)")
+                    plt.grid(True)
+                    plt.tight_layout()
+                    plt.show()
