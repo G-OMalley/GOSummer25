@@ -8,9 +8,9 @@ from dotenv import load_dotenv
 
 # Load credentials from .env
 load_dotenv()
-USERNAME = os.getenv("WSI_USERNAME")
-PROFILE = os.getenv("WSI_PROFILE")
-PASSWORD = os.getenv("WSI_PASSWORD")
+USERNAME = os.getenv("WSI_ACCOUNT_USERNAME") # Changed from WSI_USERNAME
+PROFILE = os.getenv("WSI_PROFILE_EMAIL")   # Changed from WSI_PROFILE
+PASSWORD = os.getenv("WSI_PASSWORD")       # This one is the same
 
 if not all([USERNAME, PROFILE, PASSWORD]):
     raise EnvironmentError("❌ Missing WSI credentials in .env file.")
