@@ -1,0 +1,151 @@
+from dotenv import load_dotenv
+import os
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt
+from io import StringIO
+from datetime import datetime
+from pathlib import Path
+import questionary
+
+# --- Load credentials ---
+env_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=env_path)
+USERNAME = os.getenv("WSI_USERNAME")
+PROFILE = os.getenv("WSI_PROFILE")
+PASSWORD = os.getenv("WSI_PASSWORD")
+
+# --- Load city to ISO and location mapping ---
+mapping_path = Path(r"C:\Users\gomalley\OneDrive - Colonial Energy Inc\Documents\GitHub\trader-helper\INFO\City_to_ISO_and_Location_Mapping.csv")
+city_location_df = pd.read_csv(mapping_path)
+city_location_df.columns = city_location_df.columns.str.strip().str.title()
+CITY_TO_ISO = dict(zip(city_location_df["City"], city_location_df["Iso"]))
+CITY_TO_LOCATION = dict(zip(city_location_df["City"], city_location_df["Location"]))
+
+# --- ISO to file mappings ---
+ISO_LMP_FILES = {
+    "CAISO": "CAISOMaxLMP.csv", "ERCOT": "ERCOTMaxLMP.csv", "PJM": "PJMMaxLMP.csv",
+    "MISO": "MISOMaxLMP.csv", "SPP": "SPPMaxLMP.csv", "NYISO": "NYISOMaxLMP.csv", "ISO-NE": "ISONEMaxLMP.csv"
+}
+
+def get_city_map():
+    url = "https://www.wsitrader.com/Services/CSVDownloadService.svc/GetCityIds"
+    params = {"Account": USERNAME, "Profile": PROFILE, "Password": PASSWORD}
+    response = requests.get(url, params=params)
+    df = pd.read_csv(StringIO(response.text))
+    df.columns = df.columns.str.strip()
+    return dict(zip(df["Station Name"], df["SiteId"]))
+
+def fetch_year_data(station_id, city_name, year):
+    def fmt(d): return d.strftime("%m/%d/%Y")
+    url = "https://www.wsitrader.com/Services/CSVDownloadService.svc/GetHistoricalObservations"
+    params = {
+        "Account": USERNAME, "Profile": PROFILE, "Password": PASSWORD,
+        "CityIds[]": station_id, "StartDate": fmt(datetime(year, 1, 1)), "EndDate": fmt(datetime(year, 12, 31)),
+        "HistoricalProductId": "HISTORICAL_DAILY_AVERAGE", "DataTypes[]": "temperature",
+        "TempUnits": "F", "IsTemp": "true", "IsDaily": "true", "IsDisplayDates": "false"
+    }
+    response = requests.get(url, params=params, timeout=30)
+    df = pd.read_csv(StringIO(response.text))
+    if df.empty or len(df.columns) < 3:
+        return pd.DataFrame()
+    df.columns = df.columns.str.strip()
+    df = df.rename(columns={df.columns[0]: "Date", df.columns[1]: "Min Temp", df.columns[2]: "Max Temp"})
+    df["Date"] = pd.to_datetime(df["Date"] + f" {year}", format="%d-%b %Y", errors="coerce")
+    df = df.dropna(subset=["Date"])
+    df["Min Temp"] = pd.to_numeric(df["Min Temp"], errors="coerce")
+    df["Max Temp"] = pd.to_numeric(df["Max Temp"], errors="coerce")
+    df["Avg Temp"] = (df["Min Temp"] + df["Max Temp"]) / 2
+    df["CDD"] = (df["Avg Temp"] - 65).clip(lower=0).round(1)
+    df["HDD"] = (65 - df["Avg Temp"]).clip(lower=0).round(1)
+    df["Month-Day"] = df["Date"].dt.strftime("%m-%d")
+    return df[["Date", "Min Temp", "Max Temp", "Avg Temp", "CDD", "HDD", "Month-Day"]]
+
+def fetch_all_years(station_id, city_name, start_year=2005):
+    all_data = [fetch_year_data(station_id, city_name, year)
+                for year in range(start_year, datetime.today().year + 1)]
+    return pd.concat([df for df in all_data if not df.empty], ignore_index=True)
+
+def compute_10yr_stats(df):
+    output = []
+    for idx, row in df.iterrows():
+        same_day = df[(df["Month-Day"] == row["Month-Day"]) & (df["Date"] < row["Date"])]
+        if same_day.empty:
+            stats = {k: 0.0 for k in ["10yr Min Temp", "10yr Max Temp", "10yr Avg Temp", "10yr CDD", "10yr HDD"]}
+        else:
+            tmin = same_day["Min Temp"].min()
+            tmax = same_day["Max Temp"].max()
+            tavg = (tmin + tmax) / 2
+            stats = {
+                "10yr Min Temp": round(tmin, 1),
+                "10yr Max Temp": round(tmax, 1),
+                "10yr Avg Temp": round(tavg, 1),
+                "10yr CDD": round(max(0, tavg - 65), 1),
+                "10yr HDD": round(max(0, 65 - tavg), 1)
+            }
+        output.append({**row, **stats})
+    return pd.DataFrame(output)
+
+def load_lmp_data(iso, location, start_date, end_date):
+    file = ISO_LMP_FILES.get(iso)
+    file_path = Path(__file__).resolve().parent.parent / "INFO" / file
+    if not file_path.exists():
+        print(f"❌ File not found: {file_path}")
+        return pd.DataFrame()
+    df = pd.read_csv(file_path)
+    df.columns = df.columns.str.lower()
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df["location"] = df["location"].str.strip().str.upper()
+    return df[(df["location"] == location.upper()) & (df["date"] >= start_date) & (df["date"] <= end_date)]
+
+# --- Run Main ---
+city_map = get_city_map()
+city_name = questionary.select("🌎 Choose a city:", choices=sorted(CITY_TO_ISO.keys())).ask()
+station_id = city_map.get(city_name)
+if not station_id:
+    print("❌ Station ID not found.")
+    exit()
+
+start_str = questionary.text("Start date (YYYY-MM-DD):").ask()
+end_str = questionary.text("End date (YYYY-MM-DD):").ask()
+start_date, end_date = pd.to_datetime(start_str), pd.to_datetime(end_str)
+
+iso = CITY_TO_ISO.get(city_name, "UNMAPPED")
+location = CITY_TO_LOCATION.get(city_name, None)
+if iso == "UNMAPPED" or not location:
+    print("❌ City not mapped to a supported ISO or location.")
+    exit()
+
+weather_df = fetch_all_years(station_id, city_name)
+if weather_df.empty:
+    print("❌ No weather data found.")
+    exit()
+
+weather_df = compute_10yr_stats(weather_df)
+weather_df = weather_df[weather_df["Date"].between(start_date, end_date)]
+
+lmp_df = load_lmp_data(iso, location, start_date, end_date)
+if lmp_df.empty:
+    print(f"❌ No LMP data found for location {location}.")
+    exit()
+
+merged = pd.merge(weather_df, lmp_df, left_on="Date", right_on="date", how="inner")
+merged = merged.drop(columns=["date", "Month-Day", "location"])  # remove unneeded columns
+
+# --- Output ---
+choice = questionary.select("📤 Output:", choices=["CSV only", "Chart only", "Both"]).ask()
+filename = f"{iso}_{location}_{city_name.replace(' ', '')}_Weather_LMP_{start_str}_to_{end_str}.csv"
+
+if choice in ("CSV only", "Both"):
+    merged.to_csv(filename, index=False)
+    print(f"✅ Saved CSV: {filename}")
+
+if choice in ("Chart only", "Both"):
+    plt.figure(figsize=(12, 6))
+    plt.scatter(merged["Avg Temp"], merged["max_lmp"], alpha=0.7)
+    plt.title(f"{city_name} Avg Temp vs Max LMP ({start_str} to {end_str})")
+    plt.xlabel("Average Temperature (F)")
+    plt.ylabel("Max LMP ($/MWh)")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
