@@ -1,4 +1,3 @@
 EIAGuesser/models_v3_hybrid/
-.env
-**/Weather/.env
+**/.env
 Weather/Outputs/
