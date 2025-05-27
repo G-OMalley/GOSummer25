@@ -125,9 +125,9 @@ def fetch_all_years(station_id, city_name, start_year=2005, end_year_override=No
     end_year = end_year_override if end_year_override else current_year
     
     all_data = []
-    for year in range(start_year, end_year + 1):
-        print(f"Fetching weather data for {city_name}, year {year}...")
-        year_df = fetch_year_data(station_id, city_name, year)
+    for year_idx in range(start_year, end_year + 1):
+        print(f"Fetching weather data for {city_name}, year {year_idx}...")
+        year_df = fetch_year_data(station_id, city_name, year_idx)
         if not year_df.empty:
             all_data.append(year_df)
     if not all_data:
@@ -170,8 +170,6 @@ def compute_10yr_stats(df):
             tmin_10yr = same_day_historical["Min Temp"].min()
             tmax_10yr = same_day_historical["Max Temp"].max()
             
-            # Calculate 10yr Avg Temp based on the average of 10yr Min and 10yr Max for that specific day type
-            # Or, average the 'Avg Temp' of those historical days
             avg_temp_10yr_values = same_day_historical["Avg Temp"].dropna()
             tavg_10yr = avg_temp_10yr_values.mean() if not avg_temp_10yr_values.empty else np.nan
 
@@ -186,7 +184,7 @@ def compute_10yr_stats(df):
         
     return pd.DataFrame(output_rows)
 
-# --- LMP Data Function ---
+# --- LMP Data Function (UPDATED) ---
 def load_lmp_data(iso, location, start_date, end_date):
     """Loads LMP data from the appropriate CSV file."""
     file_path = ISO_LMP_FILES.get(iso)
@@ -196,27 +194,117 @@ def load_lmp_data(iso, location, start_date, end_date):
 
     try:
         df = pd.read_csv(file_path)
-        df.columns = df.columns.str.strip().str.lower() # Standardize column names
+        original_columns = df.columns.tolist() # Keep original for messages
+        df.columns = df.columns.str.strip() # Basic strip first
+
+        # --- Robust Date Column Detection ---
+        date_col_in_df = None
+        date_col_candidates = ['date', 'datetime', 'day', 'time', 'period']
+        for candidate in date_col_candidates:
+            for col_in_df_loop in df.columns:
+                if candidate == col_in_df_loop.lower().replace('_', ''):
+                    date_col_in_df = col_in_df_loop
+                    break
+            if date_col_in_df:
+                break
+        if not date_col_in_df:
+            raise KeyError(f"LMP data CSV {file_path} must contain a 'date' column or similar (e.g., {', '.join(date_col_candidates)}). Found: {original_columns}")
+        if date_col_in_df != 'date': # Standardize name
+            df.rename(columns={date_col_in_df: 'date'}, inplace=True)
+
+        # --- Robust Location Column Detection ---
+        loc_col_in_df = None
+        # Prioritize 'location' if it exists exactly, ignoring case for initial check
+        for col_in_df_loop in df.columns:
+            if 'location' == col_in_df_loop.lower():
+                loc_col_in_df = col_in_df_loop
+                break
         
-        # Ensure 'date' and 'location' columns exist
-        if 'date' not in df.columns:
-            raise KeyError("LMP data CSV must contain a 'date' column.")
-        if 'location' not in df.columns:
-            # Try to find a location-like column, e.g., 'name', 'node'
-            loc_col_candidates = [col for col in ['name', 'node', 'lmp_node', 'location name'] if col in df.columns]
-            if not loc_col_candidates:
-                 raise KeyError("LMP data CSV must contain a 'location' column (or similar like 'name', 'node').")
-            df.rename(columns={loc_col_candidates[0]: 'location'}, inplace=True)
+        if not loc_col_in_df: # If 'location' not found, try other candidates
+            loc_col_candidates = ['node', 'name', 'pnode', 'settlementpointname', 'settlement_point_name', 'lmp_node', 'location name']
+            for candidate in loc_col_candidates:
+                for col_in_df_loop in df.columns:
+                    # Normalize both candidate and column name for matching
+                    norm_col = col_in_df_loop.lower().replace('_', '').replace(' ', '')
+                    norm_cand = candidate.lower().replace('_', '').replace(' ', '')
+                    if norm_cand == norm_col:
+                        loc_col_in_df = col_in_df_loop
+                        break
+                if loc_col_in_df:
+                    break
+        
+        if not loc_col_in_df:
+            raise KeyError(f"LMP data CSV {file_path} must contain a 'location' column or similar. Tried 'location' and candidates like 'node', 'name', etc. Found: {original_columns}")
+        if loc_col_in_df != 'location': # Standardize name
+            df.rename(columns={loc_col_in_df: 'location'}, inplace=True)
 
 
         df["date"] = pd.to_datetime(df["date"], errors="coerce")
-        df["location"] = df["location"].astype(str).str.strip().str.upper() # Ensure string type and standardize
+        df["location"] = df["location"].astype(str).str.strip().str.upper()
+
+        # --- Improved LMP Price Column Detection ---
+        lmp_price_col = None # This will store the original name of the identified LMP price column
+        simplified_to_original_cols = {} # Maps simplified name to original name
+
+        for col_original_name in df.columns:
+            # Skip already identified/standardized columns
+            if col_original_name.lower() in ['date', 'location']:
+                continue
+            
+            simplified = col_original_name.lower()
+            simplified = simplified.split('(')[0].strip()  # Remove units like ($/mwh)
+            simplified = simplified.replace('_', ' ').replace('-', ' ') # Normalize separators
+            simplified = " ".join(simplified.split()) # Normalize multiple spaces to one
+            simplified_to_original_cols[simplified] = col_original_name
         
+        # Define candidates (order can imply priority)
+        primary_keywords = ['max lmp', 'maxlmp'] # Highest priority
+        secondary_keywords = ['lmp', 'price', 'total lmp', 'marginal price lmp'] # General terms
+
+        # Search using primary keywords
+        for keyword in primary_keywords:
+            normalized_keyword = " ".join(keyword.split()) # Ensure keyword is also normalized
+            for simplified_col_name, original_col_name in simplified_to_original_cols.items():
+                if normalized_keyword in simplified_col_name: # Check if keyword is part of the simplified column name
+                    lmp_price_col = original_col_name
+                    break
+            if lmp_price_col:
+                break
+        
+        # If not found, search using secondary keywords
+        if not lmp_price_col:
+            for keyword in secondary_keywords:
+                normalized_keyword = " ".join(keyword.split())
+                for simplified_col_name, original_col_name in simplified_to_original_cols.items():
+                    if normalized_keyword in simplified_col_name:
+                        lmp_price_col = original_col_name
+                        break
+                if lmp_price_col: # Found one
+                    break
+        
+        if not lmp_price_col:
+            print(f"❌ Could not find a suitable LMP price column in {file_path}.")
+            print(f"   Searched for keywords like: {primary_keywords + secondary_keywords}")
+            print(f"   Available original columns in LMP data: {original_columns}")
+            print(f"   Simplified column names processed for matching: {list(simplified_to_original_cols.keys())}")
+            return pd.DataFrame()
+        
+        # Rename the found LMP price column to 'max_lmp' for standardization
+        # This line is crucial for the rest of the script (e.g. plotting)
+        if lmp_price_col != 'max_lmp':
+            df.rename(columns={lmp_price_col: 'max_lmp'}, inplace=True)
+        # --- End of Improved LMP Price Column Detection ---
+
         # Filter by location and date
-        # Ensure start_date and end_date are datetime objects for comparison
         start_dt = pd.to_datetime(start_date)
         end_dt = pd.to_datetime(end_date)
         
+        # Now 'max_lmp' should exist in df.columns if renaming occurred
+        if 'max_lmp' not in df.columns:
+            # This should not happen if logic above is correct, but as a safeguard:
+            print(f"Error: 'max_lmp' column not found after attempting to identify and rename LMP price column. Original price column: {lmp_price_col}")
+            return pd.DataFrame()
+
         filtered_df = df[
             (df["location"] == location.upper()) &
             (df["date"] >= start_dt) &
@@ -225,6 +313,8 @@ def load_lmp_data(iso, location, start_date, end_date):
         return filtered_df
     except Exception as e:
         print(f"❌ Error loading LMP data for {iso} from {file_path}: {e}")
+        import traceback
+        traceback.print_exc() 
         return pd.DataFrame()
 
 # --- Main Execution ---
@@ -237,29 +327,28 @@ def main():
         return
 
     # --- User Selections ---
-    # 1. Choose ISO
-    available_isos = sorted(list(set(city_location_df["Iso"].dropna())))
+    available_isos = sorted(list(set(city_location_df["Iso"].dropna().astype(str).str.upper())))
     if not available_isos:
         print("❌ No ISOs found in the mapping file.")
         return
-    iso_choice = questionary.select("🔌 Choose an ISO:", choices=available_isos).ask()
-    if not iso_choice: return
+    iso_choice_q = questionary.select("🔌 Choose an ISO:", choices=available_isos).ask()
+    if not iso_choice_q: return
+    iso_choice = iso_choice_q.upper() # Standardize ISO choice
 
-    # 2. Choose Location within ISO
     locations_in_iso = sorted(list(set(
-        city_location_df[city_location_df["Iso"] == iso_choice]["Location"].dropna()
+        city_location_df[city_location_df["Iso"].astype(str).str.upper() == iso_choice]["Location"].dropna().astype(str).str.upper()
     )))
     if not locations_in_iso:
         print(f"❌ No locations found for ISO {iso_choice} in the mapping file.")
         return
-    location_choice = questionary.select(f"📍 Choose a location in {iso_choice}:", choices=locations_in_iso).ask()
-    if not location_choice: return
+    location_choice_q = questionary.select(f"📍 Choose a location in {iso_choice}:", choices=locations_in_iso).ask()
+    if not location_choice_q: return
+    location_choice = location_choice_q.upper() # Standardize location choice
 
-    # 3. Choose City within Location
     cities_in_location = sorted(list(set(
         city_location_df[
-            (city_location_df["Iso"] == iso_choice) &
-            (city_location_df["Location"] == location_choice)
+            (city_location_df["Iso"].astype(str).str.upper() == iso_choice) &
+            (city_location_df["Location"].astype(str).str.upper() == location_choice)
         ]["City"].dropna()
     )))
     if not cities_in_location:
@@ -268,7 +357,6 @@ def main():
     city_choice = questionary.select(f"🏙️ Choose a city at {location_choice} ({iso_choice}):", choices=cities_in_location).ask()
     if not city_choice: return
 
-    # 4. Choose Dates
     while True:
         start_str = questionary.text(
             "🗓️ Enter start date (YYYY-MM-DD):",
@@ -296,10 +384,8 @@ def main():
         except ValueError:
             print("❌ Invalid end date format. Please use YYYY-MM-DD.")
 
-    # --- Fetch Data ---
     station_id = city_map_wsi.get(city_choice)
     if not station_id:
-        # Try to find a match ignoring case or common suffixes like 'Intl Airport'
         for wsi_city_name, s_id in city_map_wsi.items():
             if city_choice.lower() in wsi_city_name.lower():
                 station_id = s_id
@@ -311,10 +397,7 @@ def main():
             return
 
     print(f"\nFetching weather data for {city_choice} (Station ID: {station_id}). This may take a few minutes...")
-    # Fetch data from 2005 up to the end_date's year for 10yr stats calculation
-    # Max year for fetching historical data should be end_date.year
-    # Start year for 10yr averages can be fixed or dynamic (e.g., start_date.year - 10)
-    weather_fetch_start_year = 2005 # Or adjust as needed for 10-year history base
+    weather_fetch_start_year = 2005 
     weather_df = fetch_all_years(station_id, city_choice, start_year=weather_fetch_start_year, end_year_override=end_date.year)
 
     if weather_df.empty:
@@ -324,93 +407,96 @@ def main():
     print("Computing 10-year historical weather statistics...")
     weather_df = compute_10yr_stats(weather_df)
     
-    # Filter weather data to the user-selected date range
-    weather_df_filtered = weather_df[weather_df["Date"].between(start_date, end_date, inclusive="both")].copy() # Use .copy() to avoid SettingWithCopyWarning
+    weather_df_filtered = weather_df[weather_df["Date"].between(start_date, end_date, inclusive="both")].copy()
     
     if weather_df_filtered.empty:
         print(f"❌ No weather data available for {city_choice} in the selected period: {start_str} to {end_str}.")
         return
-
     weather_df_filtered["Year"] = weather_df_filtered["Date"].dt.year
 
     print(f"\nLoading LMP data for {location_choice} ({iso_choice})...")
+    # Pass the already upper-cased iso_choice and location_choice
     lmp_df = load_lmp_data(iso_choice, location_choice, start_date, end_date)
 
     if lmp_df.empty:
         print(f"❌ No LMP data found for location {location_choice} ({iso_choice}) in the selected period.")
-        # Proceed to show weather-only if user wants? For now, we exit.
         return
     
-    # Ensure LMP data has a 'max_lmp' column or similar.
-    # Common LMP column names: 'lmp', 'marginal_price_lmp', 'total_lmp', 'max_lmp'
-    lmp_price_col_candidates = ['max_lmp', 'lmp', 'total_lmp', 'marginal_price_lmp', 'price']
-    lmp_price_col = None
-    for col in lmp_price_col_candidates:
-        if col in lmp_df.columns:
-            lmp_price_col = col
-            break
-    if not lmp_price_col:
-        print(f"❌ Could not find a suitable LMP price column in {ISO_LMP_FILES.get(iso_choice)}. Expected one of {lmp_price_col_candidates}.")
-        print(f"   Available columns in LMP data: {lmp_df.columns.tolist()}")
+    # After load_lmp_data, the LMP price column should be named 'max_lmp'
+    if 'max_lmp' not in lmp_df.columns:
+        print(f"❌ Critical Error: 'max_lmp' column is missing from LMP data after processing. Columns: {lmp_df.columns.tolist()}")
         return
-    if lmp_price_col != 'max_lmp': # Standardize to 'max_lmp' for plotting
-        lmp_df.rename(columns={lmp_price_col: 'max_lmp'}, inplace=True)
+    
+    # The variable 'lmp_price_col' previously used for the y-axis label is no longer defined in this scope.
+    # We know the column is 'max_lmp', so we can use that directly or retrieve the original name if needed for display.
+    # For simplicity in label, we can assume it's "Max LMP" or derive from the known standardized name.
+    y_axis_label_price_col_name = "Max LMP" 
 
 
     print("\nMerging weather and LMP data...")
+    # Ensure 'date' column in lmp_df is consistently named for the merge
+    if 'date' not in lmp_df.columns and 'Date' in lmp_df.columns: # if 'date' was somehow changed to 'Date'
+        lmp_df.rename(columns={'Date':'date'}, inplace=True)
+    elif 'date' not in lmp_df.columns:
+        print(f"❌ LMP DataFrame does not have a 'date' column for merging. Columns: {lmp_df.columns.tolist()}")
+        return
+
     merged_df = pd.merge(weather_df_filtered, lmp_df, left_on="Date", right_on="date", how="inner")
 
     if merged_df.empty:
         print("❌ No matching data found after merging weather and LMP for the selected period and location.")
         print(f"   Weather data points: {len(weather_df_filtered)}, LMP data points: {len(lmp_df)}")
-        print(f"   Date range weather: {weather_df_filtered['Date'].min()} to {weather_df_filtered['Date'].max()}")
-        print(f"   Date range LMP: {lmp_df['date'].min()} to {lmp_df['date'].max()}")
+        if not weather_df_filtered.empty:
+             print(f"   Date range weather: {weather_df_filtered['Date'].min()} to {weather_df_filtered['Date'].max()}")
+        if not lmp_df.empty:
+             print(f"   Date range LMP: {lmp_df['date'].min()} to {lmp_df['date'].max()}")
         return
 
-    merged_df["Year"] = merged_df["Date"].dt.year # Ensure 'Year' is from the primary 'Date' column
+    merged_df["Year"] = merged_df["Date"].dt.year 
 
-    # --- Plotting ---
     print("Generating plot...")
     plt.figure(figsize=(14, 8))
     
-    # Use a consistent color map if number of years is large, otherwise default
     num_years = merged_df["Year"].nunique()
-    if num_years <= 10:
-        colors = plt.cm.get_cmap('tab10', num_years).colors
-    elif num_years <=20:
-        colors = plt.cm.get_cmap('tab20', num_years).colors
-    else: # For many years, 'viridis' or other continuous maps might be better, but need discrete colors
-        colors = [plt.cm.get_cmap('viridis')(i/num_years) for i in range(num_years)]
+    cmap_name = 'viridis' # Default continuous map
+    if num_years <= 10: cmap_name = 'tab10'
+    elif num_years <=20: cmap_name = 'tab20'
+    
+    # Get a color for each unique year
+    unique_years_sorted = sorted(merged_df["Year"].unique())
+    year_colors = {year_val: plt.cm.get_cmap(cmap_name)(i / max(1, num_years -1 if num_years > 1 else 1)) 
+                   for i, year_val in enumerate(unique_years_sorted)}
 
 
-    years = sorted(merged_df["Year"].unique())
-
-    for i, year in enumerate(years):
-        year_data = merged_df[merged_df["Year"] == year]
+    for year_val_loop in unique_years_sorted:
+        year_data = merged_df[merged_df["Year"] == year_val_loop]
         if year_data.empty or year_data["Avg Temp"].isnull().all() or year_data["max_lmp"].isnull().all():
             continue
 
-        color = colors[i % len(colors)]
-        plt.scatter(year_data["Avg Temp"], year_data["max_lmp"], color=color, label=f"{year}", alpha=0.6, s=50)
+        color = year_colors[year_val_loop]
+        plt.scatter(year_data["Avg Temp"], year_data["max_lmp"], color=color, label=f"{year_val_loop}", alpha=0.6, s=50)
         
-        # Calculate line of best fit if there are enough data points
         valid_points = year_data.dropna(subset=["Avg Temp", "max_lmp"])
         if len(valid_points) >= 2:
             try:
-                z = np.polyfit(valid_points["Avg Temp"], valid_points["max_lmp"], 1) # Degree 1 polynomial (line)
+                z = np.polyfit(valid_points["Avg Temp"], valid_points["max_lmp"], 1) 
                 p = np.poly1d(z)
-                x_vals = np.linspace(valid_points["Avg Temp"].min(), valid_points["Avg Temp"].max(), 100)
+                min_temp_val = valid_points["Avg Temp"].min()
+                max_temp_val = valid_points["Avg Temp"].max()
+                if min_temp_val == max_temp_val: # Avoids issue with linspace if only one unique x value
+                    x_vals = np.array([min_temp_val, max_temp_val])
+                else:
+                    x_vals = np.linspace(min_temp_val, max_temp_val, 100)
                 plt.plot(x_vals, p(x_vals), color=color, linestyle="--", linewidth=2)
             except (np.linalg.LinAlgError, TypeError) as e:
-                print(f"Could not compute trendline for {year}: {e}")
-
+                print(f"Could not compute trendline for {year_val_loop}: {e}")
 
     plt.title(f"Daily Average Temperature vs. Max LMP for {city_choice} ({location_choice}, {iso_choice})\n({start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')})", fontsize=16)
     plt.xlabel("Average Temperature (°F)", fontsize=14)
-    plt.ylabel(f"Max LMP ({lmp_price_col.replace('_',' ').title()} $/MWh)", fontsize=14)
+    plt.ylabel(f"{y_axis_label_price_col_name} ($/MWh)", fontsize=14) # Use the determined label
     plt.grid(True, linestyle=':', alpha=0.7)
     plt.legend(title="Year", bbox_to_anchor=(1.03, 1), loc='upper left')
-    plt.tight_layout(rect=[0, 0, 0.88, 1]) # Adjust layout to make space for legend
+    plt.tight_layout(rect=[0, 0, 0.88, 1]) 
     
     print("\nDisplaying plot. Close the plot window to exit.")
     plt.show()
