@@ -1,0 +1,13 @@
+History Ticker,Forecast Ticker,Item
+FDSD.IMPST.US.SUM.F,FDSD.IMPST.US.SUM.A,CONUS - STORAGE
+FDSD.NGDMD.MW.SUM.F,FDSD.NGDMD.MW.SUM.A,Total Demand - Midwest
+FDSD.NGDMD.NE.SUM.A,FDSD.NGDMD.NE.SUM.F,Total Demand - Northeast
+FDSD.NGDMD.ROX.SUM.F,FDSD.NGDMD.ROX.SUM.A,Total Demand - Rockies
+FDSD.NGDMD.ROX.SWN.F,FDSD.NGDMD.ROX.SWN.A,Total Demand - Rockies - SW
+FDSD.NGDMD.ROX.UPPER.F,FDSD.NGDMD.ROX.UPPER.A,Total Demand - Rockies - Upper
+FDSD.NGDMD.SC.SUM.F,FDSD.NGDMD.SC.SUM.A,Total Demand - South Central 
+FDSD.NGDMD.SE.FL.A,FDSD.NGDMD.SE.FL.F,Total Demand - Southeast - Florida 
+FDSD.NGDMD.SE.OTH.F,FDSD.NGDMD.SE.OTH.A,Total Demand - Southeast - Other
+FDSD.NGDMD.US.SUM.A,FDSD.NGDMD.US.SUM.F,Total Demand - Lower 48 
+FDSD.NGDMD.WST.CA.F,FDSD.NGDMD.WST.CA.A,Total Demand - California 
+FDSD.NGDMD.WST.PNW.A,FDSD.NGDMD.WST.PNW.F,Total Demand - Pacific Northwest 
