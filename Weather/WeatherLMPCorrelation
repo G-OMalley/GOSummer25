@@ -1,0 +1,159 @@
+from pathlib import Path
+import pandas as pd
+import questionary
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime
+import calendar
+import sys
+
+# --- Setup paths ---
+BASE_DIR = Path(__file__).resolve().parents[1] if "__file__" in globals() else Path(".").resolve()
+INFO_DIR = BASE_DIR / "INFO"
+WEATHER_FILE = INFO_DIR / "WEATHER.csv"
+LMP_FILE = INFO_DIR / "PowerPrices.csv" # The user said this file is now their source for ISO/Location
+
+# --- Load weather data ---
+try:
+    weather_df = pd.read_csv(WEATHER_FILE, parse_dates=["Date"])
+    weather_df["City Title"] = weather_df["City Title"].str.upper().str.strip()
+except FileNotFoundError:
+    print(f"ERROR: Weather file not found at {WEATHER_FILE}")
+    sys.exit(1)
+
+# --- Load and prepare LMP data ---
+try:
+    lmp_df = pd.read_csv(LMP_FILE, parse_dates=["Date"])
+    # Standardize LMP column names to UPPERCASE and strip whitespace
+    lmp_df.columns = lmp_df.columns.str.upper().str.strip()
+    
+    # Standardize content of 'LOCATION', 'ISO', 'DATE' columns
+    if 'LOCATION' in lmp_df.columns:
+        lmp_df["LOCATION"] = lmp_df["LOCATION"].str.upper().str.strip()
+    if 'ISO' in lmp_df.columns:
+        lmp_df["ISO"] = lmp_df["ISO"].str.upper().str.strip()
+    if 'DATE' in lmp_df.columns:
+        lmp_df["DATE"] = pd.to_datetime(lmp_df["DATE"]).dt.date
+    else: # If 'DATE' column isn't there, try 'Date' from original parse_dates
+        lmp_df['Date'] = pd.to_datetime(lmp_df['Date']).dt.date # Keep 'Date' if not renamed
+        # And rename it to 'DATE' for consistency
+        lmp_df.rename(columns={'Date': 'DATE'}, inplace=True)
+
+
+except FileNotFoundError:
+    print(f"ERROR: LMP file not found at {LMP_FILE}")
+    sys.exit(1)
+
+# --- ISO and location selection (NOW based entirely on LMP_df) ---
+if not all(col in lmp_df.columns for col in ['ISO', 'LOCATION']):
+    print("ERROR: 'ISO' or 'LOCATION' column missing from PowerPrices.csv. Cannot perform selection.")
+    sys.exit(1)
+
+iso_choice = questionary.select("🔌 Choose an ISO:", choices=sorted(lmp_df["ISO"].unique())).ask()
+locations = sorted(lmp_df[lmp_df["ISO"] == iso_choice]["LOCATION"].unique())
+location_choice = questionary.select(f"📍 Choose a Location in {iso_choice}:", choices=locations).ask()
+
+# --- Date range selection ---
+months = [f"{i:02d} - {calendar.month_name[i]}" for i in range(1, 13)]
+month_start = int(questionary.select("📅 Select START month:", choices=months).ask().split(" - ")[0])
+month_end = int(questionary.select("📅 Select END month:", choices=months).ask().split(" - ")[0])
+year_start = int(questionary.text("📅 Enter START year (e.g. 2020):").ask())
+year_end = int(questionary.text("📅 Enter END year (e.g. 2023):").ask())
+
+all_dates = []
+for year in range(year_start, year_end + 1):
+    if month_end < month_start:
+        # Range from start_month to Dec of current year
+        all_dates.extend(pd.date_range(datetime(year, month_start, 1), datetime(year, 12, 31)).date)
+        # Range from Jan to end_month of next year, if next year is within total range
+        if year + 1 <= year_end:
+            all_dates.extend(pd.date_range(datetime(year + 1, 1, 1), datetime(year + 1, month_end, calendar.monthrange(year + 1, month_end)[1])).date)
+    else:
+        # Standard range within the same year
+        all_dates.extend(pd.date_range(datetime(year, month_start, 1), datetime(year, month_end, calendar.monthrange(year, month_end)[1])).date)
+
+date_range = pd.DatetimeIndex(all_dates).unique().sort_values().date
+
+# --- Filter LMP by ISO/location/date ---
+lmp_filtered = lmp_df[(lmp_df["ISO"] == iso_choice) & (lmp_df["LOCATION"] == location_choice)]
+lmp_filtered = lmp_filtered[lmp_filtered["DATE"].isin(date_range)]
+
+if "MAX LMP" not in lmp_filtered.columns:
+    print("ERROR: 'MAX LMP' column not found in filtered LMP data. Please check column names in PowerPrices.csv.")
+    sys.exit(1)
+
+if lmp_filtered.empty:
+    print("❌ No LMP data found for the selected ISO, Location, and Date Range. Cannot perform correlation.")
+    sys.exit(0) # Exit gracefully if no LMP data matches criteria
+
+# --- Filter weather by date range for ALL cities ---
+weather_df["Date"] = weather_df["Date"].dt.date
+weather_df = weather_df[weather_df["Date"].isin(date_range)]
+
+if "Avg Temp" not in weather_df.columns:
+    print("ERROR: 'Avg Temp' column not found in weather data. Please check column names.")
+    sys.exit(1)
+
+# --- Correlation calculation ---
+results = []
+for city in weather_df["City Title"].unique():
+    city_df = weather_df[weather_df["City Title"] == city]
+    # Merge weather data (Date) with filtered LMP data (DATE)
+    merged = pd.merge(city_df, lmp_filtered, left_on="Date", right_on="DATE", how="inner")
+    
+    if not merged.empty:
+        # Convert columns to numeric, coercing errors to NaN
+        merged["Avg Temp"] = pd.to_numeric(merged["Avg Temp"], errors='coerce')
+        merged["MAX LMP"] = pd.to_numeric(merged["MAX LMP"], errors='coerce')
+        
+        # Drop rows where either 'Avg Temp' or 'MAX LMP' is NaN
+        correlation_data = merged.dropna(subset=["Avg Temp", "MAX LMP"])
+        
+        # Calculate correlation only if there are at least 2 data points
+        if len(correlation_data) > 1:
+            corr = correlation_data["Avg Temp"].corr(correlation_data["MAX LMP"])
+            if pd.notnull(corr): # Ensure correlation is not NaN (e.g., if one column has no variance)
+                results.append({"City": city, "Correlation": corr, "Data": merged})
+
+results_df = pd.DataFrame(results)
+
+# --- Output results ---
+if results_df.empty:
+    print("❌ No valid correlation data found for any city with the selected LMP data. This might be due to no overlapping dates or insufficient data after merging.")
+else:
+    # Sort by Correlation in descending order to get most positive first
+    results_df = results_df.sort_values(by="Correlation", ascending=False).reset_index(drop=True)
+    
+    print("\n--- Correlation Results (Sorted by Correlation) ---")
+    print(results_df[["City", "Correlation"]])
+    print("---------------------------------------------------\n")
+    
+    # Reiterate the city with the most positive correlation
+    most_positive_correlation = results_df.iloc[0]
+    print(f"✨ The city with the most positive correlation is: {most_positive_correlation['City']} (Correlation: {most_positive_correlation['Correlation']:.4f})")
+
+    # --- Plot ---
+    # Retrieve data for the most positively correlated city for plotting
+    top_city_data = most_positive_correlation["Data"]
+    
+    x_plot = pd.to_numeric(top_city_data["Avg Temp"], errors='coerce').dropna()
+    y_plot = pd.to_numeric(top_city_data["MAX LMP"], errors='coerce').dropna()
+
+    if len(x_plot) > 1 and len(y_plot) > 1:
+        plt.figure(figsize=(10, 6))
+        plt.scatter(x_plot, y_plot, label=most_positive_correlation['City'], alpha=0.6)
+        
+        # Add log fit line only if temperatures are suitable for log (x+1 > 0)
+        if (x_plot + 1).min() > 0:
+            coeffs = np.polyfit(np.log(x_plot + 1), y_plot, 1)
+            plt.plot(np.sort(x_plot), coeffs[0] * np.log(np.sort(x_plot) + 1) + coeffs[1], color='red', label="Log Fit")
+            
+        plt.title(f"Max LMP vs Avg Temp for {most_positive_correlation['City']}")
+        plt.xlabel("Average Temperature (F)")
+        plt.ylabel("Max LMP ($/MWh)")
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show() # Display the plot
+    else:
+        print(f"WARNING: Not enough valid data points to generate a plot for {most_positive_correlation['City']}. Plot skipped.")
