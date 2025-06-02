@@ -1,0 +1,119 @@
+from pathlib import Path
+import pandas as pd
+import questionary
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime, timedelta
+import sys
+import matplotlib
+matplotlib.use('TkAgg')
+
+# --- Setup correct paths relative to repo root ---
+BASE_DIR = Path(__file__).resolve().parents[1]
+INFO_DIR = BASE_DIR / "INFO"
+WEATHER_FILE = INFO_DIR / "WEATHER.csv"
+LMP_FILE = INFO_DIR / "PowerPrices.csv"
+
+# --- Load and clean data ---
+try:
+    weather_df = pd.read_csv(WEATHER_FILE, parse_dates=["Date"])
+    weather_df["City Title"] = weather_df["City Title"].str.upper().str.strip()
+    weather_df["Date"] = pd.to_datetime(weather_df["Date"])
+except Exception as e:
+    print(f"❌ Failed to load weather data: {e}")
+    sys.exit(1)
+
+try:
+    lmp_df = pd.read_csv(LMP_FILE, parse_dates=["Date"])
+    lmp_df.columns = lmp_df.columns.str.upper()
+    lmp_df["LOCATION"] = lmp_df["LOCATION"].str.upper().str.strip()
+    lmp_df["ISO"] = lmp_df["ISO"].str.upper().str.strip()
+    lmp_df.rename(columns={"DATE": "Date", "LMP": "MAX LMP"}, inplace=True)
+    lmp_df["Date"] = pd.to_datetime(lmp_df["Date"])
+except Exception as e:
+    print(f"❌ Failed to load LMP data: {e}")
+    sys.exit(1)
+
+# --- User prompts ---
+iso_choice = questionary.select("🔌 Choose an ISO:", choices=sorted(lmp_df["ISO"].unique())).ask()
+locations = sorted(lmp_df[lmp_df["ISO"] == iso_choice]["LOCATION"].unique())
+location_choice = questionary.select(f"📍 Choose a Location in {iso_choice}:", choices=locations).ask()
+
+while True:
+    try:
+        start_date = datetime.strptime(questionary.text("📅 Enter START date (MM-DD-YYYY):").ask(), "%m-%d-%Y")
+        break
+    except ValueError:
+        print("⚠️ Invalid format. Use MM-DD-YYYY.")
+
+while True:
+    try:
+        end_date = datetime.strptime(questionary.text("📅 Enter END date (MM-DD-YYYY):").ask(), "%m-%d-%Y")
+        if end_date >= start_date:
+            break
+        print("⚠️ End date must be after or equal to start date.")
+    except ValueError:
+        print("⚠️ Invalid format. Use MM-DD-YYYY.")
+
+# --- Build full date range including current + 3 prior years ---
+base_dates = pd.date_range(start=start_date, end=end_date)
+all_dates = []
+for delta_year in range(0, 4):
+    shifted_dates = [d - pd.DateOffset(years=delta_year) for d in base_dates]
+    all_dates.extend(shifted_dates)
+
+all_dates = pd.to_datetime(sorted(set(all_dates)))
+all_dates_only = all_dates.date
+
+# --- Filter LMP data ---
+lmp_filtered = lmp_df[(lmp_df["ISO"] == iso_choice) & (lmp_df["LOCATION"] == location_choice)]
+lmp_filtered = lmp_filtered[lmp_filtered["Date"].dt.date.isin(all_dates_only)]
+
+if lmp_filtered.empty:
+    print("❌ No LMP data found for your selection.")
+    sys.exit(0)
+
+# --- Correlate all matching weather + LMP data points without averaging ---
+results = []
+weather_df["DateOnly"] = weather_df["Date"].dt.date
+lmp_filtered["DateOnly"] = lmp_filtered["Date"].dt.date
+
+for city in weather_df["City Title"].unique():
+    city_data = weather_df[weather_df["City Title"] == city][["Date", "DateOnly", "Avg Temp"]].copy()
+    city_data = city_data[city_data["DateOnly"].isin(all_dates_only)]
+
+    merged = pd.merge(city_data, lmp_filtered, on="DateOnly", how="inner").dropna(subset=["Avg Temp", "MAX LMP"])
+    if len(merged) > 1:
+        corr = merged["Avg Temp"].corr(merged["MAX LMP"])
+        results.append((city, corr, merged))
+
+if not results:
+    print("❌ No overlapping weather + LMP data found.")
+    sys.exit(0)
+
+results_sorted = sorted(results, key=lambda x: x[1], reverse=True)
+
+# --- Print results ---
+print("\n📊 Correlation Coefficients (Avg Temp vs MAX LMP):")
+for city, corr, _ in results_sorted:
+    print(f"{city}: {corr:.4f}")
+
+top_city, top_corr, top_df = results_sorted[0]
+print(f"\n🔥 Highest correlation: {top_city} with {top_corr:.4f}")
+
+# --- Plot all dates (no averaging) ---
+x = top_df["Avg Temp"].values
+y = top_df["MAX LMP"].values
+m, b = np.polyfit(x, y, 1)
+regression_line = m * x + b
+
+plt.figure(figsize=(10, 6))
+plt.scatter(x, y, alpha=0.7, label="Data")
+plt.plot(x, regression_line, color="red", label=f"Line of Best Fit\ny = {m:.2f}x + {b:.2f}")
+plt.title(f"{top_city}: Avg Temp vs MAX LMP (incl. 3 prior years)\nCorrelation: {top_corr:.4f}")
+plt.xlabel("Avg Temp (°F)")
+plt.ylabel("MAX LMP ($/MWh)")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()

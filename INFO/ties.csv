@@ -1,0 +1,178 @@
+Price Region,Market Component,Fundy Item,City
+Northeast - Demand,AGT-CG (non-G),,
+Northeast - Demand,Dracut,,
+Northeast - Demand,Iroquois (into),,
+Northeast - Demand,Iroquois-Z2,,
+Northeast - Demand,TETCO-M3,,
+Northeast - Demand,Transco-165,,
+Northeast - Demand,Transco-Z5 South,,
+Northeast - Demand,Transco-Z6 (NY),,
+Northeast - Demand,Transco-Z6 (non-NY north),,
+Northeast - Demand,Transco-Z6 (non-NY),,
+Northeast - Demand,Transco-Z6 Sta-210,,
+Northeast - Demand,,Northeast - ResCom,
+Northeast - Demand,,Northeast - Power,
+Northeast - Demand,,North East - Balance,
+Northeast - Demand,,CONUS - Balance,
+Northeast - Demand,,CONUS - LNGexp,
+Northeast - Demand,,CONUS - Power,
+Northeast - Demand,,CONUS - Prod,
+Northeast - Demand,,CONUS - ResCom,
+Northeast - Demand,,,Boston MA
+Northeast - Demand,,,Buffalo NY
+Northeast - Demand,,,John F. Kennedy NY
+Northeast - Demand,,,Philadelphia PA
+Northeast - Demand,,,Pittsburgh PA
+Northeast - Demand,,,Raleigh/Durham NC
+Northeast - Demand,,,Washington National DC
+Northeast - Appalachia,Eastern Gas-South,,
+Northeast - Appalachia,Leidy-Transco,,
+Northeast - Appalachia,TCO,,
+Northeast - Appalachia,TETCO-M2 (receipt),,
+Northeast - Appalachia,TGP-Z4 Marcellus,,
+Northeast - Appalachia,TGP-Z4 Sta-219,,
+Northeast - Appalachia,TGP-Z4 Sta-313,,
+Northeast - Appalachia,Union-Dawn,,
+Northeast - Appalachia,,Northeast - ResCom,
+Northeast - Appalachia,,Northeast - Power,
+Northeast - Appalachia,,North East - Balance,
+Northeast - Appalachia,,CONUS - Balance,
+Northeast - Appalachia,,CONUS - LNGexp,
+Northeast - Appalachia,,CONUS - Power,
+Northeast - Appalachia,,CONUS - Prod,
+Northeast - Appalachia,,CONUS - ResCom,
+Northeast - Appalachia,,,Boston MA
+Northeast - Appalachia,,,Buffalo NY
+Northeast - Appalachia,,,John F. Kennedy NY
+Northeast - Appalachia,,,Philadelphia PA
+Northeast - Appalachia,,,Pittsburgh PA
+Northeast - Appalachia,,,Raleigh/Durham NC
+Northeast - Appalachia,,,Washington National DC
+SouthCentral - Henry,ANR-SE-T,,
+SouthCentral - Henry,CG-Onshore,,
+SouthCentral - Henry,Henry,,
+SouthCentral - Henry,Pine Prairie,,
+SouthCentral - Henry,TETCO-WLA,,
+SouthCentral - Henry,TGP-800L,,
+SouthCentral - Henry,Transco-45,,
+SouthCentral - Henry,,SouthCentral - ResCom,
+SouthCentral - Henry,,SouthCentral - Power,
+SouthCentral - Henry,,South Central - Balance,
+SouthCentral - Henry,,CONUS - Balance,
+SouthCentral - Henry,,CONUS - LNGexp,
+SouthCentral - Henry,,CONUS - Power,
+SouthCentral - Henry,,CONUS - Prod,
+SouthCentral - Henry,,CONUS - ResCom,
+SouthCentral - Henry,,,Houston TX
+SouthCentral - Henry,,,Oklahoma City OK
+SouthCentral - Henry,,,New Orleans LA
+SouthCentral - Henry,,,Houston TX
+SouthCentral - Midcon,ANR-SW,,
+SouthCentral - Midcon,NGPL-Midcont Pool,,
+SouthCentral - Midcon,Panhandle,,
+SouthCentral - Midcon,,SouthCentral - ResCom,
+SouthCentral - Midcon,,SouthCentral - Power,
+SouthCentral - Midcon,,South Central - Balance,
+SouthCentral - Midcon,,CONUS - Balance,
+SouthCentral - Midcon,,CONUS - LNGexp,
+SouthCentral - Midcon,,CONUS - Power,
+SouthCentral - Midcon,,CONUS - Prod,
+SouthCentral - Midcon,,CONUS - ResCom,
+SouthCentral - Midcon,,,Houston TX
+SouthCentral - Midcon,,,Oklahoma City OK
+SouthCentral - Midcon,,,New Orleans LA
+SouthCentral - Midcon,,,Houston TX
+Midwest - Chicago,APC-ACE,,
+Midwest - Chicago,Chicago,,
+Midwest - Chicago,NBPL-Vector,,
+Midwest - Chicago,NNG-Demarc,,
+Midwest - Chicago,NNG-Ventura,,
+Midwest - Chicago,REX E-NGPL,,
+Midwest - Chicago,REX-Z3 (receipt) ,,
+Midwest - Chicago,,Midwest - ResCom,
+Midwest - Chicago,,Midwest - Power,
+Midwest - Chicago,,Mid West - Balance,
+Midwest - Chicago,,CONUS - Balance,
+Midwest - Chicago,,CONUS - LNGexp,
+Midwest - Chicago,,CONUS - Power,
+Midwest - Chicago,,CONUS - Prod,
+Midwest - Chicago,,CONUS - ResCom,
+Midwest - Chicago,,,Chicago IL
+Midwest - Chicago,,,Detroit MI
+Midwest - Demand,Michcon,Midwest - ResCom,
+Midwest - Demand,,Midwest - Power,
+Midwest - Demand,,Mid West - Balance,
+Midwest - Demand,,CONUS - Balance,
+Midwest - Demand,,CONUS - LNGexp,
+Midwest - Demand,,CONUS - Power,
+Midwest - Demand,,CONUS - Prod,
+Midwest - Demand,,CONUS - ResCom,
+Midwest - Demand,,,Chicago IL
+Midwest - Demand,,,Detroit MI
+SouthCentral - Perryville,CG-Mainline,,
+SouthCentral - Perryville,Carthage,,
+SouthCentral - Perryville,TETCO-ELA,,
+SouthCentral - Perryville,TGP-Z1 100L,,
+SouthCentral - Perryville,TGP-Z1 Sta-87,,
+SouthCentral - Perryville,TGT-Mainline,,
+SouthCentral - Perryville,Trunkline-Z1A,,
+SouthCentral - Perryville,,SouthCentral - ResCom,
+SouthCentral - Perryville,,SouthCentral - Power,
+SouthCentral - Perryville,,South Central - Balance,
+SouthCentral - Perryville,,CONUS - Balance,
+SouthCentral - Perryville,,CONUS - LNGexp,
+SouthCentral - Perryville,,CONUS - Power,
+SouthCentral - Perryville,,CONUS - Prod,
+SouthCentral - Perryville,,CONUS - ResCom,
+SouthCentral - Perryville,,,Houston TX
+SouthCentral - Perryville,,,Oklahoma City OK
+SouthCentral - Perryville,,,New Orleans LA
+SouthCentral - Perryville,,,Houston TX
+Southeast,FGT-Z3,,
+Southeast,Sonat-Z0 South,,
+Southeast,TGP-500L,,
+Southeast,Transco Zn3,,
+Southeast,Transco-65,,
+Southeast,Transco-85,,
+Southeast,,SouthEast - ResCom,
+Southeast,,SouthEast - Power,
+Southeast,,South East - Balance,
+Southeast,,CONUS - Balance,
+Southeast,,CONUS - LNGexp,
+Southeast,,CONUS - Power,
+Southeast,,CONUS - Prod,
+Southeast,,CONUS - ResCom,
+Southeast,,,Tampa FL
+Southeast,,,Atlanta GA
+Southeast,,,Houston TX
+SouthCentral - TexCoast,HSC-HPL Pool,,
+SouthCentral - TexCoast,NGPL-STX,,
+SouthCentral - TexCoast,NGPL-TXOK East,,
+SouthCentral - TexCoast,TETCO-STX,,
+SouthCentral - TexCoast,TGP-Z0 South,,
+SouthCentral - TexCoast,Transco-30,,
+SouthCentral - TexCoast,,SouthCentral - ResCom,
+SouthCentral - TexCoast,,SouthCentral - Power,
+SouthCentral - TexCoast,,South Central - Balance,
+SouthCentral - TexCoast,,CONUS - Balance,
+SouthCentral - TexCoast,,CONUS - LNGexp,
+SouthCentral - TexCoast,,CONUS - Power,
+SouthCentral - TexCoast,,CONUS - Prod,
+SouthCentral - TexCoast,,CONUS - ResCom,
+SouthCentral - TexCoast,,,Houston TX
+SouthCentral - TexCoast,,,Oklahoma City OK
+SouthCentral - TexCoast,,,New Orleans LA
+SouthCentral - TexCoast,,,Houston TX
+SouthCentral - WesTex,Waha,,
+SouthCentral - WesTex,,SouthCentral - ResCom,
+SouthCentral - WesTex,,SouthCentral - Power,
+SouthCentral - WesTex,,South Central - Balance,
+SouthCentral - WesTex,,CONUS - Balance,
+SouthCentral - WesTex,,CONUS - LNGexp,
+SouthCentral - WesTex,,CONUS - Power,
+SouthCentral - WesTex,,CONUS - Prod,
+SouthCentral - WesTex,,CONUS - ResCom,
+SouthCentral - WesTex,,,Houston TX
+SouthCentral - WesTex,,,Oklahoma City OK
+SouthCentral - WesTex,,,New Orleans LA
+SouthCentral - WesTex,,,Houston TX
