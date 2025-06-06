@@ -1,0 +1,80 @@
+import pandas as pd
+from pathlib import Path
+
+# --- File paths ---
+data_folder = Path("C:/Users/gomalley/OneDrive - Colonial Energy Inc/Documents/GitHub/trader-helper/INFO")
+capacity_path = Path("C:/Users/gomalley/OneDrive - Colonial Energy Inc/Documents/GitHub/working_storage_capacity.csv")
+output_path = data_folder / "StoragePercentFull.csv"
+
+# --- Load data ---
+totals = pd.read_csv(data_folder / "EIAtotals.csv")
+capacity = pd.read_csv(capacity_path)
+
+# --- Match inventory to March 2025 to align with capacity data ---
+inventory_month = "2025-03"
+inventory_row = totals[totals["Period"].str.startswith(inventory_month)].iloc[-1]
+
+# --- Region-to-state mapping (based on EIA areas) ---
+region_state_map = {
+    "Midwest": ["USA-IL", "USA-MI"],
+    "East": ["USA-PA", "USA-WV", "USA-NY"],
+    "South Central": ["USA-TX", "USA-OK", "USA-LA", "USA-AR", "USA-MS"],
+    "Mountain": ["USA-UT", "USA-CO", "USA-NM", "USA-WY"],
+    "Pacific": ["USA-CA", "USA-OR"],
+    "Lower 48": []  # total of all above
+}
+
+# Match each region to its inventory column name in EIAtotals.csv
+inventory_cols = {
+    "Midwest": "Midwest Region Storage (Bcf)",
+    "East": "East Region Storage (Bcf)",
+    "South Central": "South Central Region Storage (Bcf)",
+    "Mountain": "Mountain Region Storage (Bcf)",
+    "Pacific": "Pacific Region Storage (Bcf)"
+}
+
+# --- Calculate capacity per region ---
+region_capacity = {}
+for region, states in region_state_map.items():
+    cap = capacity[capacity["area-name"].isin(states)]["value"].sum()
+    region_capacity[region] = cap / 1000  # Convert MMCF to BCF
+
+# Lower 48 capacity = sum of all
+region_capacity["Lower 48"] = sum(region_capacity.values())
+
+# --- Build results table ---
+results = []
+for region, inv_col in inventory_cols.items():
+    if inv_col not in inventory_row:
+        print(f"⚠️ Inventory column '{inv_col}' not found. Skipping...")
+        continue
+
+    inventory = inventory_row[inv_col]
+    capacity_bcf = region_capacity.get(region, 0)
+    percent = round((inventory / capacity_bcf) * 100, 1) if capacity_bcf else 0
+
+    results.append({
+        "Region": region,
+        "Inventory (Bcf)": inventory,
+        "Capacity (Bcf)": round(capacity_bcf, 1),
+        "Percent Full": percent
+    })
+
+# Add Lower 48 row
+lower_inventory = inventory_row["Lower 48 States Storage (Bcf)"]
+lower_capacity = region_capacity["Lower 48"]
+lower_percent = round((lower_inventory / lower_capacity) * 100, 1)
+
+results.append({
+    "Region": "Lower 48",
+    "Inventory (Bcf)": lower_inventory,
+    "Capacity (Bcf)": round(lower_capacity, 1),
+    "Percent Full": lower_percent
+})
+
+# --- Save to CSV ---
+df_out = pd.DataFrame(results)
+df_out.to_csv(output_path, index=False)
+print("✅ StoragePercentFull.csv updated and saved to:")
+print(output_path)
+print(df_out)

@@ -1,0 +1,47 @@
+import os
+import requests
+import pandas as pd
+from datetime import datetime
+from dotenv import load_dotenv
+from pathlib import Path
+
+# --- Load API Key ---
+dotenv_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path)
+API_KEY = os.getenv("EIA_API_KEY")
+if not API_KEY:
+    raise ValueError("❌ EIA_API_KEY not found in your .env file.")
+
+# --- API Request ---
+url = "https://api.eia.gov/v2/natural-gas/stor/cap/data/"
+today = datetime.today().strftime("%Y-%m-%d")
+
+params = {
+    "api_key": API_KEY,
+    "frequency": "monthly",
+    "data[0]": "value",
+    "sort[0][column]": "period",
+    "sort[0][direction]": "desc",
+    "offset": 0,
+    "length": 5000,
+    "end": today
+}
+
+response = requests.get(url, params=params)
+response.raise_for_status()
+
+data = response.json()
+
+# --- Filter for Working Storage Capacity ---
+records = data["response"]["data"]
+working = [r for r in records if "Working" in r.get("series-description", "")]
+
+# --- Convert to DataFrame ---
+df = pd.DataFrame(working)
+df = df[["period", "area-name", "series-description", "value", "units"]]
+
+# --- Save to CSV ---
+output_path = Path("working_storage_capacity.csv")
+df.to_csv(output_path, index=False)
+print("✅ Saved updated capacity data through today:")
+print(df.head(10))
