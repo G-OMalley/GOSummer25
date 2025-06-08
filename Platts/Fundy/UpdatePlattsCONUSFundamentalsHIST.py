@@ -57,7 +57,14 @@ def update_historical_csv(excel_io, hist_csv_path):
 
     print(f"Reading historical CSV: {hist_csv_path}")
     hist_df = pd.read_csv(hist_csv_path)
-    hist_df["GasDate"] = pd.to_datetime(hist_df["GasDate"])
+    
+    # --- MODIFICATION START ---
+    # Coerce errors will turn any non-date string (like a Git conflict marker) into NaT (Not a Time)
+    hist_df["GasDate"] = pd.to_datetime(hist_df["GasDate"], errors='coerce')
+    
+    # Drop any rows where the date conversion failed, effectively removing the corrupted lines
+    hist_df.dropna(subset=['GasDate'], inplace=True)
+    # --- MODIFICATION END ---
 
     combined = pd.concat([hist_df, new_df], ignore_index=True)
     combined.drop_duplicates(subset=["GasDate"], keep="last", inplace=True)

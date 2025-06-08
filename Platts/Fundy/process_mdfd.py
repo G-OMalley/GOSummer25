@@ -1,11 +1,51 @@
 import pandas as pd
 import os
-from datetime import datetime # For current date if needed, though we'll use max_new_date
+from datetime import datetime
+import glob
 
-# --- Configuration (remains the same as your last version) ---
+# --- New Function to Find the Latest File ---
+def find_latest_mdfd_file(directory):
+    """
+    Scans a directory for files matching the 'MDFD_YYYYMMDD.xlsx' pattern
+    and returns the full path to the one with the most recent date in its name.
+    
+    Args:
+        directory (str): The path to the directory to search.
+        
+    Returns:
+        str: The full path to the latest file, or None if no valid file is found.
+    """
+    search_pattern = os.path.join(directory, "MDFD_*.xlsx")
+    candidate_files = glob.glob(search_pattern)
+    
+    latest_file = None
+    latest_date = None
+    
+    if not candidate_files:
+        return None
+        
+    for file_path in candidate_files:
+        filename = os.path.basename(file_path)
+        try:
+            # Extract date part from filename like 'MDFD_20250530.xlsx'
+            date_str = filename.split('_')[1].split('.')[0]
+            current_date = datetime.strptime(date_str, "%Y%m%d")
+            
+            if latest_date is None or current_date > latest_date:
+                latest_date = current_date
+                latest_file = file_path
+        except (IndexError, ValueError):
+            # This handles filenames that match the pattern but have a malformed date
+            print(f"Warning: Could not parse date from filename: {filename}")
+            continue
+            
+    return latest_file
+
+# --- Updated Configuration Section ---
 script_directory = os.path.dirname(os.path.abspath(__file__))
-excel_file_name = "MDFD_20250530.xlsx"
-excel_file_path = os.path.join(script_directory, excel_file_name)
+
+# Dynamically find the latest MDFD file instead of hardcoding it
+excel_file_path = find_latest_mdfd_file(script_directory)
 
 sheets_to_exclude = [
     "MWDMF",
@@ -68,17 +108,17 @@ generation_sheet_configs = {
     }
 }
 
-# --- Main Script Logic (Processing parts remain the same as your last version) ---
+# --- Main Script Logic (Processing parts remain the same) ---
 print(f"Script is running from: {script_directory}")
-print(f"Attempting to load Excel file from: {excel_file_path}")
 
 if not os.path.exists(output_folder_path):
     os.makedirs(output_folder_path)
 
-if not os.path.exists(excel_file_path):
-    print(f"Error: The file '{excel_file_path}' was not found.")
+# This check is now the main gatekeeper for running the script
+if excel_file_path is None:
+    print(f"Error: No valid 'MDFD_YYYYMMDD.xlsx' file was found in '{script_directory}'.")
 else:
-    print(f"Found Excel file at: {excel_file_path}")
+    print(f"Found and selected latest Excel file: {os.path.basename(excel_file_path)}")
     all_processed_data_for_final_csv = [] 
 
     try:
@@ -97,7 +137,7 @@ else:
         peak_load_sheet_name = "Peak load by ISO"
         if peak_load_sheet_name not in sheets_to_exclude and peak_load_sheet_name in all_sheet_names_in_file:
             print(f"\n--- Processing sheet: '{peak_load_sheet_name}' ---")
-            # ... (Existing processing logic for Peak Load - keeping it concise here)
+            # ... (Existing processing logic for Peak Load)
             df_peak_original = xls.parse(peak_load_sheet_name)
             if not df_peak_original.empty:
                 peak_new_headers = df_peak_original.iloc[0]
@@ -125,7 +165,7 @@ else:
             if sheet_name in all_sheet_names_in_file and sheet_name not in sheets_to_exclude:
                 print(f"\n--- Processing sheet: '{sheet_name}' ---")
                 try:
-                    # ... (Existing processing logic for generation sheets - keeping it concise here)
+                    # ... (Existing processing logic for generation sheets)
                     df_raw = xls.parse(sheet_name, header=config["skip_rows"])
                     if df_raw.empty: print(f"Sheet '{sheet_name}' is empty after loading with header={config['skip_rows']}."); continue
                     df_raw.columns = [col if not (isinstance(col, str) and ('Unnamed:' in col or col.strip() == '')) else f'DROP_COL_{i}' for i, col in enumerate(df_raw.columns)]
@@ -151,15 +191,13 @@ else:
                         print(f"Finished processing '{sheet_name}'. {len(df_final)} rows transformed.")
                 except Exception as e_sheet:
                     print(f"Error processing sheet '{sheet_name}': {e_sheet}")
-                    # import traceback # Already imported if needed at the end
-                    # traceback.print_exc() # More detailed error for specific sheet
 
         # --- Combine all newly processed data ---
         if not all_processed_data_for_final_csv:
             print("\nNo data was processed from any sheet. CSV will not be updated.")
         else:
             newly_processed_df = pd.concat(all_processed_data_for_final_csv, ignore_index=True)
-            newly_processed_df['Date'] = pd.to_datetime(newly_processed_df['Date']) # Ensure Date is datetime
+            newly_processed_df['Date'] = pd.to_datetime(newly_processed_df['Date'])
             print(f"\nTotal new rows processed from Excel: {len(newly_processed_df)}")
 
             final_df_to_save = pd.DataFrame()
@@ -168,22 +206,20 @@ else:
                 print(f"Existing CSV found at {output_csv_path}. Applying update logic.")
                 try:
                     existing_df = pd.read_csv(output_csv_path)
-                    existing_df['Date'] = pd.to_datetime(existing_df['Date']) # Ensure Date is datetime
+                    existing_df['Date'] = pd.to_datetime(existing_df['Date'])
                     print(f"Read {len(existing_df)} rows from existing CSV.")
 
                     if not newly_processed_df.empty:
                         max_new_date = newly_processed_df['Date'].max()
-                        # Define the cutoff: data older than 365 days from the newest Excel data point is preserved
                         cutoff_date_for_old_data = max_new_date - pd.Timedelta(days=365) 
                         print(f"Latest date in new data: {max_new_date.strftime('%Y-%m-%d')}")
                         print(f"Preserving existing data older than: {cutoff_date_for_old_data.strftime('%Y-%m-%d')}")
                         
                         preserved_old_df = existing_df[existing_df['Date'] < cutoff_date_for_old_data]
                         
-                        # Combine preserved old data with all the new data
                         final_df_to_save = pd.concat([preserved_old_df, newly_processed_df], ignore_index=True)
                         print(f"Combined {len(preserved_old_df)} preserved old rows with {len(newly_processed_df)} new rows.")
-                    else: # No new data, just keep existing
+                    else:
                         final_df_to_save = existing_df
                         print("No new data to process, existing CSV data will be kept as is (after potential re-sort/de-dupe).")
 
@@ -198,8 +234,6 @@ else:
                 final_df_to_save = newly_processed_df
 
             if not final_df_to_save.empty:
-                # Remove duplicates: keep the latest entry (implicitly from newly_processed_df if dates/items overlap)
-                # because newly_processed_df was concatenated after preserved_old_df.
                 final_df_to_save.drop_duplicates(subset=['Date', 'Item'], keep='last', inplace=True)
                 final_df_to_save.sort_values(by=['Date', 'Item'], inplace=True)
                 
