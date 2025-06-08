@@ -6700,6 +6700,7 @@ Date,item,value,region
 05/22/2025,CONUS - STORAGE,7164.5547,Conus
 05/23/2025,CONUS - STORAGE,8162.8555,Conus
 05/24/2025,CONUS - STORAGE,14591.665,Conus
+<<<<<<< Updated upstream
 05/25/2025,CONUS - STORAGE,16332.553,Conus
 05/26/2025,CONUS - STORAGE,20885.914,Conus
 05/27/2025,CONUS - STORAGE,11442.514,Conus
@@ -6708,6 +6709,23 @@ Date,item,value,region
 05/30/2025,CONUS - STORAGE,12819.459,Conus
 05/31/2025,CONUS - STORAGE,18786.115,Conus
 06/01/2025,CONUS - STORAGE,17142.125,Conus
+=======
+05/25/2025,CONUS - STORAGE,16291.806,Conus
+05/26/2025,CONUS - STORAGE,20881.48,Conus
+05/27/2025,CONUS - STORAGE,11527.073,Conus
+05/28/2025,CONUS - STORAGE,11137.482,Conus
+05/29/2025,CONUS - STORAGE,11929.33,Conus
+05/30/2025,CONUS - STORAGE,12943.721,Conus
+05/31/2025,CONUS - STORAGE,18807.186,Conus
+06/01/2025,CONUS - STORAGE,17925.607,Conus
+06/02/2025,CONUS - STORAGE,12317.209,Conus
+06/03/2025,CONUS - STORAGE,11052.567,Conus
+06/04/2025,CONUS - STORAGE,11502.492,Conus
+06/05/2025,CONUS - STORAGE,9870.877,Conus
+06/06/2025,CONUS - STORAGE,10268.193,Conus
+06/07/2025,CONUS - STORAGE,18669.086,Conus
+06/08/2025,CONUS - STORAGE,17868.045,Conus
+>>>>>>> Stashed changes
 01/01/2015,Midwest - Balance,0.0,Midwest
 01/02/2015,Midwest - Balance,0.0,Midwest
 01/03/2015,Midwest - Balance,0.0,Midwest
@@ -25851,6 +25869,16 @@ Date,item,value,region
 05/29/2025,Total Demand - California ,4705.4043,California
 05/30/2025,Total Demand - California ,5193.6724,California
 05/31/2025,Total Demand - California ,4517.647,California
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - California ,4331.1953,California
+06/02/2025,Total Demand - California ,4760.644,California
+06/03/2025,Total Demand - California ,4736.295,California
+06/04/2025,Total Demand - California ,4719.588,California
+06/05/2025,Total Demand - California ,4717.942,California
+06/06/2025,Total Demand - California ,4723.0923,California
+06/07/2025,Total Demand - California ,4255.785,California
+>>>>>>> Stashed changes
 01/01/2015,Total Demand - Lower 48 ,112458.5,Lower 48
 01/02/2015,Total Demand - Lower 48 ,101881.48,Lower 48
 01/03/2015,Total Demand - Lower 48 ,86382.945,Lower 48
@@ -29655,6 +29683,16 @@ Date,item,value,region
 05/29/2025,Total Demand - Lower 48 ,68780.47,Lower 48
 05/30/2025,Total Demand - Lower 48 ,68129.57,Lower 48
 05/31/2025,Total Demand - Lower 48 ,61734.645,Lower 48
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - Lower 48 ,62518.504,Lower 48
+06/02/2025,Total Demand - Lower 48 ,68161.04,Lower 48
+06/03/2025,Total Demand - Lower 48 ,68477.766,Lower 48
+06/04/2025,Total Demand - Lower 48 ,68254.695,Lower 48
+06/05/2025,Total Demand - Lower 48 ,70582.195,Lower 48
+06/06/2025,Total Demand - Lower 48 ,71177.21,Lower 48
+06/07/2025,Total Demand - Lower 48 ,64070.617,Lower 48
+>>>>>>> Stashed changes
 03/30/2025,Total Demand - Midwest,12082.539,Midwest
 03/31/2025,Total Demand - Midwest,16677.674,Midwest
 04/01/2025,Total Demand - Midwest,17642.508,Midwest
@@ -29718,6 +29756,16 @@ Date,item,value,region
 05/29/2025,Total Demand - Midwest,11717.654,Midwest
 05/30/2025,Total Demand - Midwest,11217.587,Midwest
 05/31/2025,Total Demand - Midwest,10466.365,Midwest
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - Midwest,10550.107,Midwest
+06/02/2025,Total Demand - Midwest,10930.6875,Midwest
+06/03/2025,Total Demand - Midwest,11053.358,Midwest
+06/04/2025,Total Demand - Midwest,11143.748,Midwest
+06/05/2025,Total Demand - Midwest,11496.991,Midwest
+06/06/2025,Total Demand - Midwest,11318.839,Midwest
+06/07/2025,Total Demand - Midwest,10238.105,Midwest
+>>>>>>> Stashed changes
 01/01/2015,Total Demand - Northeast,26273.105,Northeast
 01/02/2015,Total Demand - Northeast,22710.045,Northeast
 01/03/2015,Total Demand - Northeast,20817.062,Northeast
@@ -33522,6 +33570,16 @@ Date,item,value,region
 05/29/2025,Total Demand - Northeast,14081.083,Northeast
 05/30/2025,Total Demand - Northeast,14010.026,Northeast
 05/31/2025,Total Demand - Northeast,13026.942,Northeast
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - Northeast,13594.994,Northeast
+06/02/2025,Total Demand - Northeast,14511.186,Northeast
+06/03/2025,Total Demand - Northeast,14142.037,Northeast
+06/04/2025,Total Demand - Northeast,14701.572,Northeast
+06/05/2025,Total Demand - Northeast,15645.357,Northeast
+06/06/2025,Total Demand - Northeast,15204.583,Northeast
+06/07/2025,Total Demand - Northeast,13066.132,Northeast
+>>>>>>> Stashed changes
 01/01/2015,Total Demand - Pacific Northwest ,3176.1448,West
 01/02/2015,Total Demand - Pacific Northwest ,2871.833,West
 01/03/2015,Total Demand - Pacific Northwest ,2492.1394,West
@@ -37326,6 +37384,16 @@ Date,item,value,region
 05/29/2025,Total Demand - Pacific Northwest ,1316.3319,West
 05/30/2025,Total Demand - Pacific Northwest ,1290.2964,West
 05/31/2025,Total Demand - Pacific Northwest ,1192.7236,West
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - Pacific Northwest ,1252.8896,West
+06/02/2025,Total Demand - Pacific Northwest ,1351.3243,West
+06/03/2025,Total Demand - Pacific Northwest ,1314.4413,West
+06/04/2025,Total Demand - Pacific Northwest ,1310.7148,West
+06/05/2025,Total Demand - Pacific Northwest ,1297.2347,West
+06/06/2025,Total Demand - Pacific Northwest ,1310.155,West
+06/07/2025,Total Demand - Pacific Northwest ,1179.1395,West
+>>>>>>> Stashed changes
 03/30/2025,Total Demand - Rockies,5095.0435,Rockies
 03/31/2025,Total Demand - Rockies,5379.2744,Rockies
 04/01/2025,Total Demand - Rockies,5991.4507,Rockies
@@ -37389,6 +37457,16 @@ Date,item,value,region
 05/29/2025,Total Demand - Rockies,4780.7686,Rockies
 05/30/2025,Total Demand - Rockies,4689.5586,Rockies
 05/31/2025,Total Demand - Rockies,4257.2817,Rockies
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - Rockies,4110.5693,Rockies
+06/02/2025,Total Demand - Rockies,4523.426,Rockies
+06/03/2025,Total Demand - Rockies,5037.592,Rockies
+06/04/2025,Total Demand - Rockies,4845.384,Rockies
+06/05/2025,Total Demand - Rockies,4872.4473,Rockies
+06/06/2025,Total Demand - Rockies,4855.6763,Rockies
+06/07/2025,Total Demand - Rockies,4281.9175,Rockies
+>>>>>>> Stashed changes
 03/30/2025,Total Demand - Rockies - SW,1671.0325,Rockies
 03/31/2025,Total Demand - Rockies - SW,1856.834,Rockies
 04/01/2025,Total Demand - Rockies - SW,1886.6682,Rockies
@@ -37452,6 +37530,16 @@ Date,item,value,region
 05/29/2025,Total Demand - Rockies - SW,2000.5325,Rockies
 05/30/2025,Total Demand - Rockies - SW,2043.144,Rockies
 05/31/2025,Total Demand - Rockies - SW,1866.8618,Rockies
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - Rockies - SW,1761.8342,Rockies
+06/02/2025,Total Demand - Rockies - SW,1900.8124,Rockies
+06/03/2025,Total Demand - Rockies - SW,1963.4504,Rockies
+06/04/2025,Total Demand - Rockies - SW,1974.3899,Rockies
+06/05/2025,Total Demand - Rockies - SW,1994.9858,Rockies
+06/06/2025,Total Demand - Rockies - SW,2033.3354,Rockies
+06/07/2025,Total Demand - Rockies - SW,1883.6075,Rockies
+>>>>>>> Stashed changes
 03/30/2025,Total Demand - Rockies - Upper,3424.011,Rockies
 03/31/2025,Total Demand - Rockies - Upper,3522.4407,Rockies
 04/01/2025,Total Demand - Rockies - Upper,4104.7827,Rockies
@@ -37515,6 +37603,16 @@ Date,item,value,region
 05/29/2025,Total Demand - Rockies - Upper,2780.2358,Rockies
 05/30/2025,Total Demand - Rockies - Upper,2646.4143,Rockies
 05/31/2025,Total Demand - Rockies - Upper,2390.42,Rockies
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - Rockies - Upper,2348.735,Rockies
+06/02/2025,Total Demand - Rockies - Upper,2622.6135,Rockies
+06/03/2025,Total Demand - Rockies - Upper,3074.1416,Rockies
+06/04/2025,Total Demand - Rockies - Upper,2870.994,Rockies
+06/05/2025,Total Demand - Rockies - Upper,2877.4614,Rockies
+06/06/2025,Total Demand - Rockies - Upper,2822.3406,Rockies
+06/07/2025,Total Demand - Rockies - Upper,2398.3098,Rockies
+>>>>>>> Stashed changes
 03/30/2025,Total Demand - South Central ,18280.145,South Central
 03/31/2025,Total Demand - South Central ,20240.37,South Central
 04/01/2025,Total Demand - South Central ,20213.71,South Central
@@ -37578,6 +37676,16 @@ Date,item,value,region
 05/29/2025,Total Demand - South Central ,20848.768,South Central
 05/30/2025,Total Demand - South Central ,20725.42,South Central
 05/31/2025,Total Demand - South Central ,18711.78,South Central
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - South Central ,19181.488,South Central
+06/02/2025,Total Demand - South Central ,21638.01,South Central
+06/03/2025,Total Demand - South Central ,21727.023,South Central
+06/04/2025,Total Demand - South Central ,21254.38,South Central
+06/05/2025,Total Demand - South Central ,21650.201,South Central
+06/06/2025,Total Demand - South Central ,22439.926,South Central
+06/07/2025,Total Demand - South Central ,20688.963,South Central
+>>>>>>> Stashed changes
 01/01/2015,Total Demand - Southeast - Florida ,3145.1306,Southeast
 01/02/2015,Total Demand - Southeast - Florida ,3213.3538,Southeast
 01/03/2015,Total Demand - Southeast - Florida ,2796.7483,Southeast
@@ -41382,6 +41490,16 @@ Date,item,value,region
 05/29/2025,Total Demand - Southeast - Florida ,5322.03,Southeast
 05/30/2025,Total Demand - Southeast - Florida ,5007.69,Southeast
 05/31/2025,Total Demand - Southeast - Florida ,4162.381,Southeast
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - Southeast - Florida ,4049.3452,Southeast
+06/02/2025,Total Demand - Southeast - Florida ,4321.1235,Southeast
+06/03/2025,Total Demand - Southeast - Florida ,4189.762,Southeast
+06/04/2025,Total Demand - Southeast - Florida ,4117.581,Southeast
+06/05/2025,Total Demand - Southeast - Florida ,4656.896,Southeast
+06/06/2025,Total Demand - Southeast - Florida ,4762.5435,Southeast
+06/07/2025,Total Demand - Southeast - Florida ,4403.05,Southeast
+>>>>>>> Stashed changes
 03/30/2025,Total Demand - Southeast - Other,5386.703,Southeast
 03/31/2025,Total Demand - Southeast - Other,5998.9785,Southeast
 04/01/2025,Total Demand - Southeast - Other,6100.6855,Southeast
@@ -41445,6 +41563,16 @@ Date,item,value,region
 05/29/2025,Total Demand - Southeast - Other,6008.431,Southeast
 05/30/2025,Total Demand - Southeast - Other,5995.322,Southeast
 05/31/2025,Total Demand - Southeast - Other,5399.524,Southeast
+<<<<<<< Updated upstream
+=======
+06/01/2025,Total Demand - Southeast - Other,5447.915,Southeast
+06/02/2025,Total Demand - Southeast - Other,6124.638,Southeast
+06/03/2025,Total Demand - Southeast - Other,6277.256,Southeast
+06/04/2025,Total Demand - Southeast - Other,6161.73,Southeast
+06/05/2025,Total Demand - Southeast - Other,6245.1255,Southeast
+06/06/2025,Total Demand - Southeast - Other,6562.392,Southeast
+06/07/2025,Total Demand - Southeast - Other,5957.5273,Southeast
+>>>>>>> Stashed changes
 01/01/2015,West - Balance,0.0,West
 01/02/2015,West - Balance,0.0,West
 01/03/2015,West - Balance,0.0,West
