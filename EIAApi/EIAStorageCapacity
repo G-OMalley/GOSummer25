@@ -1,47 +1,152 @@
 import os
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from pathlib import Path
 
+# --- File paths (Consistent with previous discussions) ---
+# Get the directory of the current script
+try:
+    script_dir = Path(__file__).resolve().parent
+except NameError:
+    # __file__ is not defined (e.g., interactive mode); use current working directory
+    script_dir = Path.cwd()
+
+# Navigate up to the 'trader-helper' directory and then down to 'INFO'
+# Assumes this script is in 'trader-helper/EIAApi/' and 'INFO' is in 'trader-helper/'
+data_folder = script_dir.parent / "INFO"
+data_folder.mkdir(parents=True, exist_ok=True) # Ensure the INFO directory exists
+
+output_path = data_folder / "working_storage_capacity.csv"
+
 # --- Load API Key ---
-dotenv_path = Path(__file__).resolve().parent / ".env"
+dotenv_path = script_dir / ".env" # .env file should be next to the script
 load_dotenv(dotenv_path)
 API_KEY = os.getenv("EIA_API_KEY")
 if not API_KEY:
-    raise ValueError("❌ EIA_API_KEY not found in your .env file.")
+    raise ValueError(f"❌ EIA_API_KEY not found in your .env file at {dotenv_path}. Please create it and add your key.")
 
-# --- API Request ---
+# --- Determine Start Date for API Request ---
+latest_existing_date = None
+existing_df = pd.DataFrame()
+
+if output_path.exists():
+    try:
+        existing_df = pd.read_csv(output_path)
+        if not existing_df.empty and "period" in existing_df.columns:
+            # Ensure 'period' is treated as datetime for proper comparison
+            existing_df["period"] = pd.to_datetime(existing_df["period"])
+            latest_existing_date = existing_df["period"].max()
+            print(f"✅ Found existing data up to: {latest_existing_date.strftime('%Y-%m-%d')}")
+        else:
+            print("⚠️ Existing CSV is empty or missing 'period' column. Fetching all available data.")
+    except Exception as e:
+        print(f"⚠️ Error reading existing CSV ({output_path}): {e}. Fetching all available data.")
+else:
+    print(f"ℹ️ No existing file found at {output_path}. Will fetch initial data.")
+
+
+# Calculate the start date for the API request
+# If we have existing data, start from the next month
+if latest_existing_date:
+    # Add one month to the latest existing date to get the start of the next month
+    # Using 'MS' for Month Start to ensure we get the correct first day of the next month
+    api_start_date = (latest_existing_date + pd.offsets.MonthBegin(1)).strftime("%Y-%m-%d")
+    print(f"ℹ️ Fetching new data starting from: {api_start_date}")
+else:
+    # If no existing data, fetch from a reasonable historical start (e.g., Jan 2010)
+    api_start_date = "2010-01-01"
+    print(f"ℹ️ No existing data found. Fetching data from: {api_start_date}")
+
+# --- API Request Parameters ---
 url = "https://api.eia.gov/v2/natural-gas/stor/cap/data/"
-today = datetime.today().strftime("%Y-%m-%d")
+today_str = datetime.today().strftime("%Y-%m-%d")
 
 params = {
     "api_key": API_KEY,
-    "frequency": "monthly",
+    "frequency": "monthly", # Data is monthly, so we update monthly
     "data[0]": "value",
     "sort[0][column]": "period",
-    "sort[0][direction]": "desc",
+    "sort[0][direction]": "desc", # Fetching in descending order to easily get newest data first
     "offset": 0,
-    "length": 5000,
-    "end": today
+    "length": 5000, # Max records per request
+    "start": api_start_date, # Only fetch data from this date onwards
+    "end": today_str
 }
 
-response = requests.get(url, params=params)
-response.raise_for_status()
+print(f"ℹ️ Calling EIA API with start={params['start']} and end={params['end']}...")
 
-data = response.json()
+try:
+    response = requests.get(url, params=params)
+    response.raise_for_status() # Raises an HTTPError for bad responses (4xx or 5xx)
+except requests.exceptions.RequestException as e:
+    print(f"❌ API Request failed: {e}")
+    print("Please check your internet connection, API key, and ensure the API is accessible.")
+    exit()
+
+api_data = response.json()
+if "response" not in api_data or "data" not in api_data["response"]:
+    print(f"❌ Unexpected API response structure: {api_data}")
+    exit()
+records = api_data["response"]["data"]
+
+if not records:
+    print(f"✅ No new data found from {api_start_date} to {today_str}. Data is already up-to-date.")
+    if not existing_df.empty:
+        print("\n--- Current capacity data (first 10 rows) ---")
+        print(existing_df.head(10).to_string(index=False))
+    exit() # Exit if no new data
 
 # --- Filter for Working Storage Capacity ---
-records = data["response"]["data"]
-working = [r for r in records if "Working" in r.get("series-description", "")]
+new_working_data = [r for r in records if "Working" in r.get("series-description", "")]
 
-# --- Convert to DataFrame ---
-df = pd.DataFrame(working)
-df = df[["period", "area-name", "series-description", "value", "units"]]
+if not new_working_data:
+    print("⚠️ No 'Working Storage Capacity' records found in the new API response.")
+    if not existing_df.empty:
+        print("\n--- Current capacity data (first 10 rows) ---")
+        print(existing_df.head(10).to_string(index=False))
+    exit()
+
+# --- Convert New Data to DataFrame ---
+new_df = pd.DataFrame(new_working_data)
+
+# Ensure essential columns exist in new_df before selecting
+expected_cols = ["period", "area-name", "series-description", "value", "units"]
+for col in expected_cols:
+    if col not in new_df.columns:
+        print(f"WARNING: Column '{col}' not found in new API response data. Adding as None.")
+        new_df[col] = None
+new_df = new_df[expected_cols]
+
+# Convert 'period' to datetime for consistent handling
+new_df["period"] = pd.to_datetime(new_df["period"])
+
+# --- Combine existing and new data ---
+if not existing_df.empty:
+    combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+else:
+    combined_df = new_df
+
+# Remove duplicates based on 'period' and 'area-name' (in case of overlaps)
+combined_df.drop_duplicates(subset=["period", "area-name"], keep="last", inplace=True)
+
+# Sort by 'period' (and 'area-name' for consistent order)
+combined_df.sort_values(by=["period", "area-name"], inplace=True)
+
+# Format 'period' back to 'YYYY-MM' string for saving if desired, or keep as datetime
+combined_df["period"] = combined_df["period"].dt.strftime("%Y-%m")
+
 
 # --- Save to CSV ---
-output_path = Path("working_storage_capacity.csv")
-df.to_csv(output_path, index=False)
-print("✅ Saved updated capacity data through today:")
-print(df.head(10))
+try:
+    combined_df.to_csv(output_path, index=False)
+    print(f"\n✅ Successfully updated and saved capacity data to: {output_path.resolve()}")
+    print(f"Total records after update: {len(combined_df)}")
+    print("\n--- First 10 rows of updated data ---")
+    print(combined_df.head(10).to_string(index=False))
+    print("\n--- Last 10 rows of updated data (showing newest) ---")
+    print(combined_df.tail(10).to_string(index=False))
+except Exception as e:
+    print(f"❌ Error saving data to CSV: {e}")
+    print(f"Attempted to save to: {output_path.resolve()}")
