@@ -66,8 +66,15 @@ df["Date"] = pd.to_datetime(df["Date"])
 df["Bcf"] = pd.to_numeric(df["Bcf"], errors="coerce")
 df.dropna(inplace=True)
 df.set_index("Date", inplace=True)
-df["Week"] = df.index.isocalendar().week.astype(int)
-df["Year"] = df.index.year
+
+# Use ISO calendar to fix 53-week years and prevent week 1 wraparound
+iso = df.index.isocalendar()
+df["ISO_Week"] = iso.week
+df["ISO_Year"] = iso.year
+df = df[df.index.year == df["ISO_Year"]]
+df["Week"] = df["ISO_Week"]
+df["Year"] = df["ISO_Year"]
+df.drop(columns=["ISO_Week", "ISO_Year"], inplace=True)
 
 if df.empty:
     sys.exit("No valid data after parsing.")
@@ -75,27 +82,23 @@ if df.empty:
 # --- Historical Stats ---
 current_year = datetime.now().year
 df_hist = df[(df["Year"] >= 2015) & (df["Year"] < current_year)]
-weekly_stats = df_hist.groupby("Week")["Bcf"].agg(["min", "max", "mean"]) if not df_hist.empty else pd.DataFrame(index=range(1, 54), columns=['min', 'max', 'mean']).fillna(np.nan)
+weekly_stats = df_hist.groupby("Week")["Bcf"].agg(["min", "max", "mean"]).reindex(range(1, 54), fill_value=np.nan)
 
 # --- Plot ---
 fig, ax = plt.subplots(figsize=(16, 9))
 plotted_elements, labels, initial_visibility = {}, [], []
 colors = plt.colormaps['tab10'](np.linspace(0, 1, 10))
 
-# --- Shaded Min/Max Range ---
+# Shaded Min/Max Range
 ax.fill_between(weekly_stats.index, weekly_stats["min"], weekly_stats["max"], color="lightgray", alpha=0.5, label="Min/Max Range")
 
-# --- Historical Years (2015 to current-1) ---
+# Historical Lines
 past_years = [y for y in sorted(df["Year"].unique()) if 2015 <= y < current_year]
 valid_years = []
 for i, y in enumerate(past_years):
     df_y = df[df["Year"] == y]
     week_diffs = df_y["Bcf"].diff().abs()
-    if (
-        df_y["Bcf"].std() < 5 or
-        len(df_y) < 20 or
-        week_diffs[1:].mean() < 1
-    ):
+    if df_y["Bcf"].std() < 5 or len(df_y) < 20 or week_diffs[1:].mean() < 1:
         print(f"Skipping {y} due to flat or junky data.")
         continue
     valid_years.append(y)
@@ -104,7 +107,7 @@ for i, y in enumerate(past_years):
     labels.append(str(y))
     initial_visibility.append(True)
 
-# --- Current Year ---
+# Current Year
 df_curr = df[df["Year"] == current_year]
 if not df_curr.empty:
     curr_line, = ax.plot(df_curr["Week"], df_curr["Bcf"], color="red", linewidth=2.5, label=f"{current_year} Current")
@@ -112,7 +115,7 @@ if not df_curr.empty:
     labels.append(str(current_year))
     initial_visibility.append(True)
 
-    # --- Projections (ONLY FOR 2020+) ---
+    # Projections
     last_week = df_curr["Week"].max()
     last_val = df_curr[df_curr["Week"] == last_week]["Bcf"].iloc[0]
     for i, y in enumerate(valid_years):
@@ -128,21 +131,13 @@ if not df_curr.empty:
                 continue
             proj_label = f"{y} Projection"
             if proj_label not in plotted_elements:
-                line, = ax.plot(
-                    proj_vals.index,
-                    proj_vals.values,
-                    color=colors[i % len(colors)],
-                    linestyle=':',
-                    linewidth=2.2,
-                    alpha=0.9,
-                    label="_nolegend_",
-                    visible=False
-                )
+                line, = ax.plot(proj_vals.index, proj_vals.values, color=colors[i % len(colors)],
+                                linestyle=':', linewidth=2.2, alpha=0.9, label="_nolegend_", visible=False)
                 plotted_elements[proj_label] = line
                 labels.append(proj_label)
                 initial_visibility.append(False)
 
-# --- Axes + Grid ---
+# Axes and Labels
 ax.set_xlim(1, 53)
 ax.set_ylim(df["Bcf"].min() * 0.95, df["Bcf"].max() * 1.05)
 ax.set_title(f"{region.replace(' Storage (Bcf)', '')} Weekly Natural Gas Storage", fontsize=18)
@@ -152,7 +147,7 @@ ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.3)
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 
-# --- Month Labels ---
+# Month Labels
 months = {'Jan': 1, 'Apr': 13, 'Jul': 26, 'Oct': 39, 'Dec': 52}
 sec_ax = ax.secondary_xaxis('bottom')
 sec_ax.set_xticks(list(months.values()))
@@ -160,7 +155,7 @@ sec_ax.set_xticklabels(list(months.keys()), fontsize=10)
 sec_ax.tick_params(length=0)
 ax.tick_params(pad=15)
 
-# --- CheckButtons ---
+# CheckButtons
 rax = plt.axes([0.83, 0.25, 0.15, 0.65])
 check = CheckButtons(rax, labels, initial_visibility)
 
@@ -172,17 +167,17 @@ def toggle(label):
 
 check.on_clicked(toggle)
 
-# --- Legend ---
+# Legends
 handles, handle_labels = ax.get_legend_handles_labels()
 main_handles = [h for h, l in zip(handles, handle_labels) if "Projection" not in l and l != "_nolegend_"]
 proj_handles = [plotted_elements[k] for k in plotted_elements if "Projection" in k]
 
 legend1 = ax.legend(main_handles, [l for l in handle_labels if "Projection" not in l and l != "_nolegend_"],
-                    loc='upper center', bbox_to_anchor=(0.5, 1.12), ncol=4, fontsize=9)
+                     loc='upper center', bbox_to_anchor=(0.5, 1.12), ncol=4, fontsize=9)
 legend2 = ax.legend(proj_handles, [k for k in plotted_elements if "Projection" in k],
-                    loc='lower right', fontsize=9)
+                     loc='lower right', fontsize=9)
 ax.add_artist(legend1)
 
-# --- Layout ---
+# Layout
 plt.subplots_adjust(left=0.05, right=0.80, top=0.90, bottom=0.08)
 plt.show()
