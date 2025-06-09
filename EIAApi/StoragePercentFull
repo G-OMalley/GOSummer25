@@ -2,17 +2,61 @@ import pandas as pd
 from pathlib import Path
 
 # --- File paths ---
-data_folder = Path("C:/Users/gomalley/OneDrive - Colonial Energy Inc/Documents/GitHub/trader-helper/INFO")
-capacity_path = Path("C:/Users/gomalley/OneDrive - Colonial Energy Inc/Documents/GitHub/working_storage_capacity.csv")
+# Get the directory of the current script
+script_dir = Path(__file__).parent
+
+# Navigate up to the 'trader-helper' directory and then down to 'INFO'
+# Assumes script is in trader-helper/EIAApi/ and INFO is in trader-helper/
+# Adjust '../INFO' if your 'INFO' folder is structured differently relative to the script.
+data_folder = script_dir.parent / "INFO"
+
+# Corrected path for capacity_path: it's inside the data_folder
+capacity_path = data_folder / "working_storage_capacity.csv"
+
+# Output path for the results (also inside the data_folder)
 output_path = data_folder / "StoragePercentFull.csv"
 
+print(f"INFO: Data folder determined as: {data_folder.resolve()}")
+print(f"INFO: Capacity file path determined as: {capacity_path.resolve()}")
+print(f"INFO: Output file path determined as: {output_path.resolve()}")
+
+
 # --- Load data ---
-totals = pd.read_csv(data_folder / "EIAtotals.csv")
-capacity = pd.read_csv(capacity_path)
+try:
+    totals = pd.read_csv(data_folder / "EIAtotals.csv")
+    print(f"✅ Successfully loaded EIAtotals.csv from: {data_folder / 'EIAtotals.csv'}")
+except FileNotFoundError:
+    print(f"ERROR: 'EIAtotals.csv' not found at {data_folder / 'EIAtotals.csv'}. Please check its location.")
+    exit()
+except Exception as e:
+    print(f"An unexpected error occurred while reading 'EIAtotals.csv': {e}")
+    exit()
+
+try:
+    capacity = pd.read_csv(capacity_path)
+    print(f"✅ Successfully loaded working_storage_capacity.csv from: {capacity_path}")
+except FileNotFoundError:
+    print(f"ERROR: 'working_storage_capacity.csv' not found at {capacity_path}.")
+    print("Please ensure the file is in the 'INFO' directory sibling to the script's parent.")
+    exit()
+except Exception as e:
+    print(f"An unexpected error occurred while reading 'working_storage_capacity.csv': {e}")
+    exit()
+
 
 # --- Match inventory to March 2025 to align with capacity data ---
 inventory_month = "2025-03"
-inventory_row = totals[totals["Period"].str.startswith(inventory_month)].iloc[-1]
+inventory_row_candidates = totals[totals["Period"].str.startswith(inventory_month)]
+
+if inventory_row_candidates.empty:
+    print(f"ERROR: No inventory data found for month starting with '{inventory_month}' in EIAtotals.csv.")
+    print("Please ensure the 'Period' column contains dates in 'YYYY-MM' format and March 2025 data exists.")
+    exit()
+
+# If there are multiple entries for the month, take the last one (e.g., end-of-month data)
+inventory_row = inventory_row_candidates.iloc[-1]
+print(f"INFO: Using inventory data for Period: {inventory_row['Period']}")
+
 
 # --- Region-to-state mapping (based on EIA areas) ---
 region_state_map = {
@@ -21,10 +65,10 @@ region_state_map = {
     "South Central": ["USA-TX", "USA-OK", "USA-LA", "USA-AR", "USA-MS"],
     "Mountain": ["USA-UT", "USA-CO", "USA-NM", "USA-WY"],
     "Pacific": ["USA-CA", "USA-OR"],
-    "Lower 48": []  # total of all above
+    # "Lower 48" states are summed from the above regions
 }
 
-# Match each region to its inventory column name in EIAtotals.csv
+# Map regions to their corresponding inventory column names in EIAtotals.csv
 inventory_cols = {
     "Midwest": "Midwest Region Storage (Bcf)",
     "East": "East Region Storage (Bcf)",
@@ -35,46 +79,74 @@ inventory_cols = {
 
 # --- Calculate capacity per region ---
 region_capacity = {}
-for region, states in region_state_map.items():
-    cap = capacity[capacity["area-name"].isin(states)]["value"].sum()
-    region_capacity[region] = cap / 1000  # Convert MMCF to BCF
+# Validate required columns in capacity DataFrame
+if "area-name" not in capacity.columns:
+    print("ERROR: 'area-name' column not found in 'working_storage_capacity.csv'. Cannot proceed.")
+    exit()
+if "value" not in capacity.columns:
+    print("ERROR: 'value' column not found in 'working_storage_capacity.csv'. Cannot proceed.")
+    exit()
 
-# Lower 48 capacity = sum of all
-region_capacity["Lower 48"] = sum(region_capacity.values())
+for region, states in region_state_map.items():
+    # Sum the 'value' (MMCF) for all states belonging to the current region
+    cap_mmcf = capacity[capacity["area-name"].isin(states)]["value"].sum()
+    region_capacity[region] = cap_mmcf / 1000  # Convert MMCF to BCF (1 BCF = 1000 MMCF)
+
+# Lower 48 capacity is the sum of all individual region capacities (excluding "Lower 48" from map directly)
+region_capacity["Lower 48"] = sum(region_capacity[r] for r in inventory_cols.keys())
+
 
 # --- Build results table ---
 results = []
 for region, inv_col in inventory_cols.items():
-    if inv_col not in inventory_row:
-        print(f"⚠️ Inventory column '{inv_col}' not found. Skipping...")
+    if inv_col not in inventory_row.index:
+        print(f"⚠️ Inventory column '{inv_col}' not found in EIAtotals.csv for selected period. Skipping '{region}'.")
         continue
 
-    inventory = inventory_row[inv_col]
+    inventory_val = inventory_row[inv_col]
     capacity_bcf = region_capacity.get(region, 0)
-    percent = round((inventory / capacity_bcf) * 100, 1) if capacity_bcf else 0
+
+    percent = 0.0
+    if capacity_bcf > 0:
+        percent = round((inventory_val / capacity_bcf) * 100, 1)
+    else:
+        print(f"⚠️ Capacity for region '{region}' is zero or not found. 'Percent Full' will be 0.0.")
 
     results.append({
         "Region": region,
-        "Inventory (Bcf)": inventory,
+        "Inventory (Bcf)": round(inventory_val, 1),
         "Capacity (Bcf)": round(capacity_bcf, 1),
         "Percent Full": percent
     })
 
 # Add Lower 48 row
-lower_inventory = inventory_row["Lower 48 States Storage (Bcf)"]
-lower_capacity = region_capacity["Lower 48"]
-lower_percent = round((lower_inventory / lower_capacity) * 100, 1)
+lower_48_inventory_col = "Lower 48 States Storage (Bcf)"
+if lower_48_inventory_col not in inventory_row.index:
+    print(f"ERROR: '{lower_48_inventory_col}' column not found in EIAtotals.csv for selected period. Cannot calculate Lower 48 totals.")
+else:
+    lower_inventory_val = inventory_row[lower_48_inventory_col]
+    lower_capacity_bcf = region_capacity.get("Lower 48", 0)
 
-results.append({
-    "Region": "Lower 48",
-    "Inventory (Bcf)": lower_inventory,
-    "Capacity (Bcf)": round(lower_capacity, 1),
-    "Percent Full": lower_percent
-})
+    lower_percent = 0.0
+    if lower_capacity_bcf > 0:
+        lower_percent = round((lower_inventory_val / lower_capacity_bcf) * 100, 1)
+    else:
+        print("⚠️ Capacity for 'Lower 48' is zero or not found. 'Percent Full' will be 0.0.")
+
+    results.append({
+        "Region": "Lower 48",
+        "Inventory (Bcf)": round(lower_inventory_val, 1),
+        "Capacity (Bcf)": round(lower_capacity_bcf, 1),
+        "Percent Full": lower_percent
+    })
 
 # --- Save to CSV ---
 df_out = pd.DataFrame(results)
-df_out.to_csv(output_path, index=False)
-print("✅ StoragePercentFull.csv updated and saved to:")
-print(output_path)
-print(df_out)
+try:
+    df_out.to_csv(output_path, index=False)
+    print("\n✅ StoragePercentFull.csv updated and saved successfully.")
+    print(f"Output file location: {output_path.resolve()}")
+    print("\n--- Calculated Percent Full Data ---")
+    print(df_out.to_string(index=False)) # Using to_string for better console formatting
+except Exception as e:
+    print(f"ERROR: Could not save the output CSV to {output_path}. Error: {e}")
