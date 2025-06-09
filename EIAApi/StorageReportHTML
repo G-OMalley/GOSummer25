@@ -34,7 +34,8 @@ region_map = {
     "Mountain Region Storage (Bcf)": "mountain_region_storage",
     "Pacific Region Storage (Bcf)": "pacific_region_storage"
 }
-DEFAULT_REGION_DISPLAY_NAME = "Lower 48 States Storage (Bcf)"
+# DEFAULT_REGION_DISPLAY_NAME is now used as the fixed default for the Report tab.
+DEFAULT_REGION_DISPLAY_NAME = "Lower 48 States Storage (Bcf)" 
 
 files = {
     "eia_totals": "EIAtotals.csv",
@@ -214,7 +215,7 @@ def process_region_data(display_name, internal_column_name, raw_data):
             m_df = merged[["period", change_col_name]].copy().sort_values('period')
             m_df['week_num'] = m_df['period'].dt.isocalendar().week 
             
-            # Calculate 4-week avg with min_periods=2 for more flexibility (THIS IS THE KEY CHANGE)
+            # Calculate 4-week avg with min_periods=2 for more flexibility
             if len(m_df.dropna(subset=[change_col_name])) >= 2: # Ensure at least 2 non-NaN values for rolling
                 m_df['4_week_avg'] = m_df[change_col_name].rolling(window=4, min_periods=2).mean() # min_periods=2 allows a value with less than 4 data points
                 latest_4wk_avg_val = m_df['4_week_avg'].iloc[-1] if pd.notna(m_df['4_week_avg'].iloc[-1]) else np.nan
@@ -386,15 +387,17 @@ html_template_raw = f"""
             <div id="report-content" class="summary"></div>
         </div>
         <div id="storage-info" class="tab">
+            <!-- Moved dropdown here -->
+            <div class="graph-controls" style="margin-top: 20px;">
+                <label for="region-select">Select Region:</label>
+                <select id="region-select">
+                    <option value="">-- Choose Region --</option>
+                    {region_options_html}
+                </select>
+            </div>
             <div class="graph-section">
                 <h2>EIA Storage Graph</h2>
-                <div class="graph-controls">
-                    <label for="region-select">Select Region:</label>
-                    <select id="region-select">
-                        <option value="">-- Choose Region --</option>
-                        {region_options_html}
-                    </select>
-                </div>
+                <!-- Graph controls content moved inside -->
                 <canvas id="chart"></canvas>
                 <div id="chart-legend-toggles" class="chart-legend-toggles" style="display: none;">
                 </div>
@@ -418,7 +421,7 @@ html_template_raw = f"""
 <script>
     const allRegionData = {region_outputs_json};
     const globalAvgTemp = "{avg_temp}"; // This is now the 7-day average
-    const defaultRegion = "{DEFAULT_REGION_DISPLAY_NAME}";
+    const defaultRegion = "{DEFAULT_REGION_DISPLAY_NAME}"; // Still used in dropdown list
 
     let myChart;
     let myMomentumChartGraph;
@@ -430,23 +433,43 @@ html_template_raw = f"""
         document.getElementById(tabId + '-tab-button').classList.add('active');
         
         const regionSelect = document.getElementById("region-select");
-        const currentSelectedRegion = regionSelect.value || defaultRegion;
+        const currentSelectedRegion = regionSelect.value; // Get current selection
+
+        // Define a function to clear charts and display messages
+        const clearAndMessageCharts = () => {{
+            if (myChart) {{ myChart.destroy(); myChart = null; }}
+            if (myMomentumChartGraph) {{ myMomentumChartGraph.destroy(); myMomentumChartGraph = null; }}
+            // Clear canvases by effectively re-creating them or clearing context
+            const chartCanvas = document.getElementById("chart");
+            const momentumCanvas = document.getElementById("momentumChartGraph");
+            chartCanvas.getContext("2d").clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+            momentumCanvas.getContext("2d").clearRect(0, 0, momentumCanvas.width, momentumCanvas.height);
+
+            document.getElementById("chart-legend-toggles").innerHTML = "<p><em>Select a region from the dropdown above to view its storage graphs.</em></p>";
+            document.getElementById("momentum-summary-graph").innerHTML = "<p><em>Select a region to view its storage change momentum.</em></p>";
+        }};
+
+        // Define a function to display "Please select" message for report
+        const messageReport = () => {{
+            document.getElementById("report-content").innerHTML = "<p><strong>Please select a region from the dropdown above to view its market report data.</strong></p>";
+        }};
+
 
         if (tabId === 'storage-info') {{
-            if (currentSelectedRegion) {{
+            if (currentSelectedRegion && currentSelectedRegion !== "") {{ 
                 updateEIAStorageGraph(currentSelectedRegion);
                 renderMomentumChartGraph(currentSelectedRegion);
-            }} else if (Object.keys(allRegionData).length > 0 && allRegionData[defaultRegion]) {{
-                regionSelect.value = defaultRegion;
-                updateEIAStorageGraph(defaultRegion);
-                renderMomentumChartGraph(defaultRegion);
+            }} else {{
+                clearAndMessageCharts();
             }}
         }} else if (tabId === 'report') {{
-            updateReportContent(currentSelectedRegion);
+            // Report tab always shows Default Region data
+            updateReportContent(defaultRegion); // Always show default (Lower 48) data for report
         }}
     }}
 
     function updateReportContent(selectedRegion) {{
+        // This function will now always be called with defaultRegion when Report tab is shown
         const reportContentDiv = document.getElementById("report-content");
         const report = allRegionData[selectedRegion] ? allRegionData[selectedRegion].report : null;
 
@@ -576,10 +599,10 @@ html_template_raw = f"""
 
     document.addEventListener("DOMContentLoaded", function() {{
         const regionSelect = document.getElementById("region-select");
-        let defaultRegionFound = false;
-        for (let i = 0; i < regionSelect.options.length; i++) {{ if (regionSelect.options[i].value === defaultRegion) {{ regionSelect.value = defaultRegion; defaultRegionFound = true; break; }} }}
-        if (!defaultRegionFound && regionSelect.options.length > 1) {{ regionSelect.value = regionSelect.options[1].value; }}
-        showTab('report');
+        // No default selected region on load
+        regionSelect.value = ""; // Ensures "Choose Region" is displayed
+
+        showTab('report'); // Show report tab, which will now prompt for selection
     }});
 
     document.getElementById("region-select").addEventListener("change", function() {{
@@ -587,10 +610,22 @@ html_template_raw = f"""
         const currentActiveTab = document.querySelector('.tab.active');
         if (currentActiveTab) {{
             if (currentActiveTab.id === 'storage-info') {{
-                updateEIAStorageGraph(selectedRegion);
-                renderMomentumChartGraph(selectedRegion);
+                // Only update graphs if a region is actually selected
+                if (selectedRegion && selectedRegion !== "") {{
+                    updateEIAStorageGraph(selectedRegion);
+                    renderMomentumChartGraph(selectedRegion);
+                }} else {{
+                    // Clear charts and show message if unselected
+                    if (myChart) {{ myChart.destroy(); myChart = null; }}
+                    if (myMomentumChartGraph) {{ myMomentumChartGraph.destroy(); myMomentumChartGraph = null; }}
+                    document.getElementById("chart").getContext("2d").clearRect(0, 0, document.getElementById("chart").width, document.getElementById("chart").height);
+                    document.getElementById("momentumChartGraph").getContext("2d").clearRect(0, 0, document.getElementById("momentumChartGraph").width, document.getElementById("momentumChartGraph").height);
+                    document.getElementById("chart-legend-toggles").innerHTML = "<p><em>Select a region from the dropdown above to view its storage graphs.</em></p>";
+                    document.getElementById("momentum-summary-graph").innerHTML = "<p><em>Select a region to view its storage change momentum.</em></p>";
+                }}
             }} else if (currentActiveTab.id === 'report') {{
-                updateReportContent(selectedRegion);
+                // Report tab always shows Default Region data
+                updateReportContent(defaultRegion); // Always show default (Lower 48) data for report
             }}
         }}
     }});
@@ -598,7 +633,6 @@ html_template_raw = f"""
 </body>
 </html>
 """
-
 # Open and write the HTML file
 with open(output_path, "w", encoding="utf-8") as f:
     f.write(html_template_raw) 
