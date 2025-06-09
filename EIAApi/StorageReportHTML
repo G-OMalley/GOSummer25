@@ -7,14 +7,29 @@ import webbrowser
 import time
 
 # --- Setup ---
-data_folder = Path("C:/Users/gomalley/OneDrive - Colonial Energy Inc/Documents/GitHub/trader-helper/INFO")
-output_path = Path("C:/Users/gomalley/OneDrive - Colonial Energy Inc/Documents/GitHub/EIA_Report.html")
+# Determine the base directory of the script
+script_dir = Path(__file__).parent
+
+# The project root (e.g., 'trader-helper') is one level up from the script's directory.
+project_root = script_dir.parent 
+
+# Define the base data folder relative to the project root
+# This assumes your 'INFO' folder is directly under the 'trader-helper' root
+data_folder = project_root / "INFO"
+
+# Define the output path for the generated HTML report relative to the project root
+# This assumes the HTML report should be generated directly in the 'trader-helper' root
+output_path = project_root / "EIA_Report.html"
+
+print(f"Data folder resolved to: {data_folder}")
+print(f"Output path resolved to: {output_path}")
+
 
 region_map = {
     "Lower 48 States Storage (Bcf)": "lower_48_states_storage",
     "East Region Storage (Bcf)": "east_region_storage",
     "Midwest Region Storage (Bcf)": "midwest_region_storage",
-    # FIX: Corrected internal name for South Central totals based on diagnostic output
+    # Corrected internal name for South Central totals based on previous diagnostic output
     "South Central Region Storage (Bcf)": "south_central_region_storage", 
     "Mountain Region Storage (Bcf)": "mountain_region_storage",
     "Pacific Region Storage (Bcf)": "pacific_region_storage"
@@ -89,10 +104,10 @@ def process_region_data(display_name, internal_column_name, raw_data):
         if not prices_weekly.empty: merged = merged.merge(prices_weekly, on="period", how="outer")
         merged = merged.sort_values("period")
 
-        # --- FIX: Check if the internal_column_name exists in the merged DataFrame ---
+        # --- Check if the internal_column_name exists in the merged DataFrame ---
         if internal_column_name not in merged.columns:
             print(f"❌ Error processing region {display_name}: Required storage column '{internal_column_name}' not found in merged data.")
-            return None # Skip processing this region if the essential column is missing
+            return None 
 
         demand_cols = [c for c in ["industrial", "rescom", "mexexp", "lngexp", "power", "power_burn"] if c in merged.columns]
         supply_cols = [c for c in ["prod", "cadimp"] if c in merged.columns]
@@ -111,7 +126,7 @@ def process_region_data(display_name, internal_column_name, raw_data):
 
         # Ensure latest_valid has the region's specific storage data as well
         latest_valid = merged.dropna(subset=["total_demand", "total_supply", internal_column_name])
-        if latest_valid.empty: return None # No valid data for this region
+        if latest_valid.empty: return None 
 
         latest_valid = latest_valid.iloc[-1]
         latest_date = latest_valid["period"].date()
@@ -122,28 +137,23 @@ def process_region_data(display_name, internal_column_name, raw_data):
             "Lower 48 States Storage (Bcf)": "lower_48_states_storage_change", 
             "East Region Storage (Bcf)": "east_region_storage_change",
             "Midwest Region Storage (Bcf)": "midwest_region_storage_change", 
-            "South Central Region Storage (Bcf)": "south_central_total_change_calculated", # This will be created below
+            "South Central Region Storage (Bcf)": "south_central_total_change_calculated", 
             "Mountain Region Storage (Bcf)": "mountain_region_storage_change", 
             "Pacific Region Storage (Bcf)": "pacific_region_storage_change"
         }
 
-        # --- FIX: Create 'south_central_total_change_calculated' for South Central Momentum ---
+        # Create 'south_central_total_change_calculated' for South Central Momentum if components exist
         if display_name == "South Central Region Storage (Bcf)":
             salt_change_col = 'salt_region_sc_storage_change'
             nonsalt_change_col = 'nonsalt_region_sc_storage_change'
             
             if salt_change_col in raw_data["eia_changes"].columns and nonsalt_change_col in raw_data["eia_changes"].columns:
-                # Sum the two change columns to create a total South Central change
-                # Ensure it's indexed correctly by period from eia_changes
                 sc_changes_temp = raw_data["eia_changes"][['period', salt_change_col, nonsalt_change_col]].copy()
                 sc_changes_temp['south_central_total_change_calculated'] = sc_changes_temp[salt_change_col] + sc_changes_temp[nonsalt_change_col]
-                
-                # Merge this calculated column into the main 'merged' DataFrame
-                merged = merged.merge(sc_changes_temp[['period', 'south_central_total_change_calculated']], on='period', how='left')
-                
+                merged = merged.set_index('period').combine_first(sc_changes_temp.set_index('period')).reset_index()
             else:
-                print(f"⚠️ Warning: Cannot find both '{salt_change_col}' and '{nonsalt_change_col}' in EIAchanges.csv for South Central. Momentum data will be missing.")
-                region_change_col_map["South Central Region Storage (Bcf)"] = None # Ensure it's not used if components are missing
+                print(f"⚠️ Warning: Cannot find both '{salt_change_col}' and '{nonsalt_change_col}' in EIAchanges.csv for South Central. Momentum data will be missing for this region.")
+                region_change_col_map["South Central Region Storage (Bcf)"] = None 
 
         change_col_name = region_change_col_map.get(display_name)
 
@@ -154,9 +164,9 @@ def process_region_data(display_name, internal_column_name, raw_data):
         # Ensure change_col_name exists in merged before adding to graph_cols
         if change_col_name and change_col_name in merged.columns: graph_cols.append(change_col_name)
         else: # If change column is missing, set change_col_name to None for momentum part
-            if display_name != DEFAULT_REGION_DISPLAY_NAME: # Suppress warning for default if not critical
+            if display_name != DEFAULT_REGION_DISPLAY_NAME: 
                 print(f"⚠️ Warning: Storage Change column '{change_col_name}' not found in merged data for {display_name}. Momentum data will be missing from graph.")
-            change_col_name = None # Set to None if not found
+            change_col_name = None 
             
         graph_df = merged[graph_cols].dropna(subset=["period", internal_column_name]).rename(columns={"period": "Date", internal_column_name: "Bcf"})
         graph_df["Week"], graph_df["Year"] = graph_df["Date"].dt.isocalendar().week.astype(int), graph_df["Date"].dt.year
@@ -194,31 +204,50 @@ def process_region_data(display_name, internal_column_name, raw_data):
 
         graph_data_list = sorted([chart_map.get(i, {"Week": i}) for i in range(1, 54)], key=lambda x: x["Week"])
 
-        # Momentum Summary
-        momentum_summary = {"latest_4wk_avg": "N/A", "five_year_avg_same_week": "N/A", "momentum_label": "Data Missing"}
+        # Momentum Summary Calculation
+        momentum_label = "Insufficient Data for Signal" 
+        latest_4wk_avg_val = np.nan 
+        five_year_avg_val = np.nan 
         momentum_chart_data = []
 
-        # FIX: Initialize momentum_label for all paths
-        momentum_label = "Data Missing" # Default value
-
-        if change_col_name and change_col_name in merged.columns: # FIX: Check 'merged' not raw_data["eia_changes"] for the calculated column
-            m_df = merged[["period", change_col_name]].copy().sort_values('period') # Use 'merged' which has the calculated column
+        if change_col_name and change_col_name in merged.columns: 
+            m_df = merged[["period", change_col_name]].copy().sort_values('period')
             m_df['week_num'] = m_df['period'].dt.isocalendar().week 
-            m_df['4_week_avg'] = m_df[change_col_name].rolling(window=4).mean()
-            latest_4wk_avg = m_df['4_week_avg'].iloc[-1] if not m_df['4_week_avg'].empty else np.nan
+            
+            # Calculate 4-week avg with min_periods=2 for more flexibility (THIS IS THE KEY CHANGE)
+            if len(m_df.dropna(subset=[change_col_name])) >= 2: # Ensure at least 2 non-NaN values for rolling
+                m_df['4_week_avg'] = m_df[change_col_name].rolling(window=4, min_periods=2).mean() # min_periods=2 allows a value with less than 4 data points
+                latest_4wk_avg_val = m_df['4_week_avg'].iloc[-1] if pd.notna(m_df['4_week_avg'].iloc[-1]) else np.nan
             
             curr_week_num = m_df['week_num'].iloc[-1]
-            five_year_data = m_df[(m_df['week_num'] == curr_week_num) & (m_df['period'].dt.year >= datetime.now().year - 5) & (m_df['period'].dt.year < datetime.now().year)]
-            five_year_avg = five_year_data[change_col_name].mean() if not five_year_data.empty else np.nan
+            five_year_data_for_avg = m_df[(m_df['week_num'] == curr_week_num) & 
+                                  (m_df['period'].dt.year >= datetime.now().year - 5) & 
+                                  (m_df['period'].dt.year < datetime.now().year)][change_col_name].dropna() 
+            
+            if len(five_year_data_for_avg) >= 3: 
+                five_year_avg_val = five_year_data_for_avg.mean()
+            
+            # Determine momentum_label only if both averages are valid numbers
+            if pd.notna(latest_4wk_avg_val) and pd.notna(five_year_avg_val):
+                if latest_4wk_avg_val > five_year_avg_val:
+                    momentum_label = "🔺 Above Normal Injections – Bearish" if latest_4wk_avg_val > 0 else "🔺 Above Normal Withdrawals (less negative) – Bullish"
+                else:
+                    momentum_label = "🔻 Below Normal Injections (less positive) – Bullish" if latest_4wk_avg_val > 0 else "🔻 Below Normal Withdrawals – Bearish"
+            else:
+                momentum_label = "Insufficient Data for Signal" 
 
-            if pd.notna(latest_4wk_avg) and pd.notna(five_year_avg):
-                momentum_label = ("🔺 Above Normal Injections – Bearish" if latest_4wk_avg > 0 else "🔺 Above Normal Withdrawals (less negative) – Bullish") if latest_4wk_avg > five_year_avg else ("🔻 Below Normal Injections (less positive) – Bullish" if latest_4wk_avg > 0 else "🔻 Below Normal Withdrawals – Bearish")
-            momentum_summary = {"latest_4wk_avg": round(latest_4wk_avg, 1) if pd.notna(latest_4wk_avg) else "N/A", "five_year_avg_same_week": round(five_year_avg, 1) if pd.notna(five_year_avg) else "N/A", "momentum_label": momentum_label}
+            # Populate chart data only if change column is available
             momentum_chart_data = m_df[["period", change_col_name]].tail(52).to_dict(orient="records")
-            for item in momentum_chart_data: item['change_value'], item['period_label'] = item.pop(change_col_name), item['period'].strftime('%b %d')
-        else:
-            # If change_col_name is None or not in merged, momentum_summary remains default "Data Missing"
-            pass # momentum_label is already initialized to "Data Missing"
+            for item in momentum_chart_data: 
+                item['change_value'] = item.pop(change_col_name)
+                item['period_label'] = item['period'].strftime('%b %d')
+
+        # Final summary dict, using the calculated numeric averages or "N/A"
+        momentum_summary = {
+            "latest_4wk_avg": round(latest_4wk_avg_val, 1) if pd.notna(latest_4wk_avg_val) else "N/A", 
+            "five_year_avg_same_week": round(five_year_avg_val, 1) if pd.notna(five_year_avg_val) else "N/A", 
+            "momentum_label": momentum_label
+        }
 
 
         return {
@@ -231,15 +260,14 @@ def process_region_data(display_name, internal_column_name, raw_data):
         return None
 
 # --- Precompute Data ---
-# FIX: Initialize aggregated_capacity_bcf globally and correctly before any loops that use it
-aggregated_capacity_bcf = {} # <<< MOVED THIS INITIALIZATION HERE AND ENSURED IT'S GLOBAL
+# Initialize aggregated_capacity_bcf globally
+aggregated_capacity_bcf = {} 
 
 region_outputs = {d_name: process_region_data(d_name, i_col_name, raw_data) for d_name, i_col_name in region_map.items()}
 region_outputs = {k: v for k, v in region_outputs.items() if v is not None} # Filter out failed regions
 
 # --- Storage Capacity Data ---
 capacity_data_for_html = []
-# Ensure latest_inventory_period_capacity is valid, fallback if eia_totals is empty
 latest_inventory_period_capacity = raw_data["eia_totals"]["period"].max() if not raw_data["eia_totals"].empty else datetime.now()
 
 
@@ -271,9 +299,7 @@ for region_group, states_list in region_state_group_map.items():
     aggregated_capacity_bcf[region_group] = region_capacity_bcf_sum
 
 # Explicitly calculate Lower 48 total capacity by summing the aggregated regions
-# This avoids issues if "Lower 48" isn't a direct entry in your capacity file
 # Sum only the regions that are actual sub-regions, excluding "Lower 48" itself if present
-# Re-evaluate sum, ensuring it handles cases where some aggregated_capacity_bcf keys might not align perfectly with region_state_group_map keys
 aggregated_capacity_bcf["Lower 48"] = sum(aggregated_capacity_bcf.get(k, 0) for k in ["East", "Midwest", "South Central", "Mountain", "Pacific"])
 
 
@@ -375,7 +401,7 @@ html_template_raw = f"""
             </div>
 
             <div class="momentum-section">
-                <h2 style="margin-top: 40px;">Storage Change Momentum (Selected Region)</h2>
+                <h2>Storage Change Momentum</h2>
                 <p id="momentum-summary-graph" style="text-align:center;"></p>
                 <canvas id="momentumChartGraph" style="height:300px; width:100%;"></canvas>
             </div>
@@ -422,7 +448,7 @@ html_template_raw = f"""
 
     function updateReportContent(selectedRegion) {{
         const reportContentDiv = document.getElementById("report-content");
-        const report = allRegionData[selectedRegion] ? allRegionData[selectedRegion].report : null; // Corrected selectedRegion
+        const report = allRegionData[selectedRegion] ? allRegionData[selectedRegion].report : null;
 
         if(report) {{
             reportContentDiv.innerHTML = `
