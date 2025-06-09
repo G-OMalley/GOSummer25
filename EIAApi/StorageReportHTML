@@ -1,723 +1,348 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import webbrowser
 import time
 
 # --- Setup ---
-# Define the base data folder where CSV files are located
-# IMPORTANT: This path is set to the one you provided. Ensure it's correct on your machine.
-data_folder = Path("C:/Users/gomalley/OneDrive - Colonial Energy Inc/Documents/GitHub/trader-helper/INFO") 
-
-# Define the output path for the generated HTML report
-# IMPORTANT: This path is set to the one you provided. Ensure it's correct on your machine.
+data_folder = Path("C:/Users/gomalley/OneDrive - Colonial Energy Inc/Documents/GitHub/trader-helper/INFO")
 output_path = Path("C:/Users/gomalley/OneDrive - Colonial Energy Inc/Documents/GitHub/EIA_Report.html")
 
-# Mapping of display names to column names for storage regions
-# Note: These display names will be used as keys for region_outputs and dropdown options.
 region_map = {
     "Lower 48 States Storage (Bcf)": "lower_48_states_storage",
     "East Region Storage (Bcf)": "east_region_storage",
     "Midwest Region Storage (Bcf)": "midwest_region_storage",
-    "South Central Region Storage (Bcf)": "south_central_storage", # Changed to align with EIAchanges.csv (often different from total)
+    # FIX: Corrected internal name for South Central totals based on diagnostic output
+    "South Central Region Storage (Bcf)": "south_central_region_storage", 
     "Mountain Region Storage (Bcf)": "mountain_region_storage",
     "Pacific Region Storage (Bcf)": "pacific_region_storage"
 }
-
-# Set a default region to display on load (using the display name)
 DEFAULT_REGION_DISPLAY_NAME = "Lower 48 States Storage (Bcf)"
 
-# Dictionary of files to load and their corresponding filenames
 files = {
     "eia_totals": "EIAtotals.csv",
-    "eia_changes": "EIAchanges.csv", # Storage change data
+    "eia_changes": "EIAchanges.csv",
     "eia_fundamentals": "EIAFundamentalMonthlydayAvg.csv",
     "weather": "WEATHER.csv",
-    "prices": "PRICES.csv", # Added PRICES.csv
-    "working_storage_capacity": "working_storage_capacity.csv" # NEW: Added capacity file
+    "prices": "PRICES.csv",
+    "working_storage_capacity": "working_storage_capacity.csv"
 }
 
-# --- Load and Pre-process Data ---
-raw_data = {}
-for key, fname in files.items():
-    file_path = data_folder / fname
-    if not file_path.exists():
-        print(f"❌ Error: Required file not found at {file_path}. Please ensure all data files are present.")
+# --- Data Loading and Cleaning ---
+def load_clean_df(file_key, fname, data_path):
+    fpath = data_path / fname
+    if not fpath.exists():
+        print(f"❌ Error: Required file not found at {fpath}.")
         exit(1)
-
-    df = pd.read_csv(file_path)
-    
-    # Clean column names: lowercase, remove (bcf), replace spaces with underscores, remove colons, strip whitespace
-    df.columns = (
-        df.columns.str.lower()
-        .str.replace(" (bcf)", "", regex=False)
-        .str.replace(" ", "_")
-        .str.replace(":", "")
-        .str.strip()
-    )
-
-    # Convert date/period columns to datetime objects
+    df = pd.read_csv(fpath)
+    df.columns = df.columns.str.lower().str.replace(" (bcf)", "", regex=False).str.replace(" ", "_").str.replace(":", "").str.strip()
     if "period" in df.columns:
-        # For EIA fundamentals, use '%Y-%m' format, otherwise infer
-        df["period"] = pd.to_datetime(df["period"], errors="coerce", 
-                                     format="%Y-%m" if key == "eia_fundamentals" else None)
-    elif "date" in df.columns and key == "weather":
+        df["period"] = pd.to_datetime(df["period"], errors="coerce", format="%Y-%m" if file_key == "eia_fundamentals" else None)
+    elif "date" in df.columns:
         df["date"] = pd.to_datetime(df["date"], errors="coerce")
-    elif "date" in df.columns and key == "prices": # For prices.csv
-        df["date"] = pd.to_datetime(df["date"], errors="coerce")
-    
-    raw_data[key] = df
+    return df
 
-# --- Calculate Average US Temperature ---
+raw_data = {key: load_clean_df(key, fname, data_folder) for key, fname in files.items()}
+
+# --- DIAGNOSTIC PRINT FOR EIA_TOTALS COLUMNS ---
+print("\n--- Diagnostic: Cleaned columns in EIAtotals.csv ---")
+if "eia_totals" in raw_data:
+    print(raw_data["eia_totals"].columns.tolist())
+else:
+    print("EIAtotals.csv was not loaded.")
+print("---------------------------------------------------\n")
+
+
+# --- Recent US Temperature ---
 avg_temp = "N/A"
 if "avg_temp" in raw_data["weather"].columns:
-    # Convert 'avg_temp' to numeric, setting invalid parsing to NaN
     raw_data["weather"]["avg_temp"] = pd.to_numeric(raw_data["weather"]["avg_temp"], errors="coerce")
-    clean_temps = raw_data["weather"]["avg_temp"].dropna()
-    if not clean_temps.empty:
-        avg_temp = round(clean_temps.mean(), 1)
+    latest_weather_date = raw_data["weather"]["date"].max()
+    if pd.notna(latest_weather_date):
+        recent_temps_df = raw_data["weather"].loc[raw_data["weather"]["date"] >= (latest_weather_date - timedelta(days=6)), "avg_temp"].dropna()
+        if not recent_temps_df.empty:
+            avg_temp = round(recent_temps_df.mean(), 1)
+        else: # Fallback to overall average if no recent data
+            overall_clean_temps = raw_data["weather"]["avg_temp"].dropna()
+            if not overall_clean_temps.empty:
+                avg_temp = round(overall_clean_temps.mean(), 1)
+            else:
+                print("⚠️ Error: No valid temperature data found in WEATHER.csv at all. Average temperature will not be displayed.")
 else:
     print("⚠️ 'avg_temp' column not found in WEATHER.csv. Average temperature will not be displayed.")
 
-# --- Precompute Report and Graph Data for Each Region ---
-region_outputs = {}
-for display_name, internal_column_name in region_map.items(): # Use display_name as key for region_outputs
+# --- Region Data Processing ---
+def process_region_data(display_name, internal_column_name, raw_data):
     try:
-        # Resample EIA fundamentals to weekly (Friday) and forward fill
         fundamentals_weekly = raw_data["eia_fundamentals"].set_index("period").resample("W-FRI").ffill().reset_index()
         
-        # Resample prices to weekly (Friday) and take mean for the week, then forward fill
-        price_column_name = None
-        if 'henry' in raw_data["prices"].columns:
-            price_column_name = 'henry'
-        else:
-            # Look for 'settle_price' or just 'price' in column names (case-insensitive)
-            for col in raw_data["prices"].columns:
-                if 'settle_price' in col.lower() or 'price' in col.lower():
-                    price_column_name = col
-                    break
-
+        price_col_name = next((c for c in raw_data["prices"].columns if 'settle_price' in c.lower() or 'price' in c.lower() or 'henry' in c.lower()), None)
         prices_weekly = pd.DataFrame()
-        if price_column_name:
-            # Ensure price column is numeric
-            raw_data["prices"][price_column_name] = pd.to_numeric(raw_data["prices"][price_column_name], errors='coerce')
-            prices_weekly = (
-                raw_data["prices"]
-                .set_index("date")
-                .resample("W-FRI")[price_column_name]
-                .mean() # Take the mean price for the week
-                .ffill() # Forward fill missing weekly prices
-                .reset_index()
-                .rename(columns={price_column_name: "weekly_avg_price", "date": "period"}) # Rename date to period for merging
-            )
-        else:
-            print(f"⚠️ Warning: No 'henry', 'settle_price' or 'price' column found in PRICES.csv for {display_name}. Price data will not be included.")
+        if price_col_name:
+            raw_data["prices"][price_col_name] = pd.to_numeric(raw_data["prices"][price_col_name], errors='coerce')
+            prices_weekly = raw_data["prices"].set_index("date").resample("W-FRI")[price_col_name].mean().ffill().reset_index().rename(columns={price_col_name: "weekly_avg_price", "date": "period"})
         
-
-        # Merge EIA totals, changes, and weekly fundamentals
         merged = pd.merge(raw_data["eia_totals"], raw_data["eia_changes"], on="period", how="outer")
         merged = merged.merge(fundamentals_weekly, on="period", how="outer")
-        if not prices_weekly.empty:
-            merged = merged.merge(prices_weekly, on="period", how="outer") # Merge prices
+        if not prices_weekly.empty: merged = merged.merge(prices_weekly, on="period", how="outer")
         merged = merged.sort_values("period")
 
-        # Define demand and supply columns, filtering for existence in merged data
+        # --- FIX: Check if the internal_column_name exists in the merged DataFrame ---
+        if internal_column_name not in merged.columns:
+            print(f"❌ Error processing region {display_name}: Required storage column '{internal_column_name}' not found in merged data.")
+            return None # Skip processing this region if the essential column is missing
+
         demand_cols = [c for c in ["industrial", "rescom", "mexexp", "lngexp", "power", "power_burn"] if c in merged.columns]
         supply_cols = [c for c in ["prod", "cadimp"] if c in merged.columns]
 
-        # Calculate total demand, supply, and net balance (min_count=1 to allow NaNs if all components are NaN)
         merged["total_demand"] = merged[demand_cols].sum(axis=1, min_count=1)
         merged["total_supply"] = merged[supply_cols].sum(axis=1, min_count=1)
         merged["net_balance"] = merged["total_supply"] - merged["total_demand"]
-        
-        # Calculate rolling 5-year (260 weeks) average net balance
         merged["rolling_5yr_net_balance"] = merged["net_balance"].rolling(window=260, min_periods=1).mean()
         
-        # Determine market status (Tight/Loose)
+        # Demand Extreme
+        demand_5th_percentile = merged["total_demand"].quantile(0.05) 
+        demand_95th_percentile = merged["total_demand"].quantile(0.95)
+        merged["demand_extreme"] = np.select([merged["total_demand"] >= demand_95th_percentile, merged["total_demand"] <= demand_5th_percentile], ["🔥 High Demand", "🧊 Low Demand"], default="Normal Demand")
+        
         merged["tight_loose"] = np.where(merged["net_balance"] < merged["rolling_5yr_net_balance"], "Tight", "Loose")
-        
-        # --- FIX: Ensure demand_extreme always shows a status ---
-        merged["demand_extreme"] = np.where(
-            merged["total_demand"] >= merged["total_demand"].quantile(0.95), 
-            "🔥 High Demand", 
-            "Normal Demand" # Changed from "" to "Normal Demand"
-        )
 
-        # Get the latest valid row for report summary
-        # Ensure 'total_demand' and 'total_supply' columns are not NaN for the latest valid row
-        latest_valid = merged.dropna(subset=["total_demand", "total_supply"])
-        if latest_valid.empty:
-            print(f"⚠️ Warning: No valid demand/supply data for {display_name}. Skipping report generation for this region.")
-            continue
-        
+        # Ensure latest_valid has the region's specific storage data as well
+        latest_valid = merged.dropna(subset=["total_demand", "total_supply", internal_column_name])
+        if latest_valid.empty: return None # No valid data for this region
+
         latest_valid = latest_valid.iloc[-1]
         latest_date = latest_valid["period"].date()
+        latest_price = round(latest_valid["weekly_avg_price"], 2) if "weekly_avg_price" in latest_valid and pd.notna(latest_valid["weekly_avg_price"]) else "N/A"
 
-        # Get latest price if available
-        latest_price = "N/A"
-        if "weekly_avg_price" in latest_valid and pd.notna(latest_valid["weekly_avg_price"]):
-            latest_price = round(latest_valid["weekly_avg_price"], 2)
-
-        # --- Prepare data for the specific region's graph (Storage Trend and Momentum) ---
-        # Identify the correct storage change column for this region
-        # Convert "Lower 48 States Storage (Bcf)" to "lower_48_states_storage_change"
-        # And "South Central Region Storage (Bcf)" to "south_central_storage_change" etc.
-        # This requires handling the difference in column names if they exist
-        region_change_col_map_for_momentum = {
-            "Lower 48 States Storage (Bcf)": "lower_48_states_storage_change",
+        # Graph Data & Momentum calculations depend on specific change column
+        region_change_col_map = {
+            "Lower 48 States Storage (Bcf)": "lower_48_states_storage_change", 
             "East Region Storage (Bcf)": "east_region_storage_change",
-            "Midwest Region Storage (Bcf)": "midwest_region_storage_change",
-            "South Central Region Storage (Bcf)": "south_central_storage_change", # Matches cleaned column name
-            "Mountain Region Storage (Bcf)": "mountain_region_storage_change",
+            "Midwest Region Storage (Bcf)": "midwest_region_storage_change", 
+            "South Central Region Storage (Bcf)": "south_central_total_change_calculated", # This will be created below
+            "Mountain Region Storage (Bcf)": "mountain_region_storage_change", 
             "Pacific Region Storage (Bcf)": "pacific_region_storage_change"
         }
-        region_change_col_name_for_momentum = region_change_col_map_for_momentum.get(display_name)
 
-
-        relevant_graph_cols = ["period", internal_column_name, "net_balance", "rolling_5yr_net_balance"]
-        if "weekly_avg_price" in merged.columns:
-            relevant_graph_cols.append("weekly_avg_price")
-        if region_change_col_name_for_momentum and region_change_col_name_for_momentum in merged.columns: # Check if change column exists in merged df
-            relevant_graph_cols.append(region_change_col_name_for_momentum)
-        else:
-            print(f"⚠️ Warning: Change column '{region_change_col_name_for_momentum}' not found in merged data for {display_name}. Momentum data will be missing from graph.")
-            region_change_col_name_for_momentum = None # Ensure it's None if not found
-
-        # Ensure these columns exist in merged before selecting
-        relevant_graph_cols = [c for c in relevant_graph_cols if c in merged.columns]
-        
-        # Create a new df with only these relevant columns, ensuring 'period' and the primary storage column are not null
-        storage_and_momentum_df = merged[relevant_graph_cols].dropna(subset=["period", internal_column_name]) # Dropna on essential columns
-        
-        # Rename the primary storage column to 'Bcf' and 'period' to 'Date' for consistency
-        storage_and_momentum_df = storage_and_momentum_df.rename(columns={"period": "Date", internal_column_name: "Bcf"})
-
-        storage_and_momentum_df["Week"] = storage_and_momentum_df["Date"].dt.isocalendar().week.astype(int)
-        storage_and_momentum_df["Year"] = storage_and_momentum_df["Date"].dt.year
-        
-        storage_and_momentum_df = storage_and_momentum_df[storage_and_momentum_df["Year"] >= 2015]
-
-        current_year = datetime.now().year
-        
-        # Calculate weekly min, max, and mean for historical data (years before current)
-        weekly_stats = storage_and_momentum_df[storage_and_momentum_df["Year"] < current_year].groupby("Week")["Bcf"].agg(["min", "max", "mean"])
-        
-        # Initialize chart map for all 53 weeks, filling missing weeks with None
-        chart_map = {i: {"Week": i} for i in range(1, 54)} 
-        
-        for week, row in weekly_stats.iterrows():
-            if week in chart_map: # Ensure week is within 1-53 range
-                chart_map[int(week)].update({"min": float(row["min"]), "max": float(row["max"]), "mean": float(row["mean"])})
-
-        # Add Bcf, net_balance, rolling_5yr_net_balance, and price values for each year to the chart map (for full 53 weeks)
-        for year in storage_and_momentum_df["Year"].unique():
-            year_full_data = storage_and_momentum_df[storage_and_momentum_df["Year"] == year] 
-            for _, row in year_full_data.iterrows():
-                if row["Week"] in chart_map: # Ensure week is within 1-53 range
-                    chart_map[row["Week"]].setdefault(f"year_{year}", float(row["Bcf"])) # Add year Bcf data
-
-                    # Add Net Balance for Momentum Chart
-                    if "net_balance" in row and pd.notna(row["net_balance"]):
-                        chart_map[row["Week"]].setdefault(f"net_balance_{year}", float(row["net_balance"]))
-                    
-                    # Add Rolling 5yr Net Balance for Momentum Chart
-                    if "rolling_5yr_net_balance" in row and pd.notna(row["rolling_5yr_net_balance"]):
-                        chart_map[row["Week"]].setdefault(f"rolling_5yr_net_balance_{year}", float(row["rolling_5yr_net_balance"]))
-                    
-                    # Add region-specific storage change for Momentum chart data within 'graph' for this region
-                    if region_change_col_name_for_momentum and region_change_col_name_for_momentum in row and pd.notna(row[region_change_col_name_for_momentum]):
-                        chart_map[row["Week"]].setdefault(f"storage_change_{year}", float(row[region_change_col_name_for_momentum]))
-                    
-                    # Add price data for full year if available
-                    if "weekly_avg_price" in row and pd.notna(row["weekly_avg_price"]):
-                        chart_map[row["Week"]].setdefault("price", float(row["weekly_avg_price"]))
-
-
-        # Calculate projections for the current year based on recent historical trends (2020 onwards)
-        current_year_data = storage_and_momentum_df[storage_and_momentum_df["Year"] == current_year]
-        
-        if not current_year_data.empty:
-            last_week = int(current_year_data["Week"].max())
+        # --- FIX: Create 'south_central_total_change_calculated' for South Central Momentum ---
+        if display_name == "South Central Region Storage (Bcf)":
+            salt_change_col = 'salt_region_sc_storage_change'
+            nonsalt_change_col = 'nonsalt_region_sc_storage_change'
             
-            last_val_row = current_year_data.loc[current_year_data["Week"] == last_week]
-            last_val = None
-            if not last_val_row.empty and pd.notna(last_val_row["Bcf"].iloc[0]):
-                last_val = float(last_val_row["Bcf"].iloc[0])
+            if salt_change_col in raw_data["eia_changes"].columns and nonsalt_change_col in raw_data["eia_changes"].columns:
+                # Sum the two change columns to create a total South Central change
+                # Ensure it's indexed correctly by period from eia_changes
+                sc_changes_temp = raw_data["eia_changes"][['period', salt_change_col, nonsalt_change_col]].copy()
+                sc_changes_temp['south_central_total_change_calculated'] = sc_changes_temp[salt_change_col] + sc_changes_temp[nonsalt_change_col]
+                
+                # Merge this calculated column into the main 'merged' DataFrame
+                merged = merged.merge(sc_changes_temp[['period', 'south_central_total_change_calculated']], on='period', how='left')
+                
             else:
-                print(f"⚠️ Warning: No valid Bcf value for current year's last week ({last_week}) in {display_name}. Projections will not be generated.")
+                print(f"⚠️ Warning: Cannot find both '{salt_change_col}' and '{nonsalt_change_col}' in EIAchanges.csv for South Central. Momentum data will be missing.")
+                region_change_col_map["South Central Region Storage (Bcf)"] = None # Ensure it's not used if components are missing
 
-            if last_val is not None:
-                for year in range(2020, current_year): 
-                    # Get historical data for the projection year for the full year to check quality
-                    full_hist_year_data = storage_and_momentum_df[storage_and_momentum_df["Year"] == year]
-                    
-                    # --- NEW: Data quality check for historical projection base ---
-                    # Check if the historical year data has enough non-null values for a meaningful projection
-                    if full_hist_year_data.empty or full_hist_year_data["Bcf"].dropna().count() < 20: 
-                        print(f"⚠️ Info: Not enough valid data points ({full_hist_year_data['Bcf'].dropna().count()}) for full year {year} in {display_name}. Skipping projection for {year}.")
-                        continue
-                    
-                    # Further check for very flat or "junky" data (similar to original Matplotlib example heuristic)
-                    bcf_series_for_check = full_hist_year_data["Bcf"].dropna()
-                    if len(bcf_series_for_check) > 1 and bcf_series_for_check.std() < 5: # Threshold of 5 Bcf standard deviation
-                         print(f"⚠️ Info: Historical data for {year} in {display_name} appears too flat (std dev < 5). Skipping projection.")
-                         continue
-
-                    # Proceed with projection calculation for valid historical years
-                    proj_base_data = storage_and_momentum_df[(storage_and_momentum_df["Year"] == year) & (storage_and_momentum_df["Week"] >= last_week)]
-                    
-                    start_val_row = proj_base_data.loc[proj_base_data["Week"] == last_week]
-                    start_val = None
-                    if not start_val_row.empty and pd.notna(start_val_row["Bcf"].iloc[0]):
-                        start_val = float(start_val_row["Bcf"].iloc[0])
-                    
-                    if start_val is None:
-                        print(f"⚠️ Info: No valid historical Bcf data for Week {last_week} in {year} for {display_name}. Cannot generate projection for {year}.")
-                        continue
-                    
-                    # Ensure proj_base_data has non-null Bcf values for the projection range
-                    if proj_base_data['Bcf'].dropna().empty:
-                         print(f"⚠️ Warning: No non-null Bcf values in historical projection base data for {year} from Week {last_week} in {display_name}. Skipping projection for {year}.")
-                         continue
-
-                    for _, row in proj_base_data.iterrows():
-                        diff = row["Bcf"] - start_val
-                        proj_val = last_val + diff
-                        if row["Week"] in chart_map: # Ensure week is within 1-53 range
-                            chart_map[row["Week"]][f"proj_{year}"] = float(proj_val)
-            else:
-                print(f"⚠️ Warning: Cannot generate projections for {display_name} as current year's last Bcf value is missing.")
-        else:
-            print(f"⚠️ Info: No current year ({current_year}) data for {display_name}. No projections generated.")
+        change_col_name = region_change_col_map.get(display_name)
 
 
-        # Convert the chart map values to a sorted list for the graph (ensuring all 53 weeks are present)
-        full_graph_data_list = [chart_map.get(i, {"Week": i}) for i in range(1, 54)]
-        graph_data = sorted(full_graph_data_list, key=lambda x: x["Week"])
+        graph_cols = ["period", internal_column_name, "net_balance", "rolling_5yr_net_balance"]
+        if "weekly_avg_price" in merged.columns: graph_cols.append("weekly_avg_price")
         
-        # --- NEW: Calculate region-specific Storage Change Momentum Summary (within this loop) ---
-        momentum_summary_data = {"latest_4wk_avg": "N/A", "five_year_avg_same_week": "N/A", "momentum_label": "Data Missing"}
+        # Ensure change_col_name exists in merged before adding to graph_cols
+        if change_col_name and change_col_name in merged.columns: graph_cols.append(change_col_name)
+        else: # If change column is missing, set change_col_name to None for momentum part
+            if display_name != DEFAULT_REGION_DISPLAY_NAME: # Suppress warning for default if not critical
+                print(f"⚠️ Warning: Storage Change column '{change_col_name}' not found in merged data for {display_name}. Momentum data will be missing from graph.")
+            change_col_name = None # Set to None if not found
+            
+        graph_df = merged[graph_cols].dropna(subset=["period", internal_column_name]).rename(columns={"period": "Date", internal_column_name: "Bcf"})
+        graph_df["Week"], graph_df["Year"] = graph_df["Date"].dt.isocalendar().week.astype(int), graph_df["Date"].dt.year
+        graph_df = graph_df[graph_df["Year"] >= 2015]
+
+        chart_map = {i: {"Week": i} for i in range(1, 54)}
+        for week, row in graph_df[graph_df["Year"] < datetime.now().year].groupby("Week")["Bcf"].agg(["min", "max", "mean"]).iterrows():
+            if week in chart_map: chart_map[int(week)].update({"min": float(row["min"]), "max": float(row["max"]), "mean": float(row["mean"])})
+        
+        current_year_for_chart = datetime.now().year
+        for year in graph_df["Year"].unique():
+            for _, row in graph_df[graph_df["Year"] == year].iterrows():
+                if row["Week"] in chart_map:
+                    chart_map[row["Week"]].setdefault(f"year_{year}", float(row["Bcf"]))
+                    if pd.notna(row.get("net_balance")): chart_map[row["Week"]].setdefault(f"net_balance_{year}", float(row["net_balance"]))
+                    if pd.notna(row.get("rolling_5yr_net_balance")): chart_map[row["Week"]].setdefault(f"rolling_5yr_net_balance_{year}", float(row["rolling_5yr_net_balance"]))
+                    if change_col_name and pd.notna(row.get(change_col_name)): chart_map[row["Week"]].setdefault(f"storage_change_{year}", float(row[change_col_name]))
+                    if pd.notna(row.get("weekly_avg_price")): chart_map[row["Week"]].setdefault("price", float(row["weekly_avg_price"]))
+
+        # Projections
+        current_year_data_for_proj = graph_df[graph_df["Year"] == current_year_for_chart]
+        if not current_year_data_for_proj.empty:
+            last_week_curr = int(current_year_data_for_proj["Week"].max())
+            last_val_curr = float(current_year_data_for_proj.loc[current_year_data_for_proj["Week"] == last_week_curr, "Bcf"].iloc[0]) if not current_year_data_for_proj.loc[current_year_data_for_proj["Week"] == last_week_curr, "Bcf"].empty else None
+            if last_val_curr is not None:
+                for year in range(2020, current_year_for_chart):
+                    hist_year_data = graph_df[graph_df["Year"] == year]["Bcf"].dropna()
+                    # Only project from historical years with sufficient and non-flat data
+                    if len(hist_year_data) > 1 and hist_year_data.std() >= 5: 
+                        proj_base_data = graph_df[(graph_df["Year"] == year) & (graph_df["Week"] >= last_week_curr)]
+                        start_val_hist = float(proj_base_data.loc[proj_base_data["Week"] == last_week_curr, "Bcf"].iloc[0]) if not proj_base_data.loc[proj_base_data["Week"] == last_week_curr, "Bcf"].empty else None
+                        if start_val_hist is not None and not proj_base_data['Bcf'].dropna().empty:
+                            for _, row in proj_base_data.iterrows():
+                                if row["Week"] in chart_map: chart_map[row["Week"]][f"proj_{year}"] = float(last_val_curr + (row["Bcf"] - start_val_hist))
+
+        graph_data_list = sorted([chart_map.get(i, {"Week": i}) for i in range(1, 54)], key=lambda x: x["Week"])
+
+        # Momentum Summary
+        momentum_summary = {"latest_4wk_avg": "N/A", "five_year_avg_same_week": "N/A", "momentum_label": "Data Missing"}
         momentum_chart_data = []
 
-        # Only proceed if region_change_col_name_for_momentum was found and data exists in storage_and_momentum_df
-        if region_change_col_name_for_momentum and region_change_col_name_for_momentum in raw_data["eia_changes"].columns:
-            momentum_calc_df = raw_data["eia_changes"][["period", region_change_col_name_for_momentum]].copy()
-            momentum_calc_df.sort_values('period', inplace=True)
-            
-            # Calculate 4-week average for this region's storage change
-            momentum_calc_df['4_week_avg'] = momentum_calc_df[region_change_col_name_for_momentum].rolling(window=4).mean()
+        # FIX: Initialize momentum_label for all paths
+        momentum_label = "Data Missing" # Default value
 
-            latest_4wk_avg = momentum_calc_df['4_week_avg'].iloc[-1] if not momentum_calc_df['4_week_avg'].empty else np.nan
-
-            # Calculate 5-year seasonal average for this region's storage change
-            momentum_calc_df['week_num'] = momentum_calc_df['period'].dt.isocalendar().week
-            current_week_num = momentum_calc_df['week_num'].iloc[-1]
+        if change_col_name and change_col_name in merged.columns: # FIX: Check 'merged' not raw_data["eia_changes"] for the calculated column
+            m_df = merged[["period", change_col_name]].copy().sort_values('period') # Use 'merged' which has the calculated column
+            m_df['week_num'] = m_df['period'].dt.isocalendar().week 
+            m_df['4_week_avg'] = m_df[change_col_name].rolling(window=4).mean()
+            latest_4wk_avg = m_df['4_week_avg'].iloc[-1] if not m_df['4_week_avg'].empty else np.nan
             
-            five_year_data_for_momentum = momentum_calc_df[
-                (momentum_calc_df['week_num'] == current_week_num) & 
-                (momentum_calc_df['period'].dt.year >= datetime.now().year - 5) & 
-                (momentum_calc_df['period'].dt.year < datetime.now().year)
-            ]
-            
-            five_year_avg_same_week = five_year_data_for_momentum[region_change_col_name_for_momentum].mean() if not five_year_data_for_momentum.empty else np.nan
+            curr_week_num = m_df['week_num'].iloc[-1]
+            five_year_data = m_df[(m_df['week_num'] == curr_week_num) & (m_df['period'].dt.year >= datetime.now().year - 5) & (m_df['period'].dt.year < datetime.now().year)]
+            five_year_avg = five_year_data[change_col_name].mean() if not five_year_data.empty else np.nan
 
-            momentum_label = "N/A"
-            if pd.notna(latest_4wk_avg) and pd.notna(five_year_avg_same_week):
-                if latest_4wk_avg > five_year_avg_same_week:
-                    momentum_label = "🔺 Above Normal Injections – Bearish" if latest_4wk_avg > 0 else "🔺 Above Normal Withdrawals (less negative) – Bullish"
-                else:
-                    momentum_label = "🔻 Below Normal Injections (less positive) – Bullish" if latest_4wk_avg > 0 else "🔻 Below Normal Withdrawals – Bearish"
-            
-            momentum_summary_data = {
-                "latest_4wk_avg": round(latest_4wk_avg, 1) if pd.notna(latest_4wk_avg) else "N/A",
-                "five_year_avg_same_week": round(five_year_avg_same_week, 1) if pd.notna(five_year_avg_same_week) else "N/A",
-                "momentum_label": momentum_label
-            }
-
-            # Prepare chart data for momentum: Period (Date) and change_value
-            # Taking last 52 weeks (1 year) for the chart
-            momentum_chart_data = momentum_calc_df[["period", region_change_col_name_for_momentum]].tail(52).to_dict(orient="records")
-            # Rename the change column in chart_data for JS access
-            for item in momentum_chart_data:
-                item['change_value'] = item.pop(region_change_col_name_for_momentum)
-                item['period_label'] = item['period'].strftime('%b %d') # Format date for X-axis label
+            if pd.notna(latest_4wk_avg) and pd.notna(five_year_avg):
+                momentum_label = ("🔺 Above Normal Injections – Bearish" if latest_4wk_avg > 0 else "🔺 Above Normal Withdrawals (less negative) – Bullish") if latest_4wk_avg > five_year_avg else ("🔻 Below Normal Injections (less positive) – Bullish" if latest_4wk_avg > 0 else "🔻 Below Normal Withdrawals – Bearish")
+            momentum_summary = {"latest_4wk_avg": round(latest_4wk_avg, 1) if pd.notna(latest_4wk_avg) else "N/A", "five_year_avg_same_week": round(five_year_avg, 1) if pd.notna(five_year_avg) else "N/A", "momentum_label": momentum_label}
+            momentum_chart_data = m_df[["period", change_col_name]].tail(52).to_dict(orient="records")
+            for item in momentum_chart_data: item['change_value'], item['period_label'] = item.pop(change_col_name), item['period'].strftime('%b %d')
         else:
-            print(f"⚠️ Warning: Storage Change column for {display_name} not found or invalid. Momentum data will be missing for this region.")
+            # If change_col_name is None or not in merged, momentum_summary remains default "Data Missing"
+            pass # momentum_label is already initialized to "Data Missing"
 
-        # Store all computed data for the region, including its momentum data
-        region_outputs[display_name] = { 
-            "report": {
-                "latest_date": str(latest_date),
-                "total_demand": round(latest_valid["total_demand"], 1),
-                "total_supply": round(latest_valid["total_supply"], 1),
-                "net_balance": round(latest_valid["net_balance"], 1),
-                "rolling_5yr_net_balance": round(latest_valid["rolling_5yr_net_balance"], 1),
-                "tight_loose": latest_valid["tight_loose"],
-                "demand_extreme": latest_valid["demand_extreme"],
-                "latest_price": latest_price
-            },
-            "graph": graph_data, # graph_data contains storage, net_balance, rolling_5yr_net_balance for main graph
-            "momentum": { # Store region-specific momentum data here
-                "summary": momentum_summary_data,
-                "chart_data": momentum_chart_data
-            }
+
+        return {
+            "report": {"latest_date": str(latest_date), "total_demand": round(latest_valid["total_demand"], 1), "total_supply": round(latest_valid["total_supply"], 1), "net_balance": round(latest_valid["net_balance"], 1), "rolling_5yr_net_balance": round(latest_valid["rolling_5yr_net_balance"], 1), "tight_loose": latest_valid["tight_loose"], "demand_extreme": latest_valid["demand_extreme"], "latest_price": latest_price},
+            "graph": graph_data_list,
+            "momentum": {"summary": momentum_summary, "chart_data": momentum_chart_data}
         }
     except Exception as e:
         print(f"❌ Error processing region {display_name}: {e}")
+        return None
 
-# --- NEW: Process Storage Capacity Data ---
+# --- Precompute Data ---
+# FIX: Initialize aggregated_capacity_bcf globally and correctly before any loops that use it
+aggregated_capacity_bcf = {} # <<< MOVED THIS INITIALIZATION HERE AND ENSURED IT'S GLOBAL
+
+region_outputs = {d_name: process_region_data(d_name, i_col_name, raw_data) for d_name, i_col_name in region_map.items()}
+region_outputs = {k: v for k, v in region_outputs.items() if v is not None} # Filter out failed regions
+
+# --- Storage Capacity Data ---
 capacity_data_for_html = []
-latest_inventory_period_capacity = raw_data["eia_totals"].iloc[-1]["period"] # Store this for HTML display
+# Ensure latest_inventory_period_capacity is valid, fallback if eia_totals is empty
+latest_inventory_period_capacity = raw_data["eia_totals"]["period"].max() if not raw_data["eia_totals"].empty else datetime.now()
 
-# Manual mapping from simple region name to the cleaned column name in raw_data["eia_totals"]
-# This assumes your cleaned column names match these exactly
+
 inventory_col_map = {
-    "Lower 48": "lower_48_states_storage",
-    "East": "east_region_storage",
-    "Midwest": "midwest_region_storage",
-    "South Central": "south_central_storage",
-    "Mountain": "mountain_region_storage",
-    "Pacific": "pacific_region_storage"
+    "Lower 48": "lower_48_states_storage", "East": "east_region_storage", "Midwest": "midwest_region_storage",
+    "South Central": "south_central_region_storage", "Mountain": "mountain_region_storage", "Pacific": "pacific_region_storage"
 }
 
-# Capacity data is in MMCF, convert to BCF by dividing by 1000
 capacity_df_bcf = raw_data["working_storage_capacity"].copy()
-# Clean column names to match the rest of the code
-capacity_df_bcf.columns = (
-    capacity_df_bcf.columns.str.lower()
-    .str.replace(" ", "_")
-    .str.replace("-", "_")
-    .str.strip()
-)
-capacity_df_bcf["value"] = capacity_df_bcf["value"] / 1000 # Convert to BCF
+capacity_df_bcf.columns = capacity_df_bcf.columns.str.lower().str.replace(" ", "_").str.replace("-", "_").str.strip()
+capacity_df_bcf["value"] = pd.to_numeric(capacity_df_bcf["value"], errors='coerce') / 1000 # Convert to BCF, handle non-numeric
 
-# --- FIX: Use correct column name for area/state/region based on the provided working_storage_capacity.csv ---
-if 'area_name' in capacity_df_bcf.columns:
-    area_col_in_capacity = 'area_name'
-elif 'area-name' in raw_data["working_storage_capacity"].columns.str.lower(): # Fallback check for original column name
-    area_col_in_capacity = 'area_name'
-else:
-    raise Exception(f"Could not find an area/state/region column (e.g., 'area_name') in working_storage_capacity.csv after cleaning. Columns: {raw_data['working_storage_capacity'].columns.tolist()}")
+area_col_in_capacity = 'area_name' if 'area_name' in capacity_df_bcf.columns else next((c for c in capacity_df_bcf.columns if 'area' in c or 'state' in c or 'region' in c), None)
+if not area_col_in_capacity: raise Exception(f"Could not find an area/state/region column in working_storage_capacity.csv. Columns: {capacity_df_bcf.columns.tolist()}")
 
-
-# Map state/area to region names for capacity aggregation
+# Expanded region_state_group_map for more comprehensive aggregation if your capacity file has state-level data
 region_state_group_map = {
-    "Midwest": ["illinois", "michigan", "ohio", "north_dakota"], # Example states, adjust as needed based on your data
-    "East": ["pennsylvania", "west_virginia", "new_york"],
-    "South Central": ["texas", "oklahoma", "louisiana", "arkansas", "mississippi"],
-    "Mountain": ["utah", "colorado", "new_mexico", "wyoming"],
+    "Midwest": ["illinois", "michigan", "ohio", "north_dakota", "indiana", "iowa", "kansas", "kentucky", "minnesota", "missouri", "nebraska", "south_dakota", "wisconsin"],
+    "East": ["pennsylvania", "west_virginia", "new_york", "maryland", "massachusetts", "new_jersey", "ohio", "virginia", "maine", "new_hampshire", "vermont", "connecticut", "delaware", "rhode_island"],
+    "South Central": ["texas", "oklahoma", "louisiana", "arkansas", "mississippi", "alabama", "new_mexico"],
+    "Mountain": ["utah", "colorado", "wyoming", "idaho", "montana", "nevada"],
     "Pacific": ["california", "oregon", "washington"],
 }
 
-aggregated_capacity_bcf = {}
+# Populate aggregated_capacity_bcf based on states in region_state_group_map
 for region_group, states_list in region_state_group_map.items():
-    aggregated_capacity_bcf[region_group] = capacity_df_bcf[
-        capacity_df_bcf[area_col_in_capacity].str.lower().isin([s.replace(" ", "_") for s in states_list])
-    ]["value"].sum()
+    filtered_df = capacity_df_bcf[capacity_df_bcf[area_col_in_capacity].str.lower().isin([s.replace(" ", "_") for s in states_list])]
+    region_capacity_bcf_sum = filtered_df["value"].sum()
+    aggregated_capacity_bcf[region_group] = region_capacity_bcf_sum
 
-# Calculate Lower 48 capacity as sum of all aggregated regions
-aggregated_capacity_bcf["Lower 48"] = sum(aggregated_capacity_bcf.values())
+# Explicitly calculate Lower 48 total capacity by summing the aggregated regions
+# This avoids issues if "Lower 48" isn't a direct entry in your capacity file
+# Sum only the regions that are actual sub-regions, excluding "Lower 48" itself if present
+# Re-evaluate sum, ensuring it handles cases where some aggregated_capacity_bcf keys might not align perfectly with region_state_group_map keys
+aggregated_capacity_bcf["Lower 48"] = sum(aggregated_capacity_bcf.get(k, 0) for k in ["East", "Midwest", "South Central", "Mountain", "Pacific"])
 
 
-# Ensure eia_totals is sorted by period before selecting the latest row
 eia_totals_sorted = raw_data["eia_totals"].sort_values("period")
 for region_display_name_simple, inv_col_name in inventory_col_map.items():
-    latest_inventory = eia_totals_sorted.iloc[-1].get(inv_col_name, np.nan)
-    region_capacity_bcf = aggregated_capacity_bcf.get(region_display_name_simple, np.nan) # Use simple name for aggregated_capacity_bcf keys
+    latest_inventory = eia_totals_sorted.iloc[-1].get(inv_col_name, np.nan) if not eia_totals_sorted.empty else np.nan
+    region_capacity_bcf = aggregated_capacity_bcf.get(region_display_name_simple, np.nan)
 
-    if pd.notna(latest_inventory) and pd.notna(region_capacity_bcf) and region_capacity_bcf > 0:
-        percent_full = round((latest_inventory / region_capacity_bcf) * 100, 1)
-    else:
-        percent_full = 0 # Or np.nan, depending on desired handling of missing capacity
+    percent_full = round((latest_inventory / region_capacity_bcf) * 100, 1) if pd.notna(latest_inventory) and pd.notna(region_capacity_bcf) and region_capacity_bcf > 0 else "N/A"
 
     capacity_data_for_html.append({
-        "Region": region_display_name_simple, # Use simple name for the table display
+        "Region": region_display_name_simple,
         "Inventory (Bcf)": round(latest_inventory, 1) if pd.notna(latest_inventory) else "N/A",
         "Capacity (Bcf)": round(region_capacity_bcf, 1) if pd.notna(region_capacity_bcf) else "N/A",
         "Percent Full": percent_full
     })
 
-# Convert to DataFrame for HTML table generation
 df_capacity_output = pd.DataFrame(capacity_data_for_html)
-df_capacity_html_table = df_capacity_output.to_html(index=False, classes="capacity-table") # Add class for styling
+df_capacity_html_table = df_capacity_output.to_html(index=False, classes="capacity-table")
 
-
-# Add capacity data to region_outputs under a special key for the new tab
-# This ensures it's available to JavaScript alongside other data
-region_outputs["Storage Capacity"] = { # Using a string key here, not a display name from region_map
+region_outputs["Storage Capacity"] = {
     "latest_period": str(latest_inventory_period_capacity.date()),
-    "capacity_data": capacity_data_for_html # Store processed list of dicts
+    "capacity_data": capacity_data_for_html
 }
 
-
-# --- Diagnostic print for Capacity Data ---
-if "Storage Capacity" in region_outputs:
-    print("\n--- Diagnostic for Storage Capacity Data ---")
-    print(f"Latest Inventory Period: {region_outputs['Storage Capacity']['latest_period']}")
-    print("Processed Capacity Data:")
-    for row in region_outputs['Storage Capacity']['capacity_data']:
-        print(f"  Region: {row['Region']}, Percent Full: {row['Percent Full']}%")
-    print("------------------------------------\n")
-
-
-# --- Prepare HTML components ---
-# Generate HTML <option> tags for the region dropdown dynamically
+# --- HTML Components ---
 region_options_html = ''.join([f'<option value="{r}"{" selected" if r == DEFAULT_REGION_DISPLAY_NAME else ""}>{r}</option>' for r in region_outputs.keys() if r != "Storage Capacity"])
-# Note: "Storage Capacity" is a separate tab. Momentum data is now nested per region.
+region_outputs_json = json.dumps(region_outputs, default=str)
 
-# Use default=str for json.dumps to handle datetime objects correctly
-region_outputs_json = json.dumps(region_outputs, default=str) 
-
-# --- HTML Template (using str.format() for robustness) ---
-html_template_raw = """
+# --- HTML Template (Consolidated and all {{ }} for literals) ---
+html_template_raw = f"""
 <!DOCTYPE html>
 <html>
 <head>
     <title>Natural Gas Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* General Body and Container Styles */
-        body {{
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-            padding: 20px; 
-            background-color: #eef2f3;
-            color: #333; 
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }}
-        .container {{ 
-            max-width: 960px;
-            margin: 30px auto;
-            background-color: #ffffff; 
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }}
-        h1 {{ 
-            color: #2c3e50; 
-            text-align: center; 
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 15px;
-        }}
-        h2 {{
-            color: #34495e;
-            font-size: 1.6em;
-            margin-top: 0;
-            margin-bottom: 25px;
-            border-bottom: 1px solid #dae1e7;
-            padding-bottom: 12px;
-            font-weight: 600;
-        }}
-        .controls {{ 
-            margin-bottom: 20px; 
-            text-align: center; 
-        }}
-        .tab-buttons {{ 
-            margin-top: 15px; 
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }}
-        .tab-buttons button {{
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 14px 30px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 1em;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }}
-        .tab-buttons button:hover {{
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }}
-        .tab-buttons button.active {{
-            background-color: #2ecc71;
-            box-shadow: 0 3px 8px rgba(46, 204, 113, 0.4);
-        }}
-        .tab {{ 
-            display: none; 
-            background-color: white; 
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-top: 25px; 
-        }}
-        .tab.active {{ 
-            display: block; 
-        }}
-        .summary p {{ 
-            margin-bottom: 18px;
-            font-size: 1.05em; 
-            line-height: 1.7; 
-            color: #555;
-        }}
-        .summary strong {{ 
-            color: #2c3e50; 
-            font-weight: 700;
-            display: inline-block;
-            min-width: 180px;
-        }}
-        .summary p:last-child {{
-            margin-bottom: 0;
-        }}
-        .summary-item {{
-            background-color: #ecf0f1;
-            padding: 12px 15px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            border-left: 5px solid #3498db;
-            display: flex;
-            align-items: center;
-            font-size: 1.05em;
-        }}
-        .summary-item strong {{
-            color: #2c3e50;
-            font-weight: 700;
-            display: inline-block;
-            min-width: 180px;
-            margin-right: 10px;
-        }}
-        .summary-item:last-child {{
-            margin-bottom: 0;
-        }}
-        canvas {{ 
-            background: #fff; 
-            border: 1px solid #e0e0e0; 
-            border-radius: 8px;
-            margin-top: 25px;
-            width: 100% !important;
-            height: 400px !important;
-        }}
-        .graph-controls {{
-            text-align: center;
-            margin-bottom: 25px;
-        }}
-        select {{
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #bbb;
-            font-size: 1.0em;
-            min-width: 300px;
-            margin-bottom: 15px; 
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
-            appearance: none;
-            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.6-6.4H19.2c-5%200-9.6%202-13.6%206.4-4%204-6.4%209.6-6.4%2016.2%200%206.5%202.4%2012.2%206.4%2016.2l128%20127.9c4%204%209.6%206.4%2016.2%206.4s12.2-2.4%2016.2-6.4l128-127.9c4-4%206.4-9.6%206.4-16.2-.1-6.6-2.5-12.2-6.5-16.2z%22%2F%3E%3C%2Fsvg%3E');
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 12px;
-            padding-right: 30px;
-        }}
-        .chart-legend-toggles {{
-            text-align: left;
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #fcfcfc;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }}
-        .chart-legend-toggles label {{
-            display: flex;
-            align-items: center;
-            margin-right: 0;
-            font-size: 0.95em;
-            cursor: pointer;
-            color: #555;
-            transition: color 0.2s ease;
-        }}
-        .chart-legend-toggles label:hover {{
-            color: #2c3e50;
-        }}
-        .chart-legend-toggles input[type="checkbox"] {{
-            margin-right: 8px;
-            transform: scale(1.1);
-            cursor: pointer;
-        }}
-        .chart-legend-toggles .color-square {{
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            margin-right: 8px;
-            border-radius: 4px;
-            vertical-align: middle;
-            border: 1px solid rgba(0,0,0,0.1);
-        }}
-        .capacity-table-container {{
-            margin-top: 30px;
-            overflow-x: auto; /* Enable horizontal scrolling for small screens */
-        }}
-        .capacity-table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }}
-        .capacity-table th, .capacity-table td {{
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-            font-size: 0.95em;
-        }}
-        .capacity-table th {{
-            background-color: #f2f2f2;
-            font-weight: bold;
-            color: #333;
-        }}
-        .capacity-table tr:nth-child(even) {{
-            background-color: #f9f9f9;
-        }}
-        .capacity-table tr:hover {{
-            background-color: #f1f1f1;
-        }}
+        body {{ font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: #eef2f3; color: #333; line-height: 1.6; }}
+        .container {{ max-width: 960px; margin: 30px auto; background-color: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }}
+        h1 {{ color: #2c3e50; text-align: center; margin-bottom: 30px; font-size: 2.5em; border-bottom: 3px solid #3498db; padding-bottom: 15px; }}
+        h2 {{ color: #34495e; font-size: 1.6em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid #dae1e7; padding-bottom: 12px; }}
+        .controls {{ text-align: center; margin-bottom: 20px; }}
+        .tab-buttons {{ margin-top: 15px; display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }}
+        .tab-buttons button {{ background-color: #3498db; color: white; border: none; padding: 14px 30px; border-radius: 10px; cursor: pointer; transition: background-color 0.3s, transform 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }}
+        .tab-buttons button:hover {{ background-color: #2980b9; transform: translateY(-2px); }}
+        .tab-buttons button.active {{ background-color: #2ecc71; box-shadow: 0 3px 8px rgba(46, 204, 113, 0.4); }}
+        .tab {{ display: none; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-top: 25px; }}
+        .tab.active {{ display: block; }}
+        .summary-item {{ background-color: #ecf0f1; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; border-left: 5px solid #3498db; display: flex; align-items: center; font-size: 1.05em; }}
+        .summary-item strong {{ color: #2c3e50; font-weight: 700; display: inline-block; min-width: 180px; margin-right: 10px; }}
+        canvas {{ background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; margin-top: 25px; width: 100% !important; height: 400px !important; }}
+        .graph-controls {{ text-align: center; margin-bottom: 25px; }}
+        select {{ padding: 12px; border-radius: 8px; border: 1px solid #bbb; font-size: 1.0em; min-width: 300px; margin-bottom: 15px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.6-6.4H19.2c-5%200-9.6%202-13.6%206.4-4%204-6.4%209.6-6.4%2016.2%200%206.5%202.4%2012.2%206.4%2016.2l128%20127.9c4%204%209.6%206.4%2016.2%206.4s12.2-2.4%2016.2-6.4l128-127.9c4-4%206.4-9.6%206.4-16.2-.1-6.6-2.5-12.2-6.5-16.2z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; padding-right: 30px; }}
+        .chart-legend-toggles {{ text-align: left; margin-top: 20px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #fcfcfc; display: flex; flex-wrap: wrap; gap: 15px; }}
+        .chart-legend-toggles label {{ display: flex; align-items: center; margin-right: 0; font-size: 0.95em; cursor: pointer; color: #555; transition: color 0.2s ease; }}
+        .chart-legend-toggles label:hover {{ color: #2c3e50; }}
+        .chart-legend-toggles input[type="checkbox"] {{ margin-right: 8px; transform: scale(1.1); cursor: pointer; }}
+        .chart-legend-toggles .color-square {{ display: inline-block; width: 14px; height: 14px; margin-right: 8px; border-radius: 4px; vertical-align: middle; border: 1px solid rgba(0,0,0,0.1); }}
+        .capacity-table-container {{ margin-top: 30px; overflow-x: auto; }}
+        .capacity-table {{ width: 100%; border-collapse: collapse; margin-bottom: 20px; }}
+        .capacity-table th, .capacity-table td {{ border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 0.95em; }}
+        .capacity-table th {{ background-color: #f2f2f2; font-weight: bold; color: #333; }}
+        .capacity-table tr:nth-child(even) {{ background-color: #f9f9f9; }}
+        .capacity-table tr:hover {{ background-color: #f1f1f1; }}
         @media (max-width: 768px) {{
-            .container {{
-                margin: 10px;
-                padding: 20px;
-            }}
-            h1 {{
-                font-size: 2em;
-            }}
-            h2 {{
-                font-size: 1.4em;
-            }}
-            .tab-buttons {{
-                flex-direction: column;
-                gap: 8px;
-            }}
-            .tab-buttons button {{
-                width: 90%;
-                margin: 0 auto;
-                padding: 10px 20px;
-            }}
-            select {{
-                min-width: unset;
-                width: 90%;
-            }}
-            .chart-legend-toggles {{
-                flex-direction: column;
-                gap: 8px;
-                padding: 10px;
-            }}
-            .chart-legend-toggles label {{
-                margin-bottom: 0;
-            }}
-            .summary strong {{
-                min-width: 120px;
-            }}
+            .container {{ margin: 10px; padding: 20px; }} h1 {{ font-size: 2em; }} h2 {{ font-size: 1.4em; }}
+            .tab-buttons {{ flex-direction: column; gap: 8px; }} .tab-buttons button {{ width: 90%; margin: 0 auto; padding: 10px 20px; }}
+            select {{ min-width: unset; width: 90%; }} .chart-legend-toggles {{ flex-direction: column; gap: 8px; padding: 10px; }}
+            .summary-item strong {{ min-width: 120px; }}
         }}
     </style>
 </head>
@@ -727,14 +352,14 @@ html_template_raw = """
         <div class="controls">
             <div class="tab-buttons">
                 <button id="report-tab-button" onclick="showTab('report')">📄 Report</button>
-                <button id="storage-info-tab-button" onclick="showTab('storage-info')">📊 Storage Information</button> {{/* NEW: Consolidated Storage Info Tab */}}
+                <button id="storage-info-tab-button" onclick="showTab('storage-info')">📊 Storage Information</button>
             </div>
         </div>
         <div id="report" class="tab">
             <h2>Market Report</h2>
             <div id="report-content" class="summary"></div>
         </div>
-        <div id="storage-info" class="tab"> {{/* NEW: Consolidated Storage Information Tab Content */}}
+        <div id="storage-info" class="tab">
             <div class="graph-section">
                 <h2>EIA Storage Graph</h2>
                 <div class="graph-controls">
@@ -748,7 +373,7 @@ html_template_raw = """
                 <div id="chart-legend-toggles" class="chart-legend-toggles" style="display: none;">
                 </div>
             </div>
-            
+
             <div class="momentum-section">
                 <h2 style="margin-top: 40px;">Storage Change Momentum (Selected Region)</h2>
                 <p id="momentum-summary-graph" style="text-align:center;"></p>
@@ -766,11 +391,11 @@ html_template_raw = """
     </div>
 <script>
     const allRegionData = {region_outputs_json};
-    const globalAvgTemp = "{avg_temp}";
-    const defaultRegion = "{DEFAULT_REGION_DISPLAY_NAME}"; 
+    const globalAvgTemp = "{avg_temp}"; // This is now the 7-day average
+    const defaultRegion = "{DEFAULT_REGION_DISPLAY_NAME}";
 
-    let myChart; // For the EIA Storage Graph (region-specific)
-    let myMomentumChartGraph; // For the momentum chart now on the graph tab
+    let myChart;
+    let myMomentumChartGraph;
 
     function showTab(tabId) {{
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -778,462 +403,28 @@ html_template_raw = """
         document.querySelectorAll('.tab-buttons button').forEach(btn => btn.classList.remove('active'));
         document.getElementById(tabId + '-tab-button').classList.add('active');
         
-        // Ensure charts update/resize when their tab becomes active
-        if (tabId === 'storage-info') {{ // NEW: Handle the consolidated Storage Information tab
-            // Get the currently selected region from the dropdown
-            const selectedRegion = document.getElementById("region-select").value;
-            // Render/update both charts within this tab
-            if (selectedRegion) {{
-                updateEIAStorageGraph(selectedRegion); // Update main storage graph
-                renderMomentumChartGraph(selectedRegion); // Update momentum graph
-            }} else if (allRegionData[defaultRegion]) {{ // Fallback to default if no selection yet
-                document.getElementById("region-select").value = defaultRegion;
+        const regionSelect = document.getElementById("region-select");
+        const currentSelectedRegion = regionSelect.value || defaultRegion;
+
+        if (tabId === 'storage-info') {{
+            if (currentSelectedRegion) {{
+                updateEIAStorageGraph(currentSelectedRegion);
+                renderMomentumChartGraph(currentSelectedRegion);
+            }} else if (Object.keys(allRegionData).length > 0 && allRegionData[defaultRegion]) {{
+                regionSelect.value = defaultRegion;
                 updateEIAStorageGraph(defaultRegion);
                 renderMomentumChartGraph(defaultRegion);
             }}
         }} else if (tabId === 'report') {{
-            // Render report specific elements if any, or just ensure text content is there
-            const reportContentDiv = document.getElementById("report-content");
-            const regionSelect = document.getElementById("region-select"); // Get selected region for report content
-            const currentSelectedRegion = regionSelect.value || defaultRegion; // Use selected or default
-            
-            if(allRegionData[currentSelectedRegion] && allRegionData[currentSelectedRegion].report) {{
-                const report = allRegionData[currentSelectedRegion].report;
-                reportContentDiv.innerHTML = `
-                    <div class="summary-item"><strong>Date:</strong> ${{report.latest_date}}</div>
-                    <div class="summary-item"><strong>Total Demand (Bcf):</strong> ${{report.total_demand}}</div>
-                    <div class="summary-item"><strong>Total Supply (Bcf):</strong> ${{report.total_supply}}</div>
-                    <div class="summary-item"><strong>Net Balance (Bcf):</strong> ${{report.net_balance}}</div>
-                    <div class="summary-item"><strong>5yr Rolling Net Balance (Bcf):</strong> ${{report.rolling_5yr_net_balance}}</div>
-                    <div class="summary-item"><strong>Market Status:</strong> ${{report.tight_loose}}</div>
-                    <div class="summary-item"><strong>Demand Extreme:</strong> ${{report.demand_extreme}}</div>
-                    <div class="summary-item"><strong>Latest Price:</strong> ${{report.latest_price}}</div>
-                    <div class="summary-item"><strong>Avg US Temp:</strong> ${{globalAvgTemp}}</div>
-                `;
-            }} else {{
-                 reportContentDiv.innerHTML = "<p><strong>No market report data available for this region.</strong></p>";
-            }}
+            updateReportContent(currentSelectedRegion);
         }}
     }}
 
-    // Function to generate X-axis labels with weeks and months
-    const getWeekMonthLabels = () => {{
-        const labels = [];
-        const monthMap = [
-            "Jan", "Jan", "Jan", "Jan", // Weeks 1-4
-            "Feb", "Feb", "Feb", "Feb", // Weeks 5-8
-            "Mar", "Mar", "Mar", "Mar", // Weeks 9-12
-            "Apr", "Apr", "Apr", "Apr", // Weeks 13-16
-            "May", "May", "May", "May", // Weeks 17-20
-            "Jun", "Jun", "Jun", "Jun", "Jun", // Weeks 21-25 (one extra for smooth transition)
-            "Jul", "Jul", "Jul", "Jul", // Weeks 26-29
-            "Aug", "Aug", "Aug", "Aug", // Weeks 30-33
-            "Sep", "Sep", "Sep", "Sep", // Weeks 34-37
-            "Oct", "Oct", "Oct", "Oct", // Weeks 38-41
-            "Nov", "Nov", "Nov", "Nov", // Weeks 42-45
-            "Dec", "Dec", "Dec", "Dec", "Dec", "Dec", "Dec" // Weeks 46-53
-        ];
+    function updateReportContent(selectedRegion) {{
+        const reportContentDiv = document.getElementById("report-content");
+        const report = allRegionData[selectedRegion] ? allRegionData[selectedRegion].report : null; // Corrected selectedRegion
 
-        for (let i = 1; i <= 53; i++) {{
-            const monthName = monthMap[i - 1] || ''; // Fallback for safety
-            labels.push(`${{i}} (${{monthName}})`);
-        }}
-        return labels;
-    }};
-
-    const colors = {{ 
-        // No mean, min, max direct lines for shaded area, but color is used for fill
-        shaded_area: 'rgba(200, 200, 200, 0.3)', // Light gray for the shaded area
-        curr: "#2ecc71", // Current Year line (prominent)
-        price: "#9b59b6", // Weekly Avg Price
-        
-        // Specific colors for projection years (2020-2024)
-        proj_2020: "#8e44ad", // Purple
-        proj_2021: "#3498db", // Blue
-        proj_2022: "#1abc9c", // Turquoise - This one will be visible by default
-        proj_2023: "#f1c40f", // Yellow/Gold
-        proj_2024: "#e74c3c",  // Red
-
-        // Historical years (2015-CurrentYear-1)
-        year_2015: "#FFC300", // Gold
-        year_2016: "#FF5733", // Orange-Red
-        year_2017: "#C70039", // Dark Red
-        year_2018: "#900C3F", // Maroon
-        year_2019: "#581845", // Dark Purple
-        year_2020: "#009688", // Teal
-        year_2021: "#4CAF50", // Green
-        year_2022: "#8BC34A", // Lime Green
-        year_2023: "#CDDC39", // Yellow-Green
-        year_2024: "#FFEB3B"  // Light Yellow
-    }};
-    // Color palette for bar chart (Chart.js default or custom)
-    const barChartColors = [ 
-        '#4CAF50', '#2196F3', '#FFC107', '#E91E63', '#9C27B0', 
-        '#00BCD4', '#8BC34A', '#FF9800', '#F44336', '#673AB7'
-    ];
-    // Colors for momentum chart (red for withdrawals, green for injections)
-    const momentumBarColors = (value) => value < 0 ? 'rgba(231, 76, 60, 0.8)' : 'rgba(46, 204, 113, 0.8)'; // Red for negative, Green for positive
-
-    // NEW: Function to update the main EIA Storage Graph
-    function updateEIAStorageGraph(region_display_name) {{ 
-        const regionDataKey = region_display_name; 
-
-        const chartCanvas = document.getElementById("chart");
-        const chartTogglesDiv = document.getElementById("chart-legend-toggles");
-
-        if (!regionDataKey || !(regionDataKey in allRegionData)) {{
-            if (myChart) {{ myChart.destroy(); myChart = null; }}
-            chartTogglesDiv.innerHTML = "<p><em>Select a valid region for storage graph.</em></p>";
-            chartTogglesDiv.style.display = 'block';
-            return;
-        }}
-
-        const graphData = allRegionData[regionDataKey].graph;
-        const labels = getWeekMonthLabels(); 
-        
-        const minData = graphData.map(d => d.min !== undefined ? d.min : null);
-        const maxData = graphData.map(d => d.max !== undefined ? d.max : null);
-        
-        const years = [];
-        const projections = [];
-        if (graphData.length > 0) {{
-            Object.keys(graphData[0]).forEach(key => {{
-                if (key.startsWith("year_")) years.push(key);
-                if (key.startsWith("proj_")) projections.push(key);
-            }});
-        }}
-
-        const currentFullYear = new Date().getFullYear();
-        const currYearKey = `year_${{currentFullYear}}`;
-        const currYearData = graphData.map(d => d[currYearKey] !== undefined ? d[currYearKey] : null);
-        let lastActualCurrYearWeek = -1;
-        for (let i = currYearData.length - 1; i >= 0; i--) {{
-            if (currYearData[i] !== null) {{
-                lastActualCurrYearWeek = i;
-                break;
-            }}
-        }}
-        const trimmedCurrYearData = currYearData.slice(0, lastActualCurrYearWeek + 1);
-
-        const projDatasets = projections.map(projKey => {{
-            const yearNum = projKey.replace("proj_", "");
-            const isDefaultVisible = (yearNum === '2022'); 
-            return {{
-                label: `Projection ${{yearNum}} Scenario`,
-                data: graphData.map(d => d[projKey] !== undefined ? d[projKey] : null),
-                borderColor: colors[projKey] || "#cccccc",
-                borderDash: [5, 5], 
-                fill: false,
-                hidden: !isDefaultVisible, 
-                tension: 0.1,
-                pointRadius: 2 
-            }};
-        }});
-
-        const historicalYearDatasets = years.filter(key => key !== currYearKey).map(yearKey => {{
-            const yearNum = yearKey.replace("year_", "");
-            return {{
-                label: `Year ${{yearNum}}`,
-                data: graphData.map(d => d[yearKey] !== undefined ? d[yearKey] : null), 
-                borderColor: colors[yearKey] || "#cccccc", 
-                fill: false,
-                hidden: false, 
-                tension: 0.1,
-                pointRadius: 2 
-            }};
-        }});
-
-        const priceData = graphData.map(d => d.price !== undefined ? d.price : null);
-
-        let yAxesConfig = {{
-            y_storage: {{ 
-                type: 'linear', display: true, position: 'left',
-                title: {{ display: true, text: 'Storage (Bcf)', font: {{ size: 14, weight: 'bold' }} }},
-                ticks: {{ font: {{ size: 12 }} }}, grid: {{ color: '#e0e0e0' }}
-            }}
-        }};
-        
-        let priceAxisAdded = false;
-        if (priceData.some(val => val !== null)) {{
-            yAxesConfig['y_price'] = {{ 
-                type: 'linear', display: true, position: 'right',
-                title: {{ display: true, text: 'Price ($/MMBtu)', font: {{ size: 14, weight: 'bold' }} }},
-                grid: {{ drawOnChartArea: false }}, ticks: {{ font: {{ size: 12 }} }}
-            }};
-            priceAxisAdded = true;
-        }}
-
-        const datasets = [
-            {{ label: "Min Data (Internal)", data: minData, borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, pointHoverRadius: 0, fill: false, hidden: true, tension: 0.1, yAxisID: 'y_storage' }},
-            {{ label: "Max Data (Internal)", data: maxData, borderColor: 'transparent', backgroundColor: colors.shaded_area, pointRadius: 0, pointHoverRadius: 0, fill: {{ target: '-1', above: colors.shaded_area, below: colors.shaded_area }}, hidden: true, tension: 0.1, yAxisID: 'y_storage' }},
-            ...historicalYearDatasets,
-            ...projDatasets,
-            currYearKey ? {{ label: `Current Year (${{currentFullYear}})`, data: trimmedCurrYearData, borderColor: colors.curr, fill: false, borderWidth: 3, hidden: false, tension: 0.1, pointRadius: 3, pointBackgroundColor: colors.curr, yAxisID: 'y_storage' }} : null,
-            priceAxisAdded ? {{ label: "Weekly Avg Price", data: priceData, borderColor: colors.price, fill: false, yAxisID: 'y_price', hidden: true, tension: 0.1, pointRadius: 2, pointBackgroundColor: colors.price }} : null
-        ].filter(Boolean);
-
-        if (myChart) {{ myChart.destroy(); }}
-
-        myChart = new Chart(chartCanvas, {{
-            type: 'line', data: {{ labels: labels, datasets: datasets }},
-            options: {{
-                responsive: true, maintainAspectRatio: false, interaction: {{ mode: 'index', intersect: false }}, stacked: false,
-                plugins: {{ legend: {{ display: false }}, title: {{ display: true, text: `${{regionDataKey}} Storage Trend`, font: {{ size: 18, weight: 'bold' }}, padding: {{ top: 10, bottom: 20 }} }},
-                    tooltip: {{
-                        mode: 'index', intersect: false,
-                        callbacks: {{
-                            title: function(context) {{ return `Week ${{context[0].label.split(' ')[0]}}`; }},
-                            label: function(context) {{
-                                let label = context.dataset.label || ''; if (label) {{ label += ': '; }}
-                                if (context.parsed.y !== null) {{ label += context.parsed.y.toFixed(1) + (context.dataset.yAxisID === 'y_price' ? ' $' : ' Bcf'); }} return label;
-                            }}
-                        }}
-                    }}
-                }},
-                scales: {{
-                    x: {{ title: {{ display: true, text: 'Week of Year' }},
-                        ticks: {{ autoSkip: false, maxRotation: 45, minRotation: 45,
-                            callback: function(val, index) {{
-                                const weekNum = parseInt(this.getLabelForValue(val).split(' ')[0]);
-                                if (weekNum === 1 || weekNum === 13 || weekNum === 21 || weekNum === 38 || weekNum === 46 || weekNum === 53) {{
-                                    return labels[index].split('(')[1].replace(')', ''); // Just month
-                                }} else if (weekNum % 4 === 0) {{ return weekNum; }}
-                                return ''; 
-                            }}
-                        }}
-                    }},
-                    ...yAxesConfig
-                }}
-            }}
-        }});
-
-        let togglesHtml = '';
-        myChart.data.datasets.forEach((ds, idx) => {{
-            const color = ds.borderColor || '#000';
-            if (ds.label && ds.label.includes("(Internal)")) {{ 
-                return; 
-            }}
-            if (ds.label) {{ 
-                const isChecked = myChart.isDatasetVisible(idx); 
-                togglesHtml += `
-                    <label>
-                        <span class="color-square" style="background:${{color}}"></span>
-                        <input type="checkbox" data-dataset-index="${{idx}}" ${{isChecked ? 'checked' : ''}}>
-                        ${{ds.label}}
-                    </label>
-                `;
-            }}
-        }});
-        chartTogglesDiv.innerHTML = togglesHtml;
-        chartTogglesDiv.style.display = 'flex'; 
-        chartTogglesDiv.style.marginTop = '20px'; // Ensure visibility
-    }}
-
-    // Function to render the Storage Capacity Bar Chart
-    function renderCapacityTableAndChart(region_display_name) {{ // Pass region to allow for future region-specific capacity if needed
-        const capacityData = allRegionData["Storage Capacity"].capacity_data;
-        const latestPeriod = allRegionData["Storage Capacity"].latest_period;
-
-        // No chart to render for capacity here, just the table.
-        // The table is embedded directly via Python.
-        // If a chart is desired later, the code for capacityBarChart would go here.
-
-        // Placeholder to ensure the element exists and is shown if this function is called
-        const capacityTableContainer = document.querySelector("#storage-info .capacity-table-container");
-        if (capacityTableContainer) capacityTableContainer.style.display = 'block';
-
-        const capacityBarChartCanvas = document.getElementById('capacityBarChart');
-        if (capacityBarChartCanvas) {{ // Only if the canvas exists in the HTML
-            const chartLabels = capacityData.map(d => d.Region);
-            const chartValues = capacityData.map(d => d["Percent Full"]);
-            
-            if (myCapacityBarChart) {{ 
-                myCapacityBarChart.destroy();
-            }}
-
-            myCapacityBarChart = new Chart(capacityBarChartCanvas, {{ 
-                type: 'bar', 
-                data: {{
-                    labels: chartLabels,
-                    datasets: [{{
-                        label: 'Percent Full', 
-                        data: chartValues,
-                        backgroundColor: barChartColors, 
-                        borderColor: 'rgba(0,0,0,0.1)', 
-                        borderWidth: 1
-                    }}]
-                }},
-                options: {{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {{ 
-                        mode: 'nearest',
-                        intersect: true
-                    }},
-                    plugins: {{
-                        title: {{
-                            display: true,
-                            text: `Storage Percent Full by Region (${{latestPeriod}})`,
-                            font: {{ size: 18, weight: 'bold' }}
-                        }},
-                        tooltip: {{
-                            callbacks: {{
-                                label: function(context) {{
-                                    let label = context.label || '';
-                                    if (label) {{
-                                        label += ': ';
-                                    }}
-                                    if (context.parsed.y !== null) {{
-                                        label += context.parsed.y + '%';
-                                    }}
-                                    return label;
-                                }}
-                            }}
-                        }},
-                        legend: {{
-                            display: false 
-                        }}
-                    }},
-                    scales: {{
-                        x: {{ 
-                            title: {{
-                                display: true,
-                                text: 'Region',
-                                font: {{ size: 14, weight: 'bold' }}
-                            }},
-                            ticks: {{ 
-                                font: {{ size: 12 }},
-                                maxRotation: 45, 
-                                minRotation: 0,
-                                autoSkip: false 
-                            }}
-                        }},
-                        y: {{ 
-                            beginAtZero: true,
-                            title: {{
-                                display: true,
-                                text: 'Percent Full (%)',
-                                font: {{ size: 14, weight: 'bold' }}
-                            }},
-                            ticks: {{
-                                callback: function(value) {{
-                                    return value + '%';
-                                }},
-                                font: {{ size: 12 }}
-                            }}
-                        }}
-                    }}
-                }}
-            }});
-        }}
-    }}
-
-    // Function to render the Storage Momentum Chart (for Storage Info Tab)
-    function renderMomentumChartGraph(region_display_name) {{ 
-        const momentumData = allRegionData[region_display_name] ? allRegionData[region_display_name].momentum : null;
-        
-        const momentumSummaryElement = document.getElementById("momentum-summary-graph"); // Target the p tag in the graph tab
-        const momentumChartCanvas = document.getElementById("momentumChartGraph"); // Target the canvas in the graph tab
-
-        if (!momentumData || !momentumData.chart_data || momentumData.chart_data.length === 0) {{
-            momentumSummaryElement.innerHTML = `<em>No Storage Change Momentum data available for ${{region_display_name}}.</em>`;
-            if (myMomentumChartGraph) myMomentumChartGraph.destroy(); // Destroy graph if no data
-            return;
-        }}
-
-        const chartData = momentumData.chart_data; 
-        const summary = momentumData.summary;
-
-        const labels = chartData.map(d => new Date(d.Date).toLocaleDateString('en-US', {{ month: 'short', day: 'numeric' }})); // Use d.Date (from python)
-        const changeValues = chartData.map(d => d.change_value); 
-        
-        momentumSummaryElement.innerHTML = `
-            <strong>4-Week Avg:</strong> ${{summary.latest_4wk_avg}} Bcf | 
-            <strong>5-Yr Avg:</strong> ${{summary.five_year_avg_same_week}} Bcf | 
-            <strong>Signal:</strong> ${{summary.momentum_label}}
-        `;
-
-        if (myMomentumChartGraph) {{
-            myMomentumChartGraph.destroy();
-        }}
-
-        myMomentumChartGraph = new Chart(momentumChartCanvas, {{ 
-            type: 'bar',
-            data: {{
-                labels: labels,
-                datasets: [{{
-                    label: 'Weekly Storage Change (Bcf)',
-                    data: changeValues,
-                    backgroundColor: changeValues.map(v => momentumBarColors(v)), 
-                    borderColor: 'rgba(0,0,0,0.1)',
-                    borderWidth: 1
-                }}]
-            }},
-            options: {{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {{
-                    title: {{
-                        display: true,
-                        text: `${{region_display_name}} Weekly Storage Change`, 
-                        font: {{ size: 16, weight: 'bold' }}
-                    }},
-                    legend: {{ display: false }},
-                    tooltip: {{
-                        callbacks: {{
-                            label: function(context) {{
-                                let label = context.dataset.label || '';
-                                if (label) label += ': ';
-                                label += context.parsed.y + ' Bcf';
-                                return label;
-                            }}
-                        }}
-                    }}
-                }},
-                scales: {{
-                    x: {{
-                        title: {{ display: true, text: 'Date' }},
-                        ticks: {{
-                            autoSkip: true, 
-                            maxRotation: 45,
-                            minRotation: 0
-                        }}
-                    }},
-                    y: {{
-                        beginAtZero: true,
-                        title: {{ display: true, text: 'Change (Bcf)' }}
-                    }}
-                }}
-            }}
-        }});
-    }}
-
-
-    // --- Initial Load Logic ---
-    document.addEventListener("DOMContentLoaded", function() {{
-        const regionSelect = document.getElementById("region-select");
-        
-        // Set default selection in dropdown for storage-info tab
-        let defaultRegionFound = false;
-        for (let i = 0; i < regionSelect.options.length; i++) {{
-            if (regionSelect.options[i].value === defaultRegion) {{
-                regionSelect.value = defaultRegion;
-                defaultRegionFound = true;
-                break;
-            }}
-        }}
-
-        if (!defaultRegionFound && regionSelect.options.length > 1) {{
-             regionSelect.value = regionSelect.options[1].value;
-        }}
-        
-        showTab('report'); // Start on the report tab by default
-
-        // Render initial data for the report tab (general market summary)
-        if (regionSelect.value && allRegionData[regionSelect.value]) {{
-            // This now sets the content of the report tab correctly
-            const report = allRegionData[regionSelect.value].report;
-            const reportContentDiv = document.getElementById("report-content");
+        if(report) {{
             reportContentDiv.innerHTML = `
                 <div class="summary-item"><strong>Date:</strong> ${{report.latest_date}}</div>
                 <div class="summary-item"><strong>Total Demand (Bcf):</strong> ${{report.total_demand}}</div>
@@ -1243,56 +434,137 @@ html_template_raw = """
                 <div class="summary-item"><strong>Market Status:</strong> ${{report.tight_loose}}</div>
                 <div class="summary-item"><strong>Demand Extreme:</strong> ${{report.demand_extreme}}</div>
                 <div class="summary-item"><strong>Latest Price:</strong> ${{report.latest_price}}</div>
-                <div class="summary-item"><strong>Avg US Temp:</strong> ${{globalAvgTemp}}</div>
+                <div class="summary-item"><strong>Avg US Temp (Last 7 Days):</strong> ${{globalAvgTemp}}</div>
             `;
         }} else {{
-            document.getElementById("report-content").innerHTML = "<p>Please select a region from the dropdown above to view its market report data.</p>";
+            reportContentDiv.innerHTML = "<p><strong>No market report data available for this region.</strong></p>";
+        }}
+    }}
+
+    const getWeekMonthLabels = () => {{
+        const labels = [];
+        const monthMap = ["Jan", "Jan", "Jan", "Jan", "Feb", "Feb", "Feb", "Feb", "Mar", "Mar", "Mar", "Mar", "Apr", "Apr", "Apr", "Apr", "May", "May", "May", "May", "Jun", "Jun", "Jun", "Jun", "Jun", "Jul", "Jul", "Jul", "Jul", "Aug", "Aug", "Aug", "Aug", "Sep", "Sep", "Sep", "Sep", "Oct", "Oct", "Oct", "Oct", "Nov", "Nov", "Nov", "Nov", "Dec", "Dec", "Dec", "Dec", "Dec", "Dec", "Dec"];
+        for (let i = 1; i <= 53; i++) {{ labels.push(`${{i}} (${{monthMap[i - 1] || ''}})`); }}
+        return labels;
+    }};
+
+    const colors = {{
+        shaded_area: 'rgba(200, 200, 200, 0.3)', curr: "#2ecc71", price: "#9b59b6",
+        proj_2020: "#8e44ad", proj_2021: "#3498db", proj_2022: "#1abc9c", proj_2023: "#f1c40f", proj_2024: "#e74c3c",
+        year_2015: "#FFC300", year_2016: "#FF5733", year_2017: "#C70039", year_2018: "#900C3F", year_2019: "#581845",
+        year_2020: "#009688", year_2021: "#4CAF50", year_2022: "#8BC34A", year_2023: "#CDDC39", year_2024: "#FFEB3B"
+    }};
+    const momentumBarColors = (value) => value < 0 ? 'rgba(231, 76, 60, 0.8)' : 'rgba(46, 204, 113, 0.8)';
+
+    function updateEIAStorageGraph(region_display_name) {{
+        const regionDataKey = region_display_name;
+        const chartCanvas = document.getElementById("chart");
+        const chartTogglesDiv = document.getElementById("chart-legend-toggles");
+
+        if (!regionDataKey || !(regionDataKey in allRegionData)) {{
+            if (myChart) {{ myChart.destroy(); myChart = null; }}
+            chartTogglesDiv.innerHTML = "<p><em>Select a valid region for storage graph.</em></p>";
+            chartTogglesDiv.style.display = 'block'; return;
         }}
 
-        // Render charts for the 'storage-info' tab based on default region
-        // These calls will be made when the 'storage-info' tab is first shown.
-        // For now, ensure they are ready to be called.
+        const graphData = allRegionData[regionDataKey].graph;
+        const labels = getWeekMonthLabels();
         
-        // This makes sure capacity table is displayed
-        // The table is directly embedded via df_capacity_html_table in Python HTML.
-        // No explicit JS call needed here.
-        
-        // Initial rendering of graphs for the 'storage-info' tab if it's the default or initially selected
-        // This will be triggered by the showTab function if 'storage-info' becomes active.
-        // For now, they are only initialized if the user switches to the tab.
-        // The regionSelect change listener will handle updates.
+        const minData = graphData.map(d => d.min !== undefined ? d.min : null);
+        const maxData = graphData.map(d => d.max !== undefined ? d.max : null);
+        const years = [], projections = [];
+        if (graphData.length > 0) {{ Object.keys(graphData[0]).forEach(key => {{ if (key.startsWith("year_")) years.push(key); if (key.startsWith("proj_")) projections.push(key); }}); }}
 
+        const currentFullYear = new Date().getFullYear();
+        const currYearKey = `year_${{currentFullYear}}`;
+        const currYearData = graphData.map(d => d[currYearKey] !== undefined ? d[currYearKey] : null);
+        let lastActualCurrYearWeek = currYearData.length - 1; while (lastActualCurrYearWeek >= 0 && currYearData[lastActualCurrYearWeek] === null) lastActualCurrYearWeek--;
+        const trimmedCurrYearData = currYearData.slice(0, lastActualCurrYearWeek + 1);
+
+        const projDatasets = projections.map(projKey => ({{ label: `Projection ${{projKey.replace("proj_", "")}} Scenario`, data: graphData.map(d => d[projKey] ?? null), borderColor: colors[projKey] || "#cccccc", borderDash: [5, 5], fill: false, hidden: (projKey !== 'proj_2022'), tension: 0.1, pointRadius: 2 }}));
+        const historicalYearDatasets = years.filter(key => key !== currYearKey).map(yearKey => ({{ label: `Year ${{yearKey.replace("year_", "")}}`, data: graphData.map(d => d[yearKey] ?? null), borderColor: colors[yearKey] || "#cccccc", fill: false, hidden: false, tension: 0.1, pointRadius: 2 }}));
+        const priceData = graphData.map(d => d.price ?? null);
+
+        let yAxesConfig = {{ y_storage: {{ type: 'linear', display: true, position: 'left', title: {{ display: true, text: 'Storage (Bcf)', font: {{ size: 14, weight: 'bold' }} }}, ticks: {{ font: {{ size: 12 }} }}, grid: {{ color: '#e0e0e0' }} }} }};
+        let priceAxisAdded = false;
+        if (priceData.some(val => val !== null)) {{ yAxesConfig['y_price'] = {{ type: 'linear', display: true, position: 'right', title: {{ display: true, text: 'Price ($/MMBtu)', font: {{ size: 14, weight: 'bold' }} }}, grid: {{ drawOnChartArea: false }}, ticks: {{ font: {{ size: 12 }} }} }}; priceAxisAdded = true; }}
+
+        const datasets = [
+            {{ label: "Min Data (Internal)", data: minData, borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, pointHoverRadius: 0, fill: false, hidden: true, tension: 0.1, yAxisID: 'y_storage' }},
+            {{ label: "Max Data (Internal)", data: maxData, borderColor: 'transparent', backgroundColor: colors.shaded_area, pointRadius: 0, pointHoverRadius: 0, fill: {{ target: '-1', above: colors.shaded_area, below: colors.shaded_area }}, hidden: true, tension: 0.1, yAxisID: 'y_storage' }},
+            ...historicalYearDatasets, ...projDatasets,
+            currYearKey ? {{ label: `Current Year (${{currentFullYear}})`, data: trimmedCurrYearData, borderColor: colors.curr, fill: false, borderWidth: 3, hidden: false, tension: 0.1, pointRadius: 3, pointBackgroundColor: colors.curr, yAxisID: 'y_storage' }} : null,
+            priceAxisAdded ? {{ label: "Weekly Avg Price", data: priceData, borderColor: colors.price, fill: false, yAxisID: 'y_price', hidden: true, tension: 0.1, pointRadius: 2, pointBackgroundColor: colors.price }} : null
+        ].filter(Boolean);
+
+        if (myChart) {{ myChart.destroy(); }}
+        myChart = new Chart(chartCanvas, {{
+            type: 'line', data: {{ labels: labels, datasets: datasets }},
+            options: {{ responsive: true, maintainAspectRatio: false, interaction: {{ mode: 'index', intersect: false }}, stacked: false,
+                plugins: {{ legend: {{ display: false }}, title: {{ display: true, text: `${{regionDataKey}} Storage Trend`, font: {{ size: 18, weight: 'bold' }}, padding: {{ top: 10, bottom: 20 }} }},
+                    tooltip: {{ mode: 'index', intersect: false, callbacks: {{
+                        title: function(context) {{ return `Week ${{context[0].label.split(' ')[0]}}`; }},
+                        label: function(context) {{ let label = context.dataset.label || ''; if (label) {{ label += ': '; }} if (context.parsed.y !== null) {{ label += context.parsed.y.toFixed(1) + (context.dataset.yAxisID === 'y_price' ? ' $' : ' Bcf'); }} return label; }}
+                    }} }}
+                }},
+                scales: {{ x: {{ title: {{ display: true, text: 'Week of Year' }}, ticks: {{ autoSkip: false, maxRotation: 45, minRotation: 45, callback: function(val, index) {{ const weekNum = parseInt(this.getLabelForValue(val).split(' ')[0]); if (weekNum === 1 || weekNum === 13 || weekNum === 21 || weekNum === 38 || weekNum === 46 || weekNum === 53) {{ return labels[index].split('(')[1].replace(')', ''); }} else if (weekNum % 4 === 0) {{ return weekNum; }} return ''; }} }} }}, ...yAxesConfig }}
+            }}
+        }});
+
+        let togglesHtml = '';
+        myChart.data.datasets.forEach((ds, idx) => {{
+            const color = ds.borderColor || '#000';
+            if (ds.label && ds.label.includes("(Internal)")) return;
+            if (ds.label) togglesHtml += `<label><span class="color-square" style="background:${{color}}"></span><input type="checkbox" data-dataset-index="${{idx}}" ${{myChart.isDatasetVisible(idx) ? 'checked' : ''}}> ${{ds.label}}</label>`;
+        }});
+        chartTogglesDiv.innerHTML = togglesHtml;
+        chartTogglesDiv.style.display = 'flex'; chartTogglesDiv.style.marginTop = '20px';
+    }}
+
+    function renderMomentumChartGraph(region_display_name) {{
+        const momentumData = allRegionData[region_display_name] ? allRegionData[region_display_name].momentum : null;
+        const momentumSummaryElement = document.getElementById("momentum-summary-graph");
+        const momentumChartCanvas = document.getElementById("momentumChartGraph");
+
+        if (!momentumData || !momentumData.chart_data || momentumData.chart_data.length === 0) {{
+            momentumSummaryElement.innerHTML = `<em>No Storage Change Momentum data available for ${{region_display_name}}.</em>`;
+            if (myMomentumChartGraph) myMomentumChartGraph.destroy(); return;
+        }}
+
+        const chartData = momentumData.chart_data;
+        const summary = momentumData.summary;
+
+        const labels = chartData.map(d => new Date(d.period).toLocaleDateString('en-US', {{ month: 'short', day: 'numeric' }}));
+        const changeValues = chartData.map(d => d.change_value);
+        
+        momentumSummaryElement.innerHTML = `<strong>4-Week Avg:</strong> ${{summary.latest_4wk_avg}} Bcf | <strong>5-Yr Avg:</strong> ${{summary.five_year_avg_same_week}} Bcf | <strong>Signal:</strong> ${{summary.momentum_label}}`;
+
+        if (myMomentumChartGraph) {{ myMomentumChartGraph.destroy(); }}
+        myMomentumChartGraph = new Chart(momentumChartCanvas, {{
+            type: 'bar', data: {{ labels: labels, datasets: [{{ label: 'Weekly Storage Change (Bcf)', data: changeValues, backgroundColor: changeValues.map(v => momentumBarColors(v)), borderColor: 'rgba(0,0,0,0.1)', borderWidth: 1 }}] }},
+            options: {{ responsive: true, maintainAspectRatio: false, plugins: {{ title: {{ display: true, text: `${{region_display_name}} Weekly Storage Change`, font: {{ size: 16, weight: 'bold' }} }}, legend: {{ display: false }}, tooltip: {{ callbacks: {{ label: function(context) {{ let label = context.dataset.label || ''; if (label) label += ': '; label += context.parsed.y + ' Bcf'; return label; }} }} }} }},
+                scales: {{ x: {{ title: {{ display: true, text: 'Date' }}, ticks: {{ autoSkip: true, maxRotation: 45, minRotation: 0 }} }}, y: {{ beginAtZero: true, title: {{ display: true, text: 'Change (Bcf)' }} }} }}
+            }}
+        }});
+    }}
+
+    document.addEventListener("DOMContentLoaded", function() {{
+        const regionSelect = document.getElementById("region-select");
+        let defaultRegionFound = false;
+        for (let i = 0; i < regionSelect.options.length; i++) {{ if (regionSelect.options[i].value === defaultRegion) {{ regionSelect.value = defaultRegion; defaultRegionFound = true; break; }} }}
+        if (!defaultRegionFound && regionSelect.options.length > 1) {{ regionSelect.value = regionSelect.options[1].value; }}
+        showTab('report');
     }});
 
-    // Event listener for region dropdown changes
     document.getElementById("region-select").addEventListener("change", function() {{
-        // When region changes, update the content of the currently active tab if it's 'storage-info' or 'report'
         const selectedRegion = this.value;
         const currentActiveTab = document.querySelector('.tab.active');
         if (currentActiveTab) {{
             if (currentActiveTab.id === 'storage-info') {{
-                updateEIAStorageGraph(selectedRegion); 
-                renderMomentumChartGraph(selectedRegion); 
-                // renderCapacityTableAndChart(selectedRegion); // Table is static HTML, no update needed here
+                updateEIAStorageGraph(selectedRegion);
+                renderMomentumChartGraph(selectedRegion);
             }} else if (currentActiveTab.id === 'report') {{
-                const report = allRegionData[selectedRegion] ? allRegionData[selectedRegion].report : null;
-                const reportContentDiv = document.getElementById("report-content");
-                if (report) {{
-                    reportContentDiv.innerHTML = `
-                        <div class="summary-item"><strong>Date:</strong> ${{report.latest_date}}</div>
-                        <div class="summary-item"><strong>Total Demand (Bcf):</strong> ${{report.total_demand}}</div>
-                        <div class="summary-item"><strong>Total Supply (Bcf):</strong> ${{report.total_supply}}</div>
-                        <div class="summary-item"><strong>Net Balance (Bcf):</strong> ${{report.net_balance}}</div>
-                        <div class="summary-item"><strong>5yr Rolling Net Balance (Bcf):</strong> ${{report.rolling_5yr_net_balance}}</div>
-                        <div class="summary-item"><strong>Market Status:</strong> ${{report.tight_loose}}</div>
-                        <div class="summary-item"><strong>Demand Extreme:</strong> ${{report.demand_extreme}}</div>
-                        <div class="summary-item"><strong>Latest Price:</strong> ${{report.latest_price}}</div>
-                        <div class="summary-item"><strong>Avg US Temp:</strong> ${{globalAvgTemp}}</div>
-                    `;
-                }} else {{
-                    reportContentDiv.innerHTML = "<p><strong>No market report data available for this region.</strong></p>";
-                }}
-                renderMomentumChartReport(selectedRegion); // Update momentum chart for report tab
+                updateReportContent(selectedRegion);
             }}
         }}
     }});
@@ -1300,19 +572,10 @@ html_template_raw = """
 </body>
 </html>
 """
-# ...existing code...
 
+# Open and write the HTML file
 with open(output_path, "w", encoding="utf-8") as f:
-    f.write(html_template_raw.format(
-        region_outputs_json=region_outputs_json,
-        avg_temp=avg_temp,
-        DEFAULT_REGION_DISPLAY_NAME=DEFAULT_REGION_DISPLAY_NAME,
-        region_options_html=region_options_html,
-        latest_inventory_period_capacity=latest_inventory_period_capacity.date(),
-        df_capacity_html_table=df_capacity_html_table
-    ))
+    f.write(html_template_raw) 
 
 # Automatically open the generated HTML file in the default web browser
 webbrowser.open_new_tab(output_path.as_uri())
-
-# ...existing code...
