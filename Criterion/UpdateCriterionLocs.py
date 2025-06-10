@@ -1,26 +1,20 @@
-# fetch_criterion_locs_final.py
-
 import os
 import pandas as pd
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 import traceback
+import numpy as np
 
-def fetch_and_save_locations():
+def update_criterion_locs():
     """
-    Fetches location data using a specific SQL query and saves it to a CSV file.
+    Intelligently updates the local locs_list.csv with the latest data from
+    the Criterion database. It adds new locations, updates existing ones while
+    preserving manual entries, and flags orphaned records.
     """
     # --- Load Environment Variables ---
-    # Assumes .env file is in the same directory as the script.
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    dotenv_path = os.path.join(script_dir, '.env') 
-
-    load_success = load_dotenv(dotenv_path=dotenv_path, override=True)
-
-    if load_success:
-        print(f"Loaded .env file from: {os.path.abspath(dotenv_path)} (Override enabled)")
-    else:
-        print(f"Warning: .env file not found at {os.path.abspath(dotenv_path)}. Relying on pre-set environment variables.")
+    dotenv_path = os.path.join(script_dir, '.env')
+    load_dotenv(dotenv_path=dotenv_path, override=True)
 
     # --- Database Connection Details ---
     DB_USER = os.getenv('DB_USER')
@@ -29,101 +23,139 @@ def fetch_and_save_locations():
     DB_PORT = 443
     DB_NAME = 'production'
 
-    print(f"Attempting to use DB_USER: {DB_USER}")
-
-    if not DB_USER or not DB_PASSWORD or DB_USER == 'your_username':
-        print(f"ERROR: Database credentials (DB_USER, DB_PASSWORD) not found or are placeholders.")
-        print(f"Please ensure a .env file with correct credentials exists in: {os.path.abspath(dotenv_path)}")
-        return # Changed from exit() to return for better control if used as a module
+    if not DB_USER or not DB_PASSWORD:
+        print(f"ERROR: Database credentials not found. Please check .env file at {dotenv_path}")
+        return
 
     DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     engine = None
 
-    # SQL Query provided by the user
-    sql_query = """
-    SELECT  
-        pipeline_name,
-        tsp,
-        tsp_short,
-        ticker,
-        loc_name,
-        loc,
-        loc_qti_id,
-        loc_qti_short,
-        loc_purp_desc,
-        rec_del_sign,
-        loc_zone,
-        category_short,
-        sub_category_desc,
-        sub_category_2_desc,
-        country_name,
-        state_name,
-        state_abb,
-        province_name,
-        offshore_block_name,
-        county_name,
-        latitude,
-        longitude,
-        connecting_pipeline,
-        connecting_entity,
-        storage_name,
-        storage_calc_flag,
-        units
-    FROM pipelines.metadata
-    GROUP BY 
-        pipeline_name, tsp, tsp_short, ticker, loc_name, loc, loc_qti_id,
-        loc_qti_short, loc_purp_desc, rec_del_sign, loc_zone, category_short,
-        sub_category_desc, sub_category_2_desc, country_name, state_name,
-        state_abb, province_name, offshore_block_name, county_name, latitude,
-        longitude, connecting_pipeline, connecting_entity, storage_name,
-        storage_calc_flag, units
-    ORDER BY 
-        pipeline_name, ticker, loc_name, loc_qti_id;
-    """
+    # --- File Path Configuration ---
+    output_dir = os.path.abspath(os.path.join(script_dir, '..', 'INFO'))
+    output_csv_path = os.path.join(output_dir, "locs_list.csv")
+    os.makedirs(output_dir, exist_ok=True)
+
+    # --- Define Columns ---
+    # Columns to be fetched from the database
+    db_columns = [
+        "loc_name", "loc", "pipeline_name", "loc_zone", "category_short",
+        "sub_category_desc", "sub_category_2_desc", "state_name", "county_name",
+        "connecting_pipeline", "storage_name", "ticker" # Added ticker
+    ]
+    # Define the final order of columns in the output file
+    final_column_order = [
+        "loc_name", "loc", "pipeline_name", "loc_zone", "category_short",
+        "sub_category_desc", "sub_category_2_desc", "state_name", "county_name",
+        "connecting_pipeline", "storage_name", "market_component", "ticker"
+    ]
+    # Define a unique key for merging records
+    merge_key = 'loc'
 
     try:
-        connect_args = {'sslmode': 'require'}
-        engine = create_engine(DATABASE_URL, connect_args=connect_args)
-        
-        print(f"\nSuccessfully created SQLAlchemy engine for: {DB_HOST}/{DB_NAME} as user {DB_USER} with SSL require")
-        print("\nExecuting SQL query to fetch location data...")
+        # --- 1. Load Existing Local Data ---
+        try:
+            print(f"Loading existing data from: {output_csv_path}")
+            existing_df = pd.read_csv(output_csv_path, encoding='latin1')
+            existing_df[merge_key] = existing_df[merge_key].astype(str)
+        except FileNotFoundError:
+            print("Local 'locs_list.csv' not found. Will create a new one.")
+            existing_df = pd.DataFrame(columns=final_column_order)
+
+        # --- Handle schema drift by ensuring all expected columns exist ---
+        for col in final_column_order:
+            if col not in existing_df.columns:
+                print(f"Adding missing column '{col}' to the local data to match the new schema.")
+                existing_df[col] = np.nan
+
+        # --- 2. Fetch Live Data from Database ---
+        engine = create_engine(DATABASE_URL, connect_args={'sslmode': 'require'})
+        print("\nConnecting to database to fetch live location data...")
+
+        sql_query = text(f"""
+            SELECT DISTINCT {', '.join(db_columns)}
+            FROM pipelines.metadata
+            WHERE country_name = 'United States'
+        """)
         
         with engine.connect() as connection:
-            df_locations = pd.read_sql_query(text(sql_query), connection)
+            db_df = pd.read_sql_query(sql_query, connection)
+        print(f"Successfully fetched {len(db_df)} unique US locations from the database.")
+        db_df[merge_key] = db_df[merge_key].astype(str)
+
+        # --- 3. Merge and Compare Data ---
+        merged_df = pd.merge(
+            existing_df,
+            db_df,
+            on=merge_key,
+            how='outer',
+            suffixes=('_old', '_new'),
+            indicator=True
+        )
+
+        updates_found = []
+        new_records = []
+        orphaned_records = []
+
+        print("\nComparing local data with database data...")
+        for index, row in merged_df.iterrows():
+            if row['_merge'] == 'left_only':
+                # Corrected: Build dict from non-key columns, then add the key
+                orphan_data = {col: row[f"{col}_old"] for col in db_columns if col != merge_key}
+                orphan_data[merge_key] = row[merge_key]
+                orphan_data['market_component'] = row['market_component']
+                orphan_data['loc_name'] = str(orphan_data.get('loc_name', '')) + " - ORPHANED"
+                orphaned_records.append(orphan_data)
+
+            elif row['_merge'] == 'right_only':
+                # Corrected: Build dict from non-key columns, then add the key
+                new_record = {col: row[f"{col}_new"] for col in db_columns if col != merge_key}
+                new_record[merge_key] = row[merge_key]
+                new_record['market_component'] = np.nan
+                new_records.append(new_record)
+
+            elif row['_merge'] == 'both':
+                updated_record = {merge_key: row[merge_key]}
+                for col in db_columns:
+                    if col == merge_key: continue
+                    old_val = row[f"{col}_old"]
+                    new_val = row[f"{col}_new"]
+                    if pd.isna(old_val) and pd.isna(new_val):
+                        updated_record[col] = new_val
+                    elif str(old_val) != str(new_val):
+                        print(f"  - UPDATE DETECTED for loc '{row[merge_key]}':")
+                        print(f"    - Column '{col}' changed from '{old_val}' to '{new_val}'")
+                        updated_record[col] = new_val
+                    else:
+                        updated_record[col] = new_val
+                
+                updated_record['market_component'] = row['market_component']
+                updates_found.append(updated_record)
+
+        # --- 4. Assemble the Final DataFrame ---
+        final_df = pd.concat([
+            pd.DataFrame(updates_found),
+            pd.DataFrame(new_records),
+            pd.DataFrame(orphaned_records)
+        ], ignore_index=True)
+
+        final_df = final_df.reindex(columns=final_column_order)
+        final_df.sort_values(by=['pipeline_name', 'loc_name'], inplace=True)
         
-        if df_locations.empty:
-            print(f"No data returned from the query for table 'pipelines.metadata'.")
-        else:
-            print(f"Successfully fetched {len(df_locations)} rows.")
-
-            # --- Save to CSV ---
-            # Output will be in the same directory as the script.
-            output_file_name = 'CriterionLOCS.csv'
-            output_file_path = os.path.join(script_dir, output_file_name)
-
-            df_locations.to_csv(output_file_path, index=False)
-            print(f"Data saved successfully to: {output_file_path}")
+        # --- 5. Save the Updated Data ---
+        final_df.to_csv(output_csv_path, index=False, encoding='utf-8-sig')
+        print(f"\nUpdate complete.")
+        print(f"{len(new_records)} new locations added.")
+        print(f"{len(orphaned_records)} orphaned locations marked.")
+        print(f"File saved to: {output_csv_path}")
 
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"\nAn unexpected error occurred: {e}")
         traceback.print_exc()
     finally:
         if engine:
             engine.dispose()
             print("\nDatabase connection closed.")
 
+
 if __name__ == '__main__':
-    # Ensure a .env file exists, or create a dummy one if it doesn't.
-    # User should replace dummy credentials with actual ones.
-    if not os.path.exists('.env'):
-        script_dir_for_main = os.path.dirname(os.path.abspath(__file__))
-        env_in_script_dir = os.path.join(script_dir_for_main, '.env')
-        print(f"WARNING: .env file not found at {env_in_script_dir}! ")
-        print("If you haven't, please create it with your DB_USER and DB_PASSWORD.")
-        # Example of creating a dummy if truly needed, but user should manage this.
-        # with open(env_in_script_dir, 'w') as f:
-        #     f.write("DB_USER=your_username\n")
-        #     f.write("DB_PASSWORD=your_password\n")
-        # print(f"A dummy .env was conceptualized; please ensure it's correct at {env_in_script_dir}")
-            
-    fetch_and_save_locations()
+    update_criterion_locs()
