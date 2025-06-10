@@ -1,0 +1,1679 @@
+period,area-name,series-description,value,units
+2025-03,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2025-03,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),200831,MMCF
+2025-03,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2025-03,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),203921,MMCF
+2025-03,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),90297,MMCF
+2025-03,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1079060,MMCF
+2025-03,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),495916,MMCF
+2025-03,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2025-03,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),264555,MMCF
+2025-03,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2025-03,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2025-03,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2025-03,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1584178,MMCF
+2025-03,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),108131,MMCF
+2025-03,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2025-03,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),571072,MMCF
+2025-03,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2025-03,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2025-03,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2025-03,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2025-03,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2025-03,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),323068,MMCF
+2025-03,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),62792,MMCF
+2025-03,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2025-03,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1230388,MMCF
+2025-03,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2025-03,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2025-03,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2025-03,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2025-03,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4828664,MMCF
+2025-03,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2025-03,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2025-03,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),69905,MMCF
+2025-03,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),443328,MMCF
+2025-03,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),239752,MMCF
+2025-03,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369218,MMCF
+2025-03,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4758759,MMCF
+2025-03,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2025-02,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1230388,MMCF
+2025-02,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2025-02,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2025-02,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2025-02,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),108131,MMCF
+2025-02,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),200857,MMCF
+2025-02,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4830377,MMCF
+2025-02,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369218,MMCF
+2025-02,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),495916,MMCF
+2025-02,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2025-02,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),571072,MMCF
+2025-02,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2025-02,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),265400,MMCF
+2025-02,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),323068,MMCF
+2025-02,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2025-02,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),443328,MMCF
+2025-02,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2025-02,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2025-02,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),90297,MMCF
+2025-02,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2025-02,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2025-02,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1584204,MMCF
+2025-02,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1080747,MMCF
+2025-02,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),69905,MMCF
+2025-02,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2025-02,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2025-02,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2025-02,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2025-02,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2025-02,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),62792,MMCF
+2025-02,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2025-02,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2025-02,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2025-02,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),240594,MMCF
+2025-02,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2025-02,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),203921,MMCF
+2025-02,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4760472,MMCF
+2025-02,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2025-01,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),108131,MMCF
+2025-01,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2025-01,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4814403,MMCF
+2025-01,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2025-01,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),69905,MMCF
+2025-01,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2025-01,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2025-01,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2025-01,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2025-01,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1080750,MMCF
+2025-01,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2025-01,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2025-01,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),571072,MMCF
+2025-01,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4744499,MMCF
+2025-01,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2025-01,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1584227,MMCF
+2025-01,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),479916,MMCF
+2025-01,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2025-01,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),203921,MMCF
+2025-01,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2025-01,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2025-01,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2025-01,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1230388,MMCF
+2025-01,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),443328,MMCF
+2025-01,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),265403,MMCF
+2025-01,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2025-01,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369218,MMCF
+2025-01,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2025-01,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),240594,MMCF
+2025-01,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2025-01,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2025-01,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2025-01,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2025-01,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2025-01,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),62792,MMCF
+2025-01,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2025-01,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),323068,MMCF
+2025-01,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),200880,MMCF
+2024-12,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),443328,MMCF
+2024-12,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),108131,MMCF
+2024-12,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-12,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-12,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-12,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-12,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-12,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-12,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-12,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),200906,MMCF
+2024-12,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),203921,MMCF
+2024-12,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),563510,MMCF
+2024-12,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4806872,MMCF
+2024-12,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1230388,MMCF
+2024-12,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-12,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),62792,MMCF
+2024-12,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-12,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1576692,MMCF
+2024-12,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1080753,MMCF
+2024-12,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-12,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),240594,MMCF
+2024-12,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-12,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-12,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-12,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369218,MMCF
+2024-12,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),69905,MMCF
+2024-12,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-12,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),265406,MMCF
+2024-12,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),323068,MMCF
+2024-12,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4736967,MMCF
+2024-12,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-12,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-12,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),479916,MMCF
+2024-12,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-12,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-12,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-12,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-12,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-11,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-11,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-11,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-11,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-11,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-11,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-11,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1230388,MMCF
+2024-11,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-11,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-11,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-11,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-11,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4804911,MMCF
+2024-11,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-11,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369218,MMCF
+2024-11,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),443328,MMCF
+2024-11,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-11,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-11,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),203921,MMCF
+2024-11,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-11,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-11,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1576718,MMCF
+2024-11,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),479916,MMCF
+2024-11,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),200932,MMCF
+2024-11,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),62792,MMCF
+2024-11,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4736996,MMCF
+2024-11,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-11,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-11,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),240594,MMCF
+2024-11,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),108131,MMCF
+2024-11,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-11,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),323068,MMCF
+2024-11,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-11,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-11,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),563510,MMCF
+2024-11,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-11,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1080756,MMCF
+2024-11,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),265409,MMCF
+2024-11,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-10,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2024-10,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-10,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),265705,MMCF
+2024-10,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-10,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),203921,MMCF
+2024-10,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-10,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),240886,MMCF
+2024-10,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-10,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-10,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-10,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),563510,MMCF
+2024-10,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4729224,MMCF
+2024-10,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-10,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1576743,MMCF
+2024-10,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),443328,MMCF
+2024-10,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-10,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1081344,MMCF
+2024-10,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2024-10,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-10,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-10,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-10,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-10,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-10,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),200958,MMCF
+2024-10,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-10,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-10,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2024-10,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-10,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2024-10,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4797139,MMCF
+2024-10,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-10,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369218,MMCF
+2024-10,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-10,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-10,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),323068,MMCF
+2024-10,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-10,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-10,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-09,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369068,MMCF
+2024-09,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1081344,MMCF
+2024-09,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2024-09,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-09,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-09,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2024-09,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1576769,MMCF
+2024-09,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-09,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-09,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-09,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),203921,MMCF
+2024-09,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),563510,MMCF
+2024-09,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4797015,MMCF
+2024-09,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-09,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-09,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),265705,MMCF
+2024-09,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-09,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4729100,MMCF
+2024-09,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-09,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-09,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-09,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-09,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-09,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-09,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2024-09,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),443328,MMCF
+2024-09,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-09,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322918,MMCF
+2024-09,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-09,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-09,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-09,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-09,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-09,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-09,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),240886,MMCF
+2024-09,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),200984,MMCF
+2024-09,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2024-09,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-08,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-08,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-08,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-08,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-08,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-08,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),451388,MMCF
+2024-08,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-08,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-08,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-08,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-08,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-08,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369068,MMCF
+2024-08,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),240886,MMCF
+2024-08,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-08,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2024-08,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2024-08,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),265711,MMCF
+2024-08,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322918,MMCF
+2024-08,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-08,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-08,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-08,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-08,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-08,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2024-08,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-08,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),563510,MMCF
+2024-08,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4803103,MMCF
+2024-08,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4735187,MMCF
+2024-08,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-08,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2024-08,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-08,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1582850,MMCF
+2024-08,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-08,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1081351,MMCF
+2024-08,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2024-08,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-08,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201005,MMCF
+2024-08,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-07,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1081353,MMCF
+2024-07,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-07,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-07,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-07,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322918,MMCF
+2024-07,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-07,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-07,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),557010,MMCF
+2024-07,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-07,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-07,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2024-07,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-07,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-07,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-07,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1576380,MMCF
+2024-07,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),451388,MMCF
+2024-07,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-07,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201035,MMCF
+2024-07,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369068,MMCF
+2024-07,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-07,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2024-07,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-07,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4796636,MMCF
+2024-07,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-07,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2024-07,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-07,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-07,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),240886,MMCF
+2024-07,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-07,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-07,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2024-07,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),265714,MMCF
+2024-07,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-07,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2024-07,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4728721,MMCF
+2024-07,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-07,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-07,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-06,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369068,MMCF
+2024-06,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-06,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241264,MMCF
+2024-06,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322918,MMCF
+2024-06,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-06,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),265717,MMCF
+2024-06,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-06,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),557027,MMCF
+2024-06,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4797058,MMCF
+2024-06,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-06,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-06,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-06,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),451388,MMCF
+2024-06,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-06,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-06,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2024-06,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-06,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-06,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2024-06,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1081734,MMCF
+2024-06,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-06,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-06,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201061,MMCF
+2024-06,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-06,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1576423,MMCF
+2024-06,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2024-06,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-06,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-06,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-06,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-06,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-06,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-06,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-06,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4729143,MMCF
+2024-06,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-06,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2024-06,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2024-06,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-05,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2024-05,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-05,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1576448,MMCF
+2024-05,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-05,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),451388,MMCF
+2024-05,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-05,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-05,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-05,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2024-05,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-05,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),266622,MMCF
+2024-05,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-05,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-05,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-05,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-05,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-05,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-05,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2024-05,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4798549,MMCF
+2024-05,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4730634,MMCF
+2024-05,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-05,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2024-05,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-05,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322918,MMCF
+2024-05,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2024-05,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-05,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),557027,MMCF
+2024-05,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-05,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369068,MMCF
+2024-05,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2024-05,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-05,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-05,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201086,MMCF
+2024-05,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-05,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-05,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-05,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1083199,MMCF
+2024-05,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-04,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2024-04,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-04,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-04,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322918,MMCF
+2024-04,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201113,MMCF
+2024-04,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-04,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-04,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),557027,MMCF
+2024-04,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-04,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-04,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1084074,MMCF
+2024-04,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-04,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-04,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-04,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-04,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4731010,MMCF
+2024-04,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2024-04,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1575949,MMCF
+2024-04,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369068,MMCF
+2024-04,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2024-04,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4798925,MMCF
+2024-04,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-04,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-04,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-04,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2024-04,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),450862,MMCF
+2024-04,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267498,MMCF
+2024-04,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2024-04,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-04,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-04,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2024-04,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-04,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-04,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-04,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-04,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-04,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-04,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-03,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2024-03,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2024-03,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-03,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2024-03,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2024-03,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),451057,MMCF
+2024-03,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2024-03,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-03,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-03,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-03,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-03,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322918,MMCF
+2024-03,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-03,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-03,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4796148,MMCF
+2024-03,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-03,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1573168,MMCF
+2024-03,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-03,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-03,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-03,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1084077,MMCF
+2024-03,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-03,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369068,MMCF
+2024-03,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267501,MMCF
+2024-03,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-03,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-03,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-03,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2024-03,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-03,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-03,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-03,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-03,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554027,MMCF
+2024-03,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-03,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-03,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-03,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201138,MMCF
+2024-03,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4728232,MMCF
+2024-02,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-02,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2024-02,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201164,MMCF
+2024-02,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4800853,MMCF
+2024-02,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),456291,MMCF
+2024-02,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-02,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-02,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-02,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2024-02,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1578420,MMCF
+2024-02,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2024-02,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-02,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2024-02,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-02,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2024-02,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2024-02,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125198,MMCF
+2024-02,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2024-02,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2024-02,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-02,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-02,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-02,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-02,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-02,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-02,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-02,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2024-02,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-02,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-02,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4732938,MMCF
+2024-02,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-02,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-02,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-02,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-02,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267503,MMCF
+2024-02,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554019,MMCF
+2024-02,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-02,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1084080,MMCF
+2024-01,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2024-01,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2024-01,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2024-01,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2024-01,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2024-01,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2024-01,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2024-01,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2024-01,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1083984,MMCF
+2024-01,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2024-01,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2024-01,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2024-01,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2024-01,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2024-01,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2024-01,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267505,MMCF
+2024-01,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2024-01,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2024-01,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2024-01,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),456275,MMCF
+2024-01,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2024-01,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2024-01,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2024-01,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1578429,MMCF
+2024-01,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2024-01,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2024-01,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2024-01,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2024-01,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2024-01,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4800765,MMCF
+2024-01,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4732850,MMCF
+2024-01,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2024-01,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201189,MMCF
+2024-01,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554019,MMCF
+2024-01,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2024-01,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2024-01,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2024-01,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-12,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-12,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-12,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-12,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-12,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-12,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2023-12,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2023-12,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-12,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229853,MMCF
+2023-12,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32285,MMCF
+2023-12,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-12,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-12,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-12,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-12,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-12,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2023-12,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-12,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2023-12,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),455751,MMCF
+2023-12,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-12,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-12,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201215,MMCF
+2023-12,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-12,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-12,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-12,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688390,MMCF
+2023-12,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-12,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-12,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554483,MMCF
+2023-12,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4800735,MMCF
+2023-12,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4732819,MMCF
+2023-12,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1578396,MMCF
+2023-12,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-12,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1083987,MMCF
+2023-12,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267508,MMCF
+2023-12,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-12,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-12,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-11,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229810,MMCF
+2023-11,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1083990,MMCF
+2023-11,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2023-11,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-11,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-11,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-11,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-11,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-11,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554483,MMCF
+2023-11,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1578422,MMCF
+2023-11,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2023-11,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-11,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267511,MMCF
+2023-11,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-11,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-11,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-11,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-11,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-11,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2023-11,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-11,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-11,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),455751,MMCF
+2023-11,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201241,MMCF
+2023-11,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4732805,MMCF
+2023-11,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-11,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-11,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-11,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-11,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4800721,MMCF
+2023-11,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-11,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-11,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2023-11,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-11,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-11,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688359,MMCF
+2023-11,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-11,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-11,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-10,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688359,MMCF
+2023-10,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-10,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-10,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201267,MMCF
+2023-10,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-10,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2023-10,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-10,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1229810,MMCF
+2023-10,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-10,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-10,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-10,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-10,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-10,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-10,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-10,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-10,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-10,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-10,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-10,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1578447,MMCF
+2023-10,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-10,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-10,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),455751,MMCF
+2023-10,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-10,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2023-10,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267515,MMCF
+2023-10,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-10,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2023-10,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-10,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-10,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-10,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-10,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554483,MMCF
+2023-10,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4800750,MMCF
+2023-10,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-10,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1083993,MMCF
+2023-10,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2023-10,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4732834,MMCF
+2023-09,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688645,MMCF
+2023-09,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-09,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-09,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-09,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-09,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2023-09,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-09,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4801169,MMCF
+2023-09,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2023-09,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-09,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2023-09,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267517,MMCF
+2023-09,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-09,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201293,MMCF
+2023-09,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-09,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4733253,MMCF
+2023-09,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-09,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-09,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-09,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1578578,MMCF
+2023-09,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-09,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-09,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-09,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-09,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554483,MMCF
+2023-09,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-09,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-09,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1230096,MMCF
+2023-09,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-09,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1083996,MMCF
+2023-09,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-09,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-09,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-09,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2023-09,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-09,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),455855,MMCF
+2023-09,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-09,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-08,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-08,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),455855,MMCF
+2023-08,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2023-08,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267520,MMCF
+2023-08,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-08,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-08,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-08,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-08,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-08,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-08,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-08,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2023-08,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1083999,MMCF
+2023-08,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688645,MMCF
+2023-08,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-08,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-08,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-08,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1230096,MMCF
+2023-08,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1578602,MMCF
+2023-08,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201319,MMCF
+2023-08,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4733281,MMCF
+2023-08,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-08,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2023-08,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-08,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-08,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-08,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-08,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2023-08,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-08,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-08,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-08,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-08,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-08,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-08,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-08,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554482,MMCF
+2023-08,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4801196,MMCF
+2023-08,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-07,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-07,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-07,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688645,MMCF
+2023-07,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-07,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-07,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-07,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201345,MMCF
+2023-07,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-07,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-07,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1084002,MMCF
+2023-07,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-07,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-07,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),455855,MMCF
+2023-07,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2023-07,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-07,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-07,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-07,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1607720,MMCF
+2023-07,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2023-07,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-07,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-07,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-07,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-07,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4830317,MMCF
+2023-07,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4762401,MMCF
+2023-07,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-07,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-07,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1230096,MMCF
+2023-07,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-07,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-07,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2023-07,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554483,MMCF
+2023-07,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-07,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267523,MMCF
+2023-07,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-07,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2023-07,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),152072,MMCF
+2023-07,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-06,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1230096,MMCF
+2023-06,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2023-06,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1084005,MMCF
+2023-06,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-06,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-06,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-06,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-06,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554483,MMCF
+2023-06,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267526,MMCF
+2023-06,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2023-06,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-06,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688645,MMCF
+2023-06,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),241824,MMCF
+2023-06,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-06,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-06,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-06,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-06,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),457255,MMCF
+2023-06,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-06,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-06,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4734741,MMCF
+2023-06,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-06,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-06,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-06,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-06,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),201921,MMCF
+2023-06,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-06,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-06,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4802656,MMCF
+2023-06,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-06,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-06,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-06,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1580056,MMCF
+2023-06,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-06,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201372,MMCF
+2023-06,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-06,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-06,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-05,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-05,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2023-05,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-05,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4732159,MMCF
+2023-05,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-05,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-05,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-05,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),688645,MMCF
+2023-05,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201398,MMCF
+2023-05,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-05,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-05,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-05,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-05,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1230096,MMCF
+2023-05,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1085397,MMCF
+2023-05,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268685,MMCF
+2023-05,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-05,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2023-05,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-05,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-05,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-05,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554483,MMCF
+2023-05,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-05,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1576082,MMCF
+2023-05,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-05,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-05,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-05,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-05,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-05,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4800074,MMCF
+2023-05,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-05,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-05,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-05,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-05,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-05,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),457255,MMCF
+2023-05,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),242057,MMCF
+2023-05,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2023-04,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-04,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-04,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268689,MMCF
+2023-04,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-04,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-04,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-04,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-04,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-04,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-04,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-04,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-04,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1576108,MMCF
+2023-04,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201424,MMCF
+2023-04,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-04,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1085401,MMCF
+2023-04,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),457255,MMCF
+2023-04,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-04,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554483,MMCF
+2023-04,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-04,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-04,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-04,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4730822,MMCF
+2023-04,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1228728,MMCF
+2023-04,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-04,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322368,MMCF
+2023-04,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4798737,MMCF
+2023-04,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-04,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368518,MMCF
+2023-04,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),687277,MMCF
+2023-04,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-04,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-04,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2023-04,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-04,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-04,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),242057,MMCF
+2023-04,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-04,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-04,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-03,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225252,MMCF
+2023-03,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1085405,MMCF
+2023-03,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-03,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),242057,MMCF
+2023-03,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268693,MMCF
+2023-03,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-03,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-03,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-03,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4727875,MMCF
+2023-03,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-03,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4795790,MMCF
+2023-03,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-03,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-03,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1576134,MMCF
+2023-03,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-03,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-03,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-03,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-03,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),554483,MMCF
+2023-03,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-03,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683801,MMCF
+2023-03,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-03,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-03,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-03,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-03,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2023-03,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-03,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369018,MMCF
+2023-03,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-03,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),457255,MMCF
+2023-03,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-03,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-03,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-03,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-03,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-03,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2023-03,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201450,MMCF
+2023-03,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-02,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),242057,MMCF
+2023-02,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2023-02,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-02,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-02,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369018,MMCF
+2023-02,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-02,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268696,MMCF
+2023-02,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1085408,MMCF
+2023-02,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-02,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),452035,MMCF
+2023-02,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-02,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),426326,MMCF
+2023-02,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-02,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-02,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-02,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-02,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-02,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2023-02,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1570400,MMCF
+2023-02,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-02,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2023-02,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-02,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4722145,MMCF
+2023-02,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683801,MMCF
+2023-02,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-02,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201476,MMCF
+2023-02,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),553943,MMCF
+2023-02,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-02,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-02,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-02,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-02,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-02,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225252,MMCF
+2023-02,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-02,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-02,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4790060,MMCF
+2023-02,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-02,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-01,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2023-01,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683801,MMCF
+2023-01,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253550,MMCF
+2023-01,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2023-01,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2023-01,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2023-01,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2023-01,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2023-01,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2023-01,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2023-01,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125099,MMCF
+2023-01,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1570450,MMCF
+2023-01,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2023-01,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2023-01,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2023-01,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2023-01,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2023-01,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2023-01,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2023-01,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4733912,MMCF
+2023-01,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2023-01,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369018,MMCF
+2023-01,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2023-01,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201526,MMCF
+2023-01,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2023-01,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2023-01,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1097126,MMCF
+2023-01,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),267621,MMCF
+2023-01,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2023-01,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2023-01,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),553943,MMCF
+2023-01,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225252,MMCF
+2023-01,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2023-01,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4801827,MMCF
+2023-01,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2023-01,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),452035,MMCF
+2023-01,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2023-01,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-12,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2022-12,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4796613,MMCF
+2022-12,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4728697,MMCF
+2022-12,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-12,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-12,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-12,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-12,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-12,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-12,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225252,MMCF
+2022-12,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369018,MMCF
+2022-12,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2022-12,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683801,MMCF
+2022-12,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-12,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-12,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544806,MMCF
+2022-12,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-12,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1563403,MMCF
+2022-12,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201527,MMCF
+2022-12,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-12,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-12,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-12,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-12,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125549,MMCF
+2022-12,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-12,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-12,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-12,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-12,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32274,MMCF
+2022-12,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1098958,MMCF
+2022-12,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2022-12,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-12,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-12,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-12,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-12,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2022-12,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-12,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-11,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-11,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-11,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-11,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-11,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369018,MMCF
+2022-11,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-11,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-11,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4728692,MMCF
+2022-11,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1563430,MMCF
+2022-11,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303813,MMCF
+2022-11,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201554,MMCF
+2022-11,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125549,MMCF
+2022-11,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1098958,MMCF
+2022-11,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-11,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-11,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-11,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-11,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544806,MMCF
+2022-11,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-11,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472066,MMCF
+2022-11,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683801,MMCF
+2022-11,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72959,MMCF
+2022-11,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2022-11,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-11,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-11,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225220,MMCF
+2022-11,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-11,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-11,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-11,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-11,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-11,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-11,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-11,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-11,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-11,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-11,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4796607,MMCF
+2022-11,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-10,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472040,MMCF
+2022-10,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-10,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-10,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1098958,MMCF
+2022-10,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4796338,MMCF
+2022-10,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-10,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-10,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-10,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21550,MMCF
+2022-10,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-10,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-10,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-10,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-10,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683821,MMCF
+2022-10,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-10,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-10,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-10,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125549,MMCF
+2022-10,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4728423,MMCF
+2022-10,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-10,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-10,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-10,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72933,MMCF
+2022-10,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-10,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-10,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-10,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-10,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-10,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),369018,MMCF
+2022-10,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-10,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-10,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201491,MMCF
+2022-10,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-10,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225040,MMCF
+2022-10,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1563367,MMCF
+2022-10,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2022-10,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-10,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544805,MMCF
+2022-09,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2022-09,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-09,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-09,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-09,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4728037,MMCF
+2022-09,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-09,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-09,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368604,MMCF
+2022-09,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125549,MMCF
+2022-09,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544805,MMCF
+2022-09,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-09,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-09,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2022-09,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-09,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-09,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-09,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-09,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-09,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),472040,MMCF
+2022-09,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-09,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72933,MMCF
+2022-09,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21136,MMCF
+2022-09,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-09,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-09,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-09,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225039,MMCF
+2022-09,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-09,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201520,MMCF
+2022-09,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1098958,MMCF
+2022-09,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-09,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-09,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1563396,MMCF
+2022-09,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-09,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-09,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-09,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-09,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4795952,MMCF
+2022-09,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-08,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-08,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-08,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1563431,MMCF
+2022-08,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368586,MMCF
+2022-08,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2022-08,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-08,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-08,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-08,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-08,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2022-08,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-08,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-08,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-08,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-08,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-08,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4795791,MMCF
+2022-08,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225039,MMCF
+2022-08,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21118,MMCF
+2022-08,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-08,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-08,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125549,MMCF
+2022-08,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-08,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-08,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-08,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-08,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-08,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1098958,MMCF
+2022-08,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2022-08,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201546,MMCF
+2022-08,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544815,MMCF
+2022-08,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4727875,MMCF
+2022-08,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-08,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2022-08,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-08,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-08,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-08,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-08,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-07,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2022-07,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-07,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-07,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-07,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544815,MMCF
+2022-07,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-07,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-07,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-07,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-07,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-07,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225039,MMCF
+2022-07,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2022-07,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-07,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21118,MMCF
+2022-07,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201573,MMCF
+2022-07,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-07,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-07,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-07,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4795817,MMCF
+2022-07,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1098958,MMCF
+2022-07,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-07,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-07,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-07,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-07,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-07,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-07,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-07,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125549,MMCF
+2022-07,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-07,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-07,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1563458,MMCF
+2022-07,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-07,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-07,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368586,MMCF
+2022-07,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2022-07,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2022-07,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4727902,MMCF
+2022-07,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-06,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225039,MMCF
+2022-06,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1098958,MMCF
+2022-06,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-06,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201599,MMCF
+2022-06,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-06,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-06,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2022-06,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-06,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368586,MMCF
+2022-06,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21118,MMCF
+2022-06,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-06,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-06,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4727929,MMCF
+2022-06,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-06,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2022-06,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-06,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-06,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-06,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-06,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-06,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-06,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-06,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-06,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2022-06,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-06,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-06,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-06,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4795844,MMCF
+2022-06,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1563485,MMCF
+2022-06,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125549,MMCF
+2022-06,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544815,MMCF
+2022-06,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-06,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-06,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2022-06,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-06,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-06,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-06,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-05,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2022-05,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-05,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1098958,MMCF
+2022-05,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2022-05,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-05,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-05,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-05,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-05,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4726815,MMCF
+2022-05,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225039,MMCF
+2022-05,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2022-05,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-05,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-05,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-05,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-05,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-05,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-05,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4794730,MMCF
+2022-05,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-05,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-05,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-05,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-05,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-05,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-05,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21118,MMCF
+2022-05,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-05,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1562371,MMCF
+2022-05,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368586,MMCF
+2022-05,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-05,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-05,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-05,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),543675,MMCF
+2022-05,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2022-05,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201625,MMCF
+2022-05,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-05,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),125549,MMCF
+2022-05,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-05,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-04,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2022-04,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21118,MMCF
+2022-04,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-04,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-04,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-04,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-04,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-04,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1562387,MMCF
+2022-04,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2022-04,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-04,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1100896,MMCF
+2022-04,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-04,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-04,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),543675,MMCF
+2022-04,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-04,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-04,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-04,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-04,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-04,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-04,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201642,MMCF
+2022-04,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-04,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-04,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-04,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-04,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225039,MMCF
+2022-04,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2022-04,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-04,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4728769,MMCF
+2022-04,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-04,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2022-04,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-04,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-04,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368586,MMCF
+2022-04,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-04,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),127487,MMCF
+2022-04,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-04,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4796684,MMCF
+2022-03,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-03,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-03,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2022-03,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2022-03,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-03,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-03,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21118,MMCF
+2022-03,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-03,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2022-03,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-03,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-03,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),127487,MMCF
+2022-03,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-03,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-03,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2022-03,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-03,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-03,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-03,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),543675,MMCF
+2022-03,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4796847,MMCF
+2022-03,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4728932,MMCF
+2022-03,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225039,MMCF
+2022-03,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1100896,MMCF
+2022-03,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-03,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-03,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-03,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-03,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-03,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201805,MMCF
+2022-03,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-03,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-03,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-03,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1562550,MMCF
+2022-03,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368586,MMCF
+2022-03,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-03,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-03,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-03,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-02,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225039,MMCF
+2022-02,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368586,MMCF
+2022-02,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2022-02,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-02,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-02,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201805,MMCF
+2022-02,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-02,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2022-02,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),543675,MMCF
+2022-02,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-02,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-02,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-02,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21118,MMCF
+2022-02,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-02,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4728932,MMCF
+2022-02,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-02,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1562550,MMCF
+2022-02,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2022-02,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2022-02,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),454124,MMCF
+2022-02,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-02,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-02,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2022-02,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4796847,MMCF
+2022-02,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-02,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-02,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-02,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-02,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-02,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-02,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-02,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-02,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),127487,MMCF
+2022-02,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1100896,MMCF
+2022-02,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-02,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-02,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-02,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-01,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1100896,MMCF
+2022-01,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2022-01,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2022-01,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2022-01,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368586,MMCF
+2022-01,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),461434,MMCF
+2022-01,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2022-01,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2022-01,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4803852,MMCF
+2022-01,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4735936,MMCF
+2022-01,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2022-01,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2022-01,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2022-01,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2022-01,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2022-01,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2022-01,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2022-01,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2022-01,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2022-01,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2022-01,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225039,MMCF
+2022-01,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2022-01,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2022-01,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2022-01,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1569554,MMCF
+2022-01,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2022-01,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21118,MMCF
+2022-01,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201829,MMCF
+2022-01,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),127487,MMCF
+2022-01,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2022-01,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2022-01,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),543345,MMCF
+2022-01,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2022-01,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2022-01,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2022-01,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2022-01,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2022-01,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2021-12,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21118,MMCF
+2021-12,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2021-12,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2021-12,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2021-12,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2021-12,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2021-12,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2021-12,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2021-12,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4736933,MMCF
+2021-12,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1100896,MMCF
+2021-12,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2021-12,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2021-12,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2021-12,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2021-12,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201856,MMCF
+2021-12,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4804849,MMCF
+2021-12,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1225039,MMCF
+2021-12,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2021-12,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2021-12,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544315,MMCF
+2021-12,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2021-12,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),461434,MMCF
+2021-12,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2021-12,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2021-12,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32242,MMCF
+2021-12,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2021-12,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368586,MMCF
+2021-12,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2021-12,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2021-12,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2021-12,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2021-12,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2021-12,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1570551,MMCF
+2021-12,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2021-12,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2021-12,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2021-12,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),127487,MMCF
+2021-12,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2021-11,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2021-11,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2021-11,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2021-11,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2021-11,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2021-11,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2021-11,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2021-11,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2021-11,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2021-11,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32109,MMCF
+2021-11,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544795,MMCF
+2021-11,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4805222,MMCF
+2021-11,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2021-11,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1100896,MMCF
+2021-11,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2021-11,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2021-11,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2021-11,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2021-11,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),461434,MMCF
+2021-11,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2021-11,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201883,MMCF
+2021-11,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2021-11,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2021-11,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2021-11,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2021-11,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21118,MMCF
+2021-11,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),127487,MMCF
+2021-11,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2021-11,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2021-11,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2021-11,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1224906,MMCF
+2021-11,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1571058,MMCF
+2021-11,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368586,MMCF
+2021-11,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4737307,MMCF
+2021-11,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2021-11,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2021-11,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2021-11,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2021-10,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1224906,MMCF
+2021-10,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1100896,MMCF
+2021-10,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),461434,MMCF
+2021-10,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2021-10,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2021-10,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544795,MMCF
+2021-10,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4737144,MMCF
+2021-10,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2021-10,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2021-10,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32109,MMCF
+2021-10,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2021-10,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2021-10,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2021-10,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2021-10,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2021-10,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4805059,MMCF
+2021-10,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2021-10,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2021-10,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2021-10,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368576,MMCF
+2021-10,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2021-10,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2021-10,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2021-10,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2021-10,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2021-10,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2021-10,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1570905,MMCF
+2021-10,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2021-10,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2021-10,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201729,MMCF
+2021-10,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2021-10,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2021-10,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2021-10,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),21108,MMCF
+2021-10,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),127487,MMCF
+2021-10,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2021-10,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2021-10,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2021-09,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2021-09,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2021-09,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),20766,MMCF
+2021-09,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2021-09,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2021-09,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2021-09,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),127487,MMCF
+2021-09,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2021-09,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2021-09,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),461434,MMCF
+2021-09,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201782,MMCF
+2021-09,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2021-09,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1570458,MMCF
+2021-09,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2021-09,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2021-09,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2021-09,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544295,MMCF
+2021-09,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2021-09,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2021-09,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),368234,MMCF
+2021-09,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2021-09,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2021-09,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2021-09,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2021-09,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1100896,MMCF
+2021-09,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2021-09,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32109,MMCF
+2021-09,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2021-09,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2021-09,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2021-09,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2021-09,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4804270,MMCF
+2021-09,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2021-09,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1224906,MMCF
+2021-09,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2021-09,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2021-09,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4736354,MMCF
+2021-09,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2021-08,USA-MI,Michigan Working Natural Gas Underground Storage Capacity (MMcf),683820,MMCF
+2021-08,COLORADO,Colorado Working Natural Gas Underground Storage Capacity (MMcf),72754,MMCF
+2021-08,OHIO,Ohio Working Natural Gas Underground Storage Capacity (MMcf),253750,MMCF
+2021-08,USA-MS,Mississippi Working Natural Gas Underground Storage Capacity (MMcf),201809,MMCF
+2021-08,USA-WY,Wyoming Working Natural Gas Underground Storage Capacity (MMcf),74297,MMCF
+2021-08,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF
+2021-08,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2021-08,USA-AK,Alaska Working Natural Gas Underground Storage Capacity (MMcf),67915,MMCF
+2021-08,USA-KY,Kentucky Working Natural Gas Underground Storage Capacity (MMcf),107596,MMCF
+2021-08,USA-AR,Arkansas Working Natural Gas Underground Storage Capacity (MMcf),8894,MMCF
+2021-08,NA,Midwest Region Natural Gas Working Underground Storage Capacity (MMcf),1224906,MMCF
+2021-08,CALIFORNIA,California Working Natural Gas Underground Storage Capacity (MMcf),322868,MMCF
+2021-08,U.S.,U.S. Working Natural Gas Total Underground Storage Capacity (MMcf),4803691,MMCF
+2021-08,USA-NE,Nebraska Working Natural Gas Underground Storage Capacity (MMcf),12653,MMCF
+2021-08,NA,South Central Region Natural Gas Working Underground Storage Capacity (MMcf),1570625,MMCF
+2021-08,USA-IL,Illinois Working Natural Gas Underground Storage Capacity (MMcf),303613,MMCF
+2021-08,USA-IA,Iowa Working Natural Gas Underground Storage Capacity (MMcf),90313,MMCF
+2021-08,USA-MD,Maryland Working Natural Gas Underground Storage Capacity (MMcf),18300,MMCF
+2021-08,USA-NM,New Mexico Working Natural Gas Underground Storage Capacity (MMcf),59738,MMCF
+2021-08,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32109,MMCF
+2021-08,USA-TN,Tennessee Working Natural Gas Underground Storage Capacity (MMcf),1800,MMCF
+2021-08,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2021-08,NA,East Region Natural Gas Working Underground Storage Capacity (MMcf),1100896,MMCF
+2021-08,USA-MT,Montana Working Natural Gas Underground Storage Capacity (MMcf),197477,MMCF
+2021-08,USA-LA,Louisiana Working Natural Gas Underground Storage Capacity (MMcf),461434,MMCF
+2021-08,NEW YORK,New York Working Natural Gas Underground Storage Capacity (MMcf),127487,MMCF
+2021-08,USA-UT,Utah Working Natural Gas Underground Storage Capacity (MMcf),54942,MMCF
+2021-08,NA,Lower 48 States Working Natural Gas Total Underground Storage Capacity (MMcf),4735776,MMCF
+2021-08,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2021-08,USA-WV,West Virginia Working Natural Gas Underground Storage Capacity (MMcf),268803,MMCF
+2021-08,USA-OR,Oregon Working Natural Gas Underground Storage Capacity (MMcf),20020,MMCF
+2021-08,TEXAS,Texas Working Natural Gas Underground Storage Capacity (MMcf),544435,MMCF
+2021-08,NA,Pacific Region Natural Gas Working Underground Storage Capacity (MMcf),367488,MMCF
+2021-08,USA-PA,Pennsylvania Working Natural Gas Underground Storage Capacity (MMcf),427626,MMCF
+2021-08,WASHINGTON,Washington Working Natural Gas Underground Storage Capacity (MMcf),24600,MMCF
+2021-08,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2021-08,MINNESOTA,Minnesota Working Natural Gas Underground Storage Capacity (MMcf),2000,MMCF
+2021-08,USA-MO,Missouri Working Natural Gas Underground Storage Capacity (MMcf),3656,MMCF
+2021-07,NA,Mountain Region Natural Gas Working Underground Storage Capacity (MMcf),471861,MMCF
+2021-07,USA-VA,Virginia Working Natural Gas Underground Storage Capacity (MMcf),4930,MMCF
+2021-07,USA-OK,Oklahoma Working Natural Gas Underground Storage Capacity (MMcf),197921,MMCF
+2021-07,USA-IN,Indiana Working Natural Gas Underground Storage Capacity (MMcf),32109,MMCF
+2021-07,USA-AL,Alabama Working Natural Gas Underground Storage Capacity (MMcf),33150,MMCF
+2021-07,USA-KS,Kansas Working Natural Gas Underground Storage Capacity (MMcf),122982,MMCF

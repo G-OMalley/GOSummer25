@@ -1,30 +1,22 @@
-# UpdateCriterionStorage.py
-
 import os
 import pandas as pd
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def calculate_and_save_daily_storage_change():
     """
-    Calculates the daily net storage change for each facility from 2015-01-01
-    through today, applying the confirmed logic, and saves it to a CSV file.
+    Calculates the daily net storage change for each facility.
+    If the output CSV exists, it performs an incremental update for the last 60 days.
+    Otherwise, it fetches all data from 2015-01-01.
     The value saved is (SUM(scheduled_quantity * rec_del_sign)) * -1.
-    This means net withdrawals will be positive, net injections will be negative in the CSV.
     """
     # --- Load Environment Variables ---
-    # Script determines .env path relative to its own location
     script_dir = os.path.dirname(os.path.abspath(__file__))
     dotenv_path = os.path.join(script_dir, '.env') 
 
-    load_success = load_dotenv(dotenv_path=dotenv_path, override=True)
-
-    if load_success:
-        print(f"Loaded .env file from: {os.path.abspath(dotenv_path)} (Override enabled)")
-    else:
-        print(f"Warning: .env file not found at {os.path.abspath(dotenv_path)}. Relying on pre-set environment variables.")
+    load_dotenv(dotenv_path=dotenv_path, override=True)
 
     # --- Database Connection Details ---
     DB_USER = os.getenv('DB_USER')
@@ -33,117 +25,110 @@ def calculate_and_save_daily_storage_change():
     DB_PORT = 443
     DB_NAME = 'production'
 
-    print(f"Attempting to use DB_USER: {DB_USER}")
-
-    if not DB_USER or not DB_PASSWORD or DB_USER == 'your_username':
-        print(f"ERROR: Database credentials (DB_USER, DB_PASSWORD) not found or are placeholders.")
-        print(f"Please ensure a .env file with correct credentials exists in: {os.path.abspath(dotenv_path)}")
+    if not DB_USER or not DB_PASSWORD:
+        print(f"ERROR: Database credentials not found. Please check .env file at {dotenv_path}")
         return
 
     DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     engine = None
 
-    # --- Define Parameters ---
-    # Output path is absolute as specified by user
+    # --- Configuration ---
     output_dir_path = r"C:\Users\patri\OneDrive\Desktop\Coding\TraderHelper\INFO"
-    output_csv_filename = "CriterionStorageChange.csv" # Singular "Change"
+    output_csv_filename = "CriterionStorageChange.csv"
     output_csv_path = os.path.join(output_dir_path, output_csv_filename)
     
-    all_data_chunks = []
+    START_DATE_FULL_FETCH = pd.to_datetime('2015-01-01')
     
-    start_process_year = 2015
-    current_datetime = datetime.now() # Current date, e.g., June 1, 2025
-    end_process_year = current_datetime.year
+    # --- Check for existing data and determine fetch strategy ---
+    existing_df = None
+    start_date_for_fetch = START_DATE_FULL_FETCH
+    
+    os.makedirs(output_dir_path, exist_ok=True)
 
     try:
-        connect_args = {'sslmode': 'require'}
-        engine = create_engine(DATABASE_URL, connect_args=connect_args)
-        print(f"\nSuccessfully created SQLAlchemy engine for: {DB_HOST}/{DB_NAME} as user {DB_USER} with SSL require")
+        print(f"Checking for existing file at: {output_csv_path}")
+        existing_df = pd.read_csv(output_csv_path, parse_dates=['eff_gas_day'])
+        if existing_df.empty:
+            print("Existing file is empty. Performing a full data fetch.")
+            existing_df = None # Treat as if file doesn't exist
+        else:
+            max_date_in_file = existing_df['eff_gas_day'].max()
+            start_date_for_fetch = max_date_in_file - timedelta(days=60)
+            print(f"Existing file found. Last date is {max_date_in_file.strftime('%Y-%m-%d')}.")
+            print(f"Incremental update: fetching new data from {start_date_for_fetch.strftime('%Y-%m-%d')}.")
+    except FileNotFoundError:
+        print("No existing file found. Performing a full data fetch from scratch.")
+    except Exception as e:
+        print(f"Could not read existing file. Performing full fetch. Error: {e}")
+        existing_df = None
+        
+    try:
+        engine = create_engine(DATABASE_URL, connect_args={'sslmode': 'require'})
+        print(f"\nSuccessfully created SQLAlchemy engine.")
 
-        for year in range(start_process_year, end_process_year + 1):
-            year_start_date_str = f"{year}-01-01"
-            if year < end_process_year:
-                year_end_date_str = f"{year}-12-31"
+        # --- Data Fetching ---
+        # The query now covers the entire range from the determined start date to today
+        today_str = datetime.now().strftime('%Y-%m-%d')
+        start_date_str = start_date_for_fetch.strftime('%Y-%m-%d')
+        
+        print(f"\nFetching and processing data for period: {start_date_str} to {today_str}...")
+
+        sql_query = text("""
+        SELECT
+            meta.storage_name,
+            noms.eff_gas_day,
+            SUM(noms.scheduled_quantity * meta.rec_del_sign) AS intermediate_daily_net_flow
+        FROM
+            pipelines.nomination_points noms
+        INNER JOIN
+            pipelines.metadata meta ON meta.metadata_id = noms.metadata_id
+        WHERE
+            meta.storage_calc_flag = 'T'
+            AND meta.category_short = 'Storage'
+            AND meta.sub_category_desc = 'Daily Flows'
+            AND (meta.ticker LIKE '%.7' OR meta.ticker LIKE '%.8') 
+            AND noms.eff_gas_day BETWEEN :start_date AND :end_date
+        GROUP BY
+            meta.storage_name,
+            noms.eff_gas_day
+        """)
+        
+        with engine.connect() as connection:
+            new_data_df = pd.read_sql_query(sql_query, connection, params={'start_date': start_date_str, 'end_date': today_str})
+        
+        if new_data_df.empty:
+            print(f"No new data found for period {start_date_str} to {today_str}.")
+            if existing_df is None: # If no new data and no old data, nothing to do.
+                return
+            final_df = existing_df # If there's old data, just save that back.
+        else:
+            print(f"Fetched {len(new_data_df)} aggregated rows for the update period.")
+            
+            # --- Data Processing and Combination ---
+            new_data_df['daily_storage_change'] = new_data_df['intermediate_daily_net_flow'] * -1
+            new_data_df['eff_gas_day'] = pd.to_datetime(new_data_df['eff_gas_day'])
+            
+            # Keep only the necessary columns
+            new_data_df = new_data_df[['storage_name', 'eff_gas_day', 'daily_storage_change']]
+            
+            if existing_df is not None:
+                old_data_to_keep = existing_df[existing_df['eff_gas_day'] < start_date_for_fetch]
+                final_df = pd.concat([old_data_to_keep, new_data_df], ignore_index=True)
+                print(f"Combined {len(old_data_to_keep)} old rows with {len(new_data_df)} new/updated rows.")
             else:
-                year_end_date_str = current_datetime.strftime('%Y-%m-%d') # Up to current date for the current year
-            
-            print(f"\nFetching and processing data for period: {year_start_date_str} to {year_end_date_str}...")
+                final_df = new_data_df
+                print("Processing full dataset from scratch.")
 
-            sql_query_chunk = f"""
-            SELECT
-                meta.storage_name,
-                noms.eff_gas_day,
-                SUM(noms.scheduled_quantity * meta.rec_del_sign) AS intermediate_daily_net_flow
-                -- This sum represents (sum of positive injections) + (sum of negative withdrawals)
-            FROM
-                pipelines.nomination_points noms
-            INNER JOIN
-                pipelines.metadata meta ON meta.metadata_id = noms.metadata_id
-            WHERE
-                meta.storage_calc_flag = 'T'
-                AND meta.category_short = 'Storage'
-                AND meta.sub_category_desc = 'Daily Flows'
-                AND (meta.ticker LIKE '%.7' OR meta.ticker LIKE '%.8') 
-                AND noms.eff_gas_day BETWEEN '{year_start_date_str}' AND '{year_end_date_str}'
-            GROUP BY
-                meta.storage_name,
-                noms.eff_gas_day
-            ORDER BY
-                meta.storage_name,
-                noms.eff_gas_day;
-            """
-            
-            with engine.connect() as connection:
-                df_chunk = pd.read_sql_query(text(sql_query_chunk), connection)
-            
-            if not df_chunk.empty:
-                print(f"Fetched {len(df_chunk)} aggregated rows for period {year_start_date_str} to {year_end_date_str}.")
-                all_data_chunks.append(df_chunk)
-            else:
-                print(f"No data found for period {year_start_date_str} to {year_end_date_str}.")
-        
-        if not all_data_chunks:
-            print(f"\nNo daily net storage change data found from {start_process_year}-01-01 to {current_datetime.strftime('%Y-%m-%d')} matching the criteria.")
-            return
-
-        # Concatenate all fetched chunks
-        df_aggregated_flows = pd.concat(all_data_chunks, ignore_index=True)
-        print(f"\nSuccessfully fetched and combined a total of {len(df_aggregated_flows)} rows.")
-        
-        # Apply the final step: multiply by -1 to get the daily_storage_change
-        df_aggregated_flows['daily_storage_change'] = df_aggregated_flows['intermediate_daily_net_flow'] * -1
-        
-        # Prepare final DataFrame for CSV
-        final_df = df_aggregated_flows[['storage_name', 'eff_gas_day', 'daily_storage_change']].copy()
-        
-        if 'eff_gas_day' in final_df.columns:
-            final_df['eff_gas_day'] = pd.to_datetime(final_df['eff_gas_day'])
-        
-        # Sort data
+        # Sort data and remove duplicates
         final_df.sort_values(by=['storage_name', 'eff_gas_day'], inplace=True)
-
-        # Ensure the output directory exists
-        if not os.path.exists(output_dir_path):
-            os.makedirs(output_dir_path)
-            print(f"Created directory: {output_dir_path}")
+        final_df.drop_duplicates(subset=['storage_name', 'eff_gas_day'], keep='last', inplace=True)
 
         # Save to CSV
-        try:
-            final_df.to_csv(output_csv_path, index=False, date_format='%Y-%m-%d') # Using ISO date format for CSV
-            print(f"Data saved to: {output_csv_path}")
-        except Exception as e_csv:
-            print(f"Error saving data to CSV {output_csv_path}: {e_csv}")
-        
-        print("\nFirst 5 rows of final daily storage changes:")
-        print(final_df.head())
-        if len(final_df) > 5:
-            print("\nLast 5 rows of final daily storage changes:")
-            print(final_df.tail())
+        final_df.to_csv(output_csv_path, index=False, date_format='%Y-%m-%d')
+        print(f"\nData successfully processed and saved to:\n{output_csv_path}")
 
     except Exception as e:
         print(f"\nAn unexpected error occurred: {e}")
-        if "SerializationFailure" in str(e) or "conflict with recovery" in str(e):
-             print("\nADVICE: The 'SerializationFailure' error may require running during off-peak hours or smaller chunks (e.g., monthly).")
         traceback.print_exc()
     finally:
         if engine:
@@ -151,10 +136,4 @@ def calculate_and_save_daily_storage_change():
             print("\nDatabase connection closed.")
 
 if __name__ == '__main__':
-    script_dir_for_main = os.path.dirname(os.path.abspath(__file__))
-    env_in_script_dir = os.path.join(script_dir_for_main, '.env')
-    if not os.path.exists(env_in_script_dir):
-        print(f"WARNING: .env file not found at {env_in_script_dir}! ")
-        print("If you haven't, please create it with your DB_USER and DB_PASSWORD before running.")
-            
     calculate_and_save_daily_storage_change()
