@@ -1,0 +1,183 @@
+import os
+import sys
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime
+from pathlib import Path
+from dotenv import load_dotenv
+import questionary
+from matplotlib.widgets import CheckButtons
+import matplotlib
+
+matplotlib.use('TkAgg')
+
+# --- Load API Key ---
+load_dotenv(Path(__file__).resolve().parent / ".env")
+api_key = os.getenv("EIA_API_KEY")
+if not api_key:
+    raise ValueError("Missing EIA_API_KEY in .env file.")
+
+# --- Region Mapping ---
+REGION_SERIES_MAP = {
+    "Lower 48 States Storage (Bcf)": "NW2_EPG0_SWO_R48_BCF",
+    "East Region Storage (Bcf)": "NW2_EPG0_SWO_R31_BCF",
+    "Midwest Region Storage (Bcf)": "NW2_EPG0_SWO_R32_BCF",
+    "South Central Region Storage (Bcf)": "NW2_EPG0_SWO_R33_BCF",
+    "Mountain Region Storage (Bcf)": "NW2_EPG0_SWO_R34_BCF",
+    "Pacific Region Storage (Bcf)": "NW2_EPG0_SWO_R35_BCF"
+}
+
+# --- User Selection ---
+region = questionary.select("Choose a Natural Gas Storage Region:", choices=list(REGION_SERIES_MAP)).ask()
+if not region:
+    sys.exit("No region selected.")
+series_id = REGION_SERIES_MAP[region]
+
+# --- API Call ---
+url = "https://api.eia.gov/v2/natural-gas/stor/wkly/data/"
+params = {
+    "api_key": api_key,
+    "frequency": "weekly",
+    "data[0]": "value",
+    "facets[series][0]": series_id,
+    "start": "2015-01-01",
+    "end": datetime.today().strftime("%Y-%m-%d"),
+    "sort[0][column]": "period",
+    "sort[0][direction]": "asc",
+    "offset": "0",
+    "length": "5000"
+}
+
+try:
+    r = requests.get(url, params=params)
+    r.raise_for_status()
+    data = r.json().get("response", {}).get("data", [])
+    if not data:
+        sys.exit("No data returned from EIA API.")
+except requests.exceptions.RequestException as e:
+    print(f"API Error: {e}")
+    sys.exit(1)
+
+# --- DataFrame ---
+df = pd.DataFrame([{"Date": d["period"], "Bcf": d["value"]} for d in data])
+df["Date"] = pd.to_datetime(df["Date"])
+df["Bcf"] = pd.to_numeric(df["Bcf"], errors="coerce")
+df.dropna(inplace=True)
+df.set_index("Date", inplace=True)
+
+# Use ISO calendar to fix 53-week years and prevent week 1 wraparound
+iso = df.index.isocalendar()
+df["ISO_Week"] = iso.week
+df["ISO_Year"] = iso.year
+df = df[df.index.year == df["ISO_Year"]]
+df["Week"] = df["ISO_Week"]
+df["Year"] = df["ISO_Year"]
+df.drop(columns=["ISO_Week", "ISO_Year"], inplace=True)
+
+if df.empty:
+    sys.exit("No valid data after parsing.")
+
+# --- Historical Stats ---
+current_year = datetime.now().year
+df_hist = df[(df["Year"] >= 2015) & (df["Year"] < current_year)]
+weekly_stats = df_hist.groupby("Week")["Bcf"].agg(["min", "max", "mean"]).reindex(range(1, 54), fill_value=np.nan)
+
+# --- Plot ---
+fig, ax = plt.subplots(figsize=(16, 9))
+plotted_elements, labels, initial_visibility = {}, [], []
+colors = plt.colormaps['tab10'](np.linspace(0, 1, 10))
+
+# Shaded Min/Max Range
+ax.fill_between(weekly_stats.index, weekly_stats["min"], weekly_stats["max"], color="lightgray", alpha=0.5, label="Min/Max Range")
+
+# Historical Lines
+past_years = [y for y in sorted(df["Year"].unique()) if 2015 <= y < current_year]
+valid_years = []
+for i, y in enumerate(past_years):
+    df_y = df[df["Year"] == y]
+    week_diffs = df_y["Bcf"].diff().abs()
+    if df_y["Bcf"].std() < 5 or len(df_y) < 20 or week_diffs[1:].mean() < 1:
+        print(f"Skipping {y} due to flat or junky data.")
+        continue
+    valid_years.append(y)
+    line, = ax.plot(df_y["Week"], df_y["Bcf"], color=colors[i % len(colors)], linewidth=2.2, label=f"{y}")
+    plotted_elements[str(y)] = line
+    labels.append(str(y))
+    initial_visibility.append(True)
+
+# Current Year
+df_curr = df[df["Year"] == current_year]
+if not df_curr.empty:
+    curr_line, = ax.plot(df_curr["Week"], df_curr["Bcf"], color="red", linewidth=2.5, label=f"{current_year} Current")
+    plotted_elements[str(current_year)] = curr_line
+    labels.append(str(current_year))
+    initial_visibility.append(True)
+
+    # Projections
+    last_week = df_curr["Week"].max()
+    last_val = df_curr[df_curr["Week"] == last_week]["Bcf"].iloc[0]
+    for i, y in enumerate(valid_years):
+        if y < 2020:
+            continue
+        df_y = df[df["Year"] == y]
+        proj = df_y[df_y["Week"] >= last_week]
+        if last_week in proj["Week"].values:
+            start_val = proj.set_index("Week").at[last_week, "Bcf"]
+            diffs = proj.set_index("Week")["Bcf"] - start_val
+            proj_vals = last_val + diffs
+            if len(proj_vals) < 3 or proj_vals.std() < 1:
+                continue
+            proj_label = f"{y} Projection"
+            if proj_label not in plotted_elements:
+                line, = ax.plot(proj_vals.index, proj_vals.values, color=colors[i % len(colors)],
+                                linestyle=':', linewidth=2.2, alpha=0.9, label="_nolegend_", visible=False)
+                plotted_elements[proj_label] = line
+                labels.append(proj_label)
+                initial_visibility.append(False)
+
+# Axes and Labels
+ax.set_xlim(1, 53)
+ax.set_ylim(df["Bcf"].min() * 0.95, df["Bcf"].max() * 1.05)
+ax.set_title(f"{region.replace(' Storage (Bcf)', '')} Weekly Natural Gas Storage", fontsize=18)
+ax.set_xlabel("Week of Year")
+ax.set_ylabel("Volume (Bcf)")
+ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.3)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+# Month Labels
+months = {'Jan': 1, 'Apr': 13, 'Jul': 26, 'Oct': 39, 'Dec': 52}
+sec_ax = ax.secondary_xaxis('bottom')
+sec_ax.set_xticks(list(months.values()))
+sec_ax.set_xticklabels(list(months.keys()), fontsize=10)
+sec_ax.tick_params(length=0)
+ax.tick_params(pad=15)
+
+# CheckButtons
+rax = plt.axes([0.83, 0.25, 0.15, 0.65])
+check = CheckButtons(rax, labels, initial_visibility)
+
+def toggle(label):
+    line = plotted_elements.get(label)
+    if line:
+        line.set_visible(not line.get_visible())
+    plt.draw()
+
+check.on_clicked(toggle)
+
+# Legends
+handles, handle_labels = ax.get_legend_handles_labels()
+main_handles = [h for h, l in zip(handles, handle_labels) if "Projection" not in l and l != "_nolegend_"]
+proj_handles = [plotted_elements[k] for k in plotted_elements if "Projection" in k]
+
+legend1 = ax.legend(main_handles, [l for l in handle_labels if "Projection" not in l and l != "_nolegend_"],
+                     loc='upper center', bbox_to_anchor=(0.5, 1.12), ncol=4, fontsize=9)
+legend2 = ax.legend(proj_handles, [k for k in plotted_elements if "Projection" in k],
+                     loc='lower right', fontsize=9)
+ax.add_artist(legend1)
+
+# Layout
+plt.subplots_adjust(left=0.05, right=0.80, top=0.90, bottom=0.08)
+plt.show()
