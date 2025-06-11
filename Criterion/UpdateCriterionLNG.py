@@ -144,14 +144,14 @@ def main():
     ]
     
     forecast_tickers_map = {
-        'PLAG.LNGEXP.CAMER.SEASCAP.F': 'Cameron LNG Feed Gas',
-        'PLAG.LNGEXP.CCL.SEASCAP.F': 'Corpus Christi LNG Feed Gas',
-        'PLAG.LNGEXP.FLNG.SEASCAP.F': 'Freeport LNG Feed Gas',
-        'PLAG.LNGEXP.SPL.SEASCAP.F': 'Sabine Pass LNG Feed Gas',
-        'PLAG.LNGEXP.CALCP.SEASCAP.F': 'Calcasieu Pass LNG Feed Gas',
-        'PLAG.LNGEXP.ELBA.SEASCAP.F': 'Elba Island LNG Feed Gas',
-        'PLAG.LNGEXP.PLQ.SEASCAP.F': 'US LNG Exports - Plaquemines LNG',
-        'PLAG.LNGEXP.COVE.SEASCAP.F': 'Cove Point LNG Feed Gas'
+        'PLAG.LNGEXP.CAMER.MAINTCAP.F': 'Cameron LNG Feed Gas',
+        'PLAG.LNGEXP.CCL.MAINTCAP.F': 'Corpus Christi LNG Feed Gas',
+        'PLAG.LNGEXP.FLNG.MAINTCAP.F': 'Freeport LNG Feed Gas',
+        'PLAG.LNGEXP.SPL.MAINTCAP.F': 'Sabine Pass LNG Feed Gas',
+        'PLAG.LNGEXP.CALCP.MAINTCAP.F': 'Calcasieu Pass LNG Feed Gas',
+        'PLAG.LNGEXP.ELBA.MAINTCAP.F': 'Elba Island LNG Feed Gas',
+        'PLAG.LNGEXP.PLQ.MAINTCAP.F': 'US LNG Exports - Plaquemines LNG',
+        'PLAG.LNGEXP.COVE.MAINTCAP.F': 'Cove Point LNG Feed Gas'
     }
 
     engine = None
