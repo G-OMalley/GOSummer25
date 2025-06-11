@@ -32,3 +32,5 @@ Fundy/*.xlsx
 # Operating System specific files
 .DS_Store
 Thumbs.db
+
+TraderHelper2/
