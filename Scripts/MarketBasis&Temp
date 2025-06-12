@@ -1,0 +1,563 @@
+import pandas as pd
+import numpy as np
+import plotly.graph_objs as go
+import plotly.io as pio
+import webbrowser
+from pathlib import Path
+import math
+import json # Import json for safer data serialization to JavaScript
+import plotly.colors # For getting color palettes
+from datetime import datetime, timedelta # Import datetime and timedelta to get current year and manage forecast dates
+
+# --- Configuration ---
+# Assuming this script is in a 'Scripts' folder, and 'INFO' is a sibling folder
+BASE_DIR = Path(__file__).resolve().parent
+INFO_DIR = BASE_DIR.parent / "INFO"
+
+# Use Path objects for file paths
+PRICES_FILE = INFO_DIR / "PRICES.csv"
+WEATHER_HISTORICAL_FILE = INFO_DIR / "WEATHER.csv"
+WEATHER_FORECAST_FILE = INFO_DIR / "WEATHERforecast.csv"
+
+HENRY_HUB_NAME = 'Henry' # The column name for Henry Hub in PRICES.csv
+
+# --- City Name Standardization Map ---
+# This map ensures consistency BETWEEN weather files and matches values in COMPONENT_TO_CITY_MAP_HARDCODED.
+CITY_STANDARDIZATION_MAP = {
+    'JFK NY': 'John F. Kennedy NY',
+    'Houston IAH TX': 'Houston TX',
+    'Ok. City OK': 'Oklahoma City OK',
+    'Chicago OHare IL': 'Chicago IL',
+    'Washington DC': 'Washington National DC',
+    'Ral-Durham NC': 'Raleigh/Durham NC',
+    'Atlanta GA': 'Atlanta GA',
+    'Boston MA': 'Boston MA',
+    'Buffalo NY': 'Buffalo NY',
+    'Denver CO': 'Denver CO',
+    'Detroit MI': 'Detroit MI',
+    'Los Angeles CA': 'Los Angeles CA',
+    'Little Rock AR': 'Little Rock AR',
+    'New Orleans LA': 'New Orleans LA',
+    'Philadelphia PA': 'Philadelphia PA',
+    'Pittsburgh PA': 'Pittsburgh PA',
+    'Seattle WA': 'Seattle WA',
+    'San Francisco CA': 'San Francisco CA',
+    'Tampa FL': 'Tampa FL',
+}
+
+def standardize_city_name(city_name):
+    """Applies a common standardization (strip) and then uses the hardcoded map."""
+    city_name = str(city_name).strip() # Basic cleaning
+    return CITY_STANDARDIZATION_MAP.get(city_name, city_name)
+
+
+# --- Hardcoded Component to City Mapping ---
+# This dictionary directly maps Market Components from PRICES.csv to their standardized City names.
+COMPONENT_TO_CITY_MAP_HARDCODED = {
+    'AGT-CG (non-G)': 'John F. Kennedy NY',
+    'ANR-SE-T': 'Houston TX',
+    'ANR-SW': 'Oklahoma City OK',
+    'APC-ACE': 'Chicago IL',
+    'CG-Mainline': 'New Orleans LA',
+    'CG-Onshore': 'New Orleans LA',
+    'Carthage': 'Oklahoma City OK',
+    'Chicago': 'Chicago IL',
+    'Dracut': 'Boston MA',
+    'Eastern Gas-South': 'Pittsburgh PA',
+    'FGT-Z3': 'Tampa FL',
+    'HSC-HPL Pool': 'Houston TX',
+    'Henry': 'Henry Hub',
+    'Iroquois (into)': 'Buffalo NY',
+    'Iroquois-Z2': 'John F. Kennedy NY',
+    'Leidy-Transco': 'Philadelphia PA',
+    'Michcon': 'Detroit MI',
+    'NBPL-Vector': 'Chicago IL',
+    'NGPL-Midcont Pool': 'Oklahoma City OK',
+    'NGPL-STX': 'Houston TX',
+    'NGPL-TXOK East': 'Houston TX',
+    'NNG-Demarc': 'Chicago IL',
+    'NNG-Ventura': 'Chicago IL',
+    'Panhandle': 'Oklahoma City OK',
+    'Pine Prairie': 'Atlanta GA',
+    'REX E-NGPL': 'Chicago IL',
+    'REX-Z3 (receipt)': 'Philadelphia PA',
+    'Sonat-Z0 South': 'Atlanta GA',
+    'TCO': 'Pittsburgh PA',
+    'TETCO-ELA': 'Houston TX',
+    'TETCO-M2 (receipt)': 'Pittsburgh PA',
+    'TETCO-M3': 'John F. Kennedy NY',
+    'TETCO-STX': 'Houston TX',
+    'TETCO-WLA': 'Houston TX',
+    'TGP-500L': 'Houston TX',
+    'TGP-800L': 'Houston TX',
+    'TGP-Z0 South': 'Houston TX',
+    'TGP-Z1 100L': 'Houston TX',
+    'TGP-Z1 Sta-87': 'Houston TX',
+    'TGP-Z4 Marcellus': 'Pittsburgh PA',
+    'TGP-Z4 Sta-219': 'Pittsburgh PA',
+    'TGP-Z4 Sta-313': 'Pittsburgh PA',
+    'TGT-Mainline': 'Houston TX',
+    'Transco Zn3': 'Atlanta GA',
+    'Transco-165': 'Raleigh/Durham NC',
+    'Transco-30': 'Houston TX',
+    'Transco-45': 'Atlanta GA',
+    'Transco-65': 'Atlanta GA',
+    'Transco-85': 'Atlanta GA',
+    'Transco-Z5 South': 'Washington National DC',
+    'Transco-Z6 (NY)': 'John F. Kennedy NY',
+    'Transco-Z6 (non-NY north)': 'Philadelphia PA',
+    'Transco-Z6 (non-NY)': 'Philadelphia PA',
+    'Transco-Z6 Sta-210': 'Philadelphia PA',
+    'Trunkline-Z1A': 'Houston TX',
+    'Union-Dawn': 'Buffalo NY',
+    'Waha': 'Houston TX',
+}
+
+
+# --- Data Loading Function ---
+def load_all_data(prices_path, weather_hist_path, weather_forecast_path):
+    """Loads and preprocesses all necessary dataframes."""
+    
+    print("\n--- Starting Data Loading ---")
+
+    # Load PRICES.csv
+    try:
+        prices_df = pd.read_csv(prices_path)
+        prices_df['Date'] = pd.to_datetime(prices_df['Date'], errors='coerce')
+        print(f"Loaded {prices_path.name} successfully.")
+    except Exception as e:
+        print(f"ERROR: Failed to load PRICES.csv from {prices_path}: {e}")
+        return None, None, None, None
+
+    # Load WEATHER.csv (Historical)
+    try:
+        weather_df = pd.read_csv(weather_hist_path)
+        weather_df['Date'] = pd.to_datetime(weather_df['Date'], errors='coerce')
+        if 'City Title' in weather_df.columns:
+            weather_df['City Title'] = weather_df['City Title'].apply(standardize_city_name)
+            print(f"Loaded {weather_hist_path.name} successfully. Unique cities (standardized): {weather_df['City Title'].astype(str).str.strip().unique().tolist()}")
+        else:
+            print(f"WARNING: '{weather_hist_path.name}' is missing 'City Title' column.")
+            weather_df = pd.DataFrame() # Ensure empty if critical column missing
+    except Exception as e:
+        print(f"ERROR: Failed to load WEATHER.csv from {weather_hist_path}: {e}")
+        return None, None, None, None
+
+    # Load WEATHERforecast.csv
+    forecast_df = pd.DataFrame()
+    try:
+        forecast_df = pd.read_csv(weather_forecast_path)
+        forecast_df['Date'] = pd.to_datetime(forecast_df['Date'], errors='coerce')
+        forecast_df = forecast_df.dropna(subset=['Date']).sort_values(by='Date')
+        if 'City Title' in forecast_df.columns:
+            forecast_df['City Title'] = forecast_df['City Title'].apply(standardize_city_name)
+            print(f"Loaded {weather_forecast_path.name} successfully. Unique cities (standardized): {forecast_df['City Title'].astype(str).str.strip().unique().tolist()}")
+        else:
+            print(f"WARNING: '{weather_forecast_path.name}' is missing 'City Title' column.")
+            forecast_df = pd.DataFrame() # Ensure empty if critical column missing
+
+        # Always start the forecast from tomorrow's date for a consistent 7-day future view
+        forecast_start_date = datetime.now().date() + timedelta(days=1)
+        
+        # Filter forecast data for dates starting from forecast_start_date
+        # We will take the .head(7) for each city later in prepare_dashboard_data
+        forecast_df = forecast_df[forecast_df['Date'].dt.date >= forecast_start_date].copy()
+        print(f"Filtered forecast data for dates starting {forecast_start_date}.")
+
+    except FileNotFoundError:
+        print(f"WARNING: WEATHERforecast.csv not found at {weather_forecast_path}. Forecast table will be empty.")
+    except Exception as e:
+        print(f"ERROR: Failed to load WEATHERforecast.csv: {e}. Forecast table will be empty.")
+
+    # Assign hardcoded component_to_city map
+    component_to_city = COMPONENT_TO_CITY_MAP_HARDCODED
+    print("--- Data Loading Complete ---")
+    return prices_df, weather_df, forecast_df, component_to_city
+
+# --- Function to Prepare Data for Plotly and Forecast Table ---
+def prepare_dashboard_data(prices_df, weather_df, forecast_df, component_to_city, henry_hub_name):
+    """Prepares all data for the interactive Plotly dashboard and forecast table."""
+    
+    print("\n--- Starting Data Preparation for Dashboard ---")
+
+    valid_components = []
+    if prices_df is not None and henry_hub_name in prices_df.columns and component_to_city:
+        for comp in prices_df.columns:
+            if comp != 'Date' and comp != henry_hub_name and comp in component_to_city:
+                if pd.to_numeric(prices_df[comp], errors='coerce').notna().sum() > 0:
+                    valid_components.append(comp)
+    else:
+        print("WARNING: Insufficient primary data (prices_df, Henry Hub, or city map) to identify valid components.")
+        return {} 
+
+    basis_data_js = {}
+    colors = plotly.colors.qualitative.Plotly
+    current_year = datetime.now().year
+    start_year_for_analysis = current_year - 3
+
+    for comp in valid_components:
+        city = component_to_city.get(comp)
+        if not city:
+            print(f"WARNING: Skipping component '{comp}': No city mapping found in hardcoded map.")
+            basis_data_js[comp] = {
+                'city': 'N/A',
+                'overall_x': [], 'overall_y': [], 'overall_fit_x': [], 'overall_fit_y': [],
+                'overall_formula': "N/A (No city mapping)",
+                'per_year_data': [],
+                'forecast_table_data': []
+            }
+            continue
+
+        city_weather = weather_df[weather_df['City Title'].astype(str).str.strip() == city].copy()
+
+        hist_merged_all = pd.merge(
+            prices_df[['Date', comp, henry_hub_name]],
+            city_weather[['Date', 'Avg Temp']],
+            on='Date', how='inner'
+        ).dropna(subset=[comp, henry_hub_name, 'Avg Temp'])
+
+        hist_merged_all = hist_merged_all[hist_merged_all['Date'].dt.year >= start_year_for_analysis].copy()
+
+        if hist_merged_all.empty or hist_merged_all['Avg Temp'].isnull().all() or hist_merged_all[comp].isnull().all():
+            print(f"WARNING: Skipping {comp}: Not enough historical data for plotting in the last 4 years or critical columns are empty.")
+            basis_data_js[comp] = {
+                'city': city,
+                'overall_x': [], 'overall_y': [], 'overall_fit_x': [], 'overall_fit_y': [],
+                'overall_formula': "N/A (Insufficient historical data)",
+                'per_year_data': [],
+                'forecast_table_data': []
+            }
+            continue
+
+        hist_merged_all[comp] = pd.to_numeric(hist_merged_all[comp], errors='coerce')
+        hist_merged_all[henry_hub_name] = pd.to_numeric(hist_merged_all[henry_hub_name], errors='coerce')
+        hist_merged_all['Basis'] = hist_merged_all[comp] - hist_merged_all[henry_hub_name]
+
+        overall_data_for_fit = hist_merged_all.dropna(subset=['Avg Temp', 'Basis']).copy()
+
+        overall_formula_str = "N/A (Insufficient data for overall quadratic fit)"
+        overall_fit_x_smooth = np.array([])
+        overall_fit_y_smooth = np.array([])
+        overall_coeffs = None
+        r_squared = np.nan # Initialize R-squared
+
+        if len(overall_data_for_fit) >= 3:
+            try:
+                overall_coeffs = np.polyfit(overall_data_for_fit['Avg Temp'], overall_data_for_fit['Basis'], 2)
+                
+                overall_poly_func = np.poly1d(overall_coeffs)
+                overall_fit_y_smooth = overall_poly_func(overall_fit_x_smooth)
+
+                # Calculate predicted Y values on actual data
+                y_true = overall_data_for_fit['Basis'].values
+                x_true = overall_data_for_fit['Avg Temp'].values
+                y_pred = overall_poly_func(x_true)
+
+                # Compute R²
+                ss_res = np.sum((y_true - y_pred) ** 2)
+                ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
+                
+                # Handle case where ss_tot might be zero (e.g., all y_true are the same)
+                if ss_tot != 0:
+                    r_squared = 1 - (ss_res / ss_tot)
+                else:
+                    r_squared = 1.0 if ss_res == 0 else np.nan # If ss_tot is 0, R^2 is 1 if ss_res is also 0, otherwise NaN
+
+                overall_formula_str = (
+                    f"Basis = {overall_coeffs[0]:.4f} * Temp² + "
+                    f"{overall_coeffs[1]:.4f} * Temp + {overall_coeffs[2]:.4f} "
+                    f"(R² = {r_squared:.3f})"
+                )
+                
+                overall_temp_min = overall_data_for_fit['Avg Temp'].min()
+                overall_temp_max = overall_data_for_fit['Avg Temp'].max()
+                overall_fit_x_smooth = np.linspace(overall_temp_min, overall_temp_max, 100)
+                overall_poly_func = np.poly1d(overall_coeffs)
+                overall_fit_y_smooth = overall_poly_func(overall_fit_x_smooth)
+
+            except Exception as e:
+                print(f"WARNING: Error calculating overall quadratic fit for {comp}: {e}. Formula will be N/A.")
+                pass
+
+        per_year_data = []
+        unique_years_in_range = [int(y) for y in sorted(hist_merged_all['Date'].dt.year.unique())]
+        
+        for i, year in enumerate(unique_years_in_range):
+            year_data = hist_merged_all[hist_merged_all['Date'].dt.year == year].copy()
+            
+            if year_data.empty:
+                continue
+
+            x_year = year_data['Avg Temp'].values
+            y_year = year_data['Basis'].values
+            
+            year_data_for_fit = year_data.dropna(subset=['Avg Temp', 'Basis']).copy()
+
+            year_formula_str = "N/A"
+            year_fit_x_smooth = np.array([])
+            year_fit_y_smooth = np.array([])
+
+            if len(year_data_for_fit) >= 3:
+                try:
+                    year_coeffs = np.polyfit(year_data_for_fit['Avg Temp'], year_data_for_fit['Basis'], 2)
+                    year_formula_str = (
+                        f"Basis = {year_coeffs[0]:.4f} * Temp² + "
+                        f"{year_coeffs[1]:.4f} * Temp + {year_coeffs[2]:.4f} (Year {year})"
+                    )
+                    
+                    year_temp_min = year_data_for_fit['Avg Temp'].min()
+                    year_temp_max = year_data_for_fit['Avg Temp'].max()
+                    year_fit_x_smooth = np.linspace(year_temp_min, year_temp_max, 50)
+                    year_poly_func = np.poly1d(year_coeffs)
+                    year_fit_y_smooth = year_poly_func(year_fit_x_smooth)
+                except Exception as e:
+                    print(f"WARNING: Error calculating quadratic fit for {comp} year {year}: {e}. Formula will be N/A.")
+                    pass
+
+            valid_indices_year = ~np.isnan(y_year) & ~np.isnan(x_year) 
+            clean_x_year = x_year[valid_indices_year].tolist()
+            clean_y_year = y_year[valid_indices_year].tolist()
+            
+            valid_fit_indices_year_smooth = ~np.isnan(year_fit_y_smooth)
+            clean_x_year_for_fit = year_fit_x_smooth[valid_fit_indices_year_smooth].tolist()
+            clean_y_year_for_fit_line = year_fit_y_smooth[valid_fit_indices_year_smooth].tolist()
+
+
+            per_year_data.append({
+                'year': year,
+                'x': clean_x_year,
+                'y': clean_y_year,
+                'fit_x': clean_x_year_for_fit,
+                'fit_y': clean_y_year_for_fit_line,
+                'formula': year_formula_str,
+                'color': colors[i % len(colors)]
+            })
+
+        forecast_table_data = []
+        if overall_coeffs is not None and not forecast_df.empty and 'City Title' in forecast_df.columns:
+            # Filter for the specific city and then take the next 7 days
+            city_forecast = forecast_df[forecast_df['City Title'].astype(str).str.strip() == city].copy()
+            city_forecast = city_forecast.sort_values(by='Date').head(7).copy() # Take first 7 days for this city
+            
+            if not city_forecast.empty:
+                overall_poly_func_for_forecast = np.poly1d(overall_coeffs)
+                city_forecast['Predicted Basis'] = city_forecast['Avg Temp'].apply(
+                    lambda temp: overall_poly_func_for_forecast(temp) if pd.notna(temp) else np.nan
+                )
+                city_forecast = city_forecast.dropna(subset=['Predicted Basis']).copy()
+                
+                for _, row in city_forecast.iterrows():
+                    forecast_table_data.append({
+                        'Date': row['Date'].strftime('%Y-%m-%d'),
+                        'Avg Temp': round(row['Avg Temp'], 1),
+                        'Predicted Basis': round(row['Predicted Basis'], 3)
+                    })
+            else:
+                print(f"WARNING: No 7-day forecast data found for city '{city}' in WEATHERforecast.csv starting from the specified forecast start date.")
+
+
+        overall_valid_fit_indices_smooth = ~np.isnan(overall_fit_y_smooth)
+        clean_overall_x_for_fit = overall_fit_x_smooth[overall_valid_fit_indices_smooth].tolist()
+        clean_overall_y_for_fit = overall_fit_y_smooth[overall_valid_fit_indices_smooth].tolist()
+
+        clean_hist_x_all = hist_merged_all['Avg Temp'].values[~np.isnan(hist_merged_all['Basis'].values) & ~np.isnan(hist_merged_all['Avg Temp'].values)].tolist()
+        clean_hist_y_all = hist_merged_all['Basis'].values[~np.isnan(hist_merged_all['Basis'].values) & ~np.isnan(hist_merged_all['Avg Temp'].values)].tolist()
+
+        basis_data_js[comp] = {
+            'city': city,
+            'overall_x': clean_hist_x_all,
+            'overall_y': clean_hist_y_all,
+            'overall_fit_x': clean_overall_x_for_fit,
+            'overall_fit_y': clean_overall_y_for_fit,
+            'overall_formula': overall_formula_str,
+            'per_year_data': per_year_data,
+            'forecast_table_data': forecast_table_data
+        }
+    print("--- Data Preparation Complete ---")
+    return basis_data_js
+
+# --- Main HTML Generation Function ---
+def generate_html_content(basis_data_json_str):
+    """Generates the full HTML string for the dashboard."""
+    
+    # Temporarily parse it to get keys for the dropdown, assuming the structure is consistent
+    temp_basis_data = json.loads(basis_data_json_str)
+    valid_components = sorted(list(temp_basis_data.keys()))
+
+    html_content = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basis Temperature Analysis</title>
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <style>
+        body {{ font-family: 'Inter', sans-serif; padding: 20px; background-color: #f8f8f8; color: #333; }}
+        .container {{ max-width: 900px; margin: 20px auto; background-color: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }}
+        h1, h2 {{ text-align: center; color: #2c3e50; margin-bottom: 25px; }}
+        h2 {{ font-size: 1.8em; border-bottom: 2px solid #3498db; padding-bottom: 10px; }}
+        #componentDropdown {{
+            display: block; margin: 0 auto 30px auto; padding: 10px 15px;
+            font-size: 1em; border: 1px solid #ccc; border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); width: calc(100% - 40px); max-width: 300px;
+        }}
+        #plot {{ width: 100%; height: 600px; margin-bottom: 20px; border: 1px solid #eee; border-radius: 8px; }}
+        #formula {{ text-align: center; font-size: 1.1em; font-weight: bold; margin-bottom: 30px; padding: 15px; background-color: #eaf6ff; border-radius: 8px; border: 1px solid #cce5ff; }}
+        
+        #forecast_table {{ margin-top: 40px; text-align: center; }}
+        #forecast_table h3 {{ color: #2980b9; margin-bottom: 20px; font-size: 1.6em; }}
+        #forecast_table table {{
+            width: 80%; margin: 0 auto; border-collapse: separate; border-spacing: 0;
+            border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }}
+        #forecast_table th, #forecast_table td {{
+            border: 1px solid #e0e0e0; padding: 12px 15px; text-align: center;
+            font-size: 0.95em;
+        }}
+        #forecast_table th {{ background-color: #f0f0f0; color: #555; font-weight: bold; }}
+        #forecast_table tr:nth-child(even) {{ background-color: #f9f9f9; }}
+        #forecast_table tr:hover {{ background-color: #eef; }}
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Market Basis and Temperature Analysis</h1>
+        <h2>Select Market Component</h2>
+        <select id='componentDropdown' onchange='updateGraph()'>
+            {"".join(f"<option value='{comp}'>{comp}</option>" for comp in valid_components)}
+        </select>
+        <div id='plot'></div>
+        <div id='formula'></div>
+        <div id='forecast_table'></div>
+    </div>
+
+    <script>
+        const basisData = {basis_data_json_str}; // Use the passed string directly
+
+        function updateGraph() {{
+            const comp = document.getElementById('componentDropdown').value;
+            const data = basisData[comp];
+            
+            if (!data || data.per_year_data.length === 0) {{ 
+                document.getElementById('plot').innerHTML = '<p style="text-align:center;">No data available or insufficient valid data points for this component for any year.</p>';
+                document.getElementById('formula').innerHTML = '';
+                document.getElementById('forecast_table').innerHTML = ''; 
+                return; 
+            }}
+
+            let traces = [];
+
+            // Add traces for each year's historical data points and their fit lines
+            data.per_year_data.forEach(year_info => {{
+                // Scatter points for the year
+                traces.push({{ 
+                    x: year_info.x, y: year_info.y, mode: 'markers',
+                    name: `${{year_info.year}}`, 
+                    marker: {{ size: 8, opacity: 0.7, color: year_info.color }}
+                }});
+
+                // Fit line for the year
+                if (year_info.fit_x && year_info.fit_x.length > 1) {{
+                    traces.push({{ 
+                        x: year_info.fit_x, y: year_info.fit_y, mode: 'lines',
+                        name: `Fit ${{year_info.year}}`, 
+                        line: {{ color: year_info.color, width: 2, dash: 'dot' }}
+                    }});
+                }}
+            }});
+
+            // Add overall fit line
+            if (data.overall_fit_x && data.overall_fit_x.length > 1) {{
+                traces.push({{ 
+                    x: data.overall_fit_x, y: data.overall_fit_y, mode: 'lines',
+                    name: `Overall Quadratic Fit`,
+                    line: {{ color: 'black', width: 3 }}
+                }});
+            }}
+
+            Plotly.newPlot('plot', traces, {{
+                title: {{ text: `${{comp}} Basis vs. ${{data.city}} Avg Temp`, font: {{ size: 20 }} }},
+                xaxis: {{ title: 'Average Temperature (°F)', automargin: true }},
+                yaxis: {{ title: 'Daily Basis ($/MMBtu)', automargin: true }},
+                hovermode: 'closest',
+                margin: {{ l: 50, r: 50, b: 80, t: 80, pad: 4 }},
+                plot_bgcolor: '#fcfcfc',
+                paper_bgcolor: '#fcfcfc',
+                showlegend: true,
+                legend: {{ x: 1.02, y: 1, xanchor: 'left', yanchor: 'top' }},
+                shapes: [
+                    {{
+                        type: 'line',
+                        xref: 'paper', yref: 'y',
+                        x0: 0, y0: 0, x1: 1, y1: 0,
+                        line: {{ color: 'grey', width: 1, dash: 'dot' }}
+                    }}
+                ]
+            }});
+            document.getElementById('formula').innerHTML = `<b>Overall Best Fit Formula (Quadratic):</b> ${{data.overall_formula}}`;
+
+
+            // --- Populate Forecast Table ---
+            const forecastTableDiv = document.getElementById('forecast_table');
+            const forecastDataForComp = data.forecast_table_data;
+
+            if (forecastDataForComp && forecastDataForComp.length > 0) {{
+                let tableHtml = '<h3>7-Day Basis Forecast (using Overall Quadratic Fit)</h3>';
+                tableHtml += '<table><thead><tr><th>Date</th><th>Forecast Temp (°F)</th><th>Predicted Basis ($/MMBtu)</th></tr></thead><tbody>';
+                forecastDataForComp.forEach(row => {{
+                    tableHtml += `<tr><td>${{row.Date}}</td><td>${{row['Avg Temp'].toFixed(1)}}</td><td>${{row['Predicted Basis'].toFixed(3)}}</td></tr>`;
+                }});
+                tableHtml += '</tbody></table>';
+                forecastTableDiv.innerHTML = tableHtml;
+            }} else {{
+                forecastTableDiv.innerHTML = '<p style="text-align:center;">No 7-day forecast data available or fit not possible for this component.</p>';
+            }}
+            // --- End Populate Forecast Table ---
+
+        }}
+        
+        // Initial graph update when the page loads
+        updateGraph();
+    </script>
+</body>
+</html>
+"""
+    return html_content
+
+# --- Main Execution ---
+if __name__ == "__main__":
+    prices_df, weather_df, forecast_df, component_to_city_map = load_all_data(
+        PRICES_FILE, WEATHER_HISTORICAL_FILE, WEATHER_FORECAST_FILE
+    )
+
+    if prices_df is None or weather_df is None:
+        print("Exiting: Data loading failed.")
+    else:
+        basis_data_for_js = prepare_dashboard_data(
+            prices_df, weather_df, forecast_df, component_to_city_map, HENRY_HUB_NAME
+        )
+        
+        # Convert the prepared Python dictionary to a JSON string
+        basis_data_json_str = json.dumps(basis_data_for_js, indent=2)
+
+        # Generate the HTML content
+        html_output = generate_html_content(basis_data_json_str)
+
+        # Define the output HTML file path
+        output_html_file = BASE_DIR / "basis_dashboard.html"
+
+        # Write the HTML content to the file
+        try:
+            with open(output_html_file, "w") as f:
+                f.write(html_output)
+            print(f"\nDashboard saved to {output_html_file}")
+            
+            # Open the HTML file in the default web browser
+            webbrowser.open(f'file://{output_html_file.resolve()}')
+            print(f"Opening dashboard in web browser: {output_html_file.resolve()}")
+
+        except Exception as e:
+            print(f"ERROR: Could not write or open the HTML file: {e}")

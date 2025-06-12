@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 import json
 import webbrowser
 import time
+import plotly.graph_objs as go
+import plotly.colors
 
 # --- Setup ---
 # Determine the base directory of the script
@@ -19,10 +21,13 @@ data_folder = project_root / "INFO"
 
 # Define the output path for the generated HTML report relative to the project root
 # This assumes the HTML report should be generated directly in the 'trader-helper' root
-output_path = project_root / "EIA_Report.html"
+output_path = project_root / "EIA_Dashboard.html" # Renamed for clarity
 
 print(f"Data folder resolved to: {data_folder}")
 print(f"Output path resolved to: {output_path}")
+
+# Standard base temperature for CDD/HDD in natural gas markets
+BASE_TEMP_CDD_HDD = 65
 
 region_map = {
     "Lower 48 States Storage (Bcf)": "lower_48_states_storage",
@@ -40,24 +45,155 @@ DEFAULT_REGION_DISPLAY_NAME = "Lower 48 States Storage (Bcf)"
 files = {
     "eia_totals": "EIAtotals.csv",
     "eia_changes": "EIAchanges.csv",
-    "weather": "WEATHER.csv",
-    "prices": "PRICES.csv",
+    "weather": "WEATHER.csv", # Keep for original dashboard weather
+    "prices": "PRICES.csv", # Keep for original dashboard prices
     "fundy": "Fundy.csv",
     "forecast": "FundyForecast.csv",
     "criterion_storage_change": "CriterionStorageChange.csv",
-    "nuclear_forecast": "NuclearForecast.csv", # Add the new file
+    "nuclear_forecast": "NuclearForecast.csv",
 }
 
-# --- Data Loading and Cleaning ---
+# --- BASIS ANALYSIS SPECIFIC CONFIGURATION ---
+PRICES_FILE_BASIS = data_folder / "PRICES.csv"
+WEATHER_HISTORICAL_FILE_BASIS = data_folder / "WEATHER.csv"
+WEATHER_FORECAST_FILE_BASIS = data_folder / "WEATHERforecast.csv"
+
+HENRY_HUB_NAME = 'Henry' # The column name for Henry Hub in PRICES.csv
+
+# --- City Name Standardization Map (for Basis Analysis and Weather Report) ---
+CITY_STANDARDIZATION_MAP = {
+    'JFK NY': 'John F. Kennedy NY',
+    'Houston IAH TX': 'Houston TX',
+    'Ok. City OK': 'Oklahoma City OK',
+    'Chicago OHare IL': 'Chicago IL',
+    'Washington DC': 'Washington National DC',
+    'Ral-Durham NC': 'Raleigh/Durham NC',
+    'Atlanta GA': 'Atlanta GA',
+    'Boston MA': 'Boston MA',
+    'Buffalo NY': 'Buffalo NY',
+    'Denver CO': 'Denver CO',
+    'Detroit MI': 'Detroit MI',
+    'Los Angeles CA': 'Los Angeles CA',
+    'Little Rock AR': 'Little Rock AR',
+    'New Orleans LA': 'New Orleans LA',
+    'Philadelphia PA': 'Philadelphia PA',
+    'Pittsburgh PA': 'Pittsburgh PA',
+    'Seattle WA': 'Seattle WA',
+    'San Francisco CA': 'San Francisco CA',
+    'Tampa FL': 'Tampa FL',
+}
+
+def standardize_city_name(city_name):
+    """Applies a common standardization (strip) and then uses the hardcoded map."""
+    city_name = str(city_name).strip() # Basic cleaning
+    return CITY_STANDARDIZATION_MAP.get(city_name, city_name)
+
+# --- Hardcoded Component to City Mapping (for Basis Analysis) ---
+COMPONENT_TO_CITY_MAP_HARDCODED = {
+    'AGT-CG (non-G)': 'John F. Kennedy NY',
+    'ANR-SE-T': 'Houston TX',
+    'ANR-SW': 'Oklahoma City OK',
+    'APC-ACE': 'Chicago IL',
+    'CG-Mainline': 'New Orleans LA',
+    'CG-Onshore': 'New Orleans LA',
+    'Carthage': 'Oklahoma City OK',
+    'Chicago': 'Chicago IL',
+    'Dracut': 'Boston MA',
+    'Eastern Gas-South': 'Pittsburgh PA',
+    'FGT-Z3': 'Tampa FL',
+    'HSC-HPL Pool': 'Houston TX',
+    'Henry': 'Henry Hub',
+    'Iroquois (into)': 'Buffalo NY',
+    'Iroquois-Z2': 'John F. Kennedy NY',
+    'Leidy-Transco': 'Philadelphia PA',
+    'Michcon': 'Detroit MI',
+    'NBPL-Vector': 'Chicago IL',
+    'NGPL-Midcont Pool': 'Oklahoma City OK',
+    'NGPL-STX': 'Houston TX',
+    'NGPL-TXOK East': 'Houston TX',
+    'NNG-Demarc': 'Chicago IL',
+    'NNG-Ventura': 'Chicago IL',
+    'Panhandle': 'Oklahoma City OK',
+    'Pine Prairie': 'Atlanta GA',
+    'REX E-NGPL': 'Chicago IL',
+    'REX-Z3 (receipt)': 'Philadelphia PA',
+    'Sonat-Z0 South': 'Atlanta GA',
+    'TCO': 'Pittsburgh PA',
+    'TETCO-ELA': 'Houston TX',
+    'TETCO-M2 (receipt)': 'Pittsburgh PA',
+    'TETCO-M3': 'John F. Kennedy NY',
+    'TETCO-STX': 'Houston TX',
+    'TETCO-WLA': 'Houston TX',
+    'TGP-500L': 'Houston TX',
+    'TGP-800L': 'Houston TX',
+    'TGP-Z0 South': 'Houston TX',
+    'TGP-Z1 100L': 'Houston TX',
+    'TGP-Z1 Sta-87': 'Houston TX',
+    'TGP-Z4 Marcellus': 'Pittsburgh PA',
+    'TGP-Z4 Sta-219': 'Pittsburgh PA',
+    'TGP-Z4 Sta-313': 'Pittsburgh PA',
+    'TGT-Mainline': 'Houston TX',
+    'Transco Zn3': 'Atlanta GA',
+    'Transco-165': 'Raleigh/Durham NC',
+    'Transco-30': 'Houston TX',
+    'Transco-45': 'Atlanta GA',
+    'Transco-65': 'Atlanta GA',
+    'Transco-85': 'Atlanta GA',
+    'Transco-Z5 South': 'Washington National DC',
+    'Transco-Z6 (NY)': 'John F. Kennedy NY',
+    'Transco-Z6 (non-NY north)': 'Philadelphia PA',
+    'Transco-Z6 (non-NY)': 'Philadelphia PA',
+    'Transco-Z6 Sta-210': 'Philadelphia PA',
+    'Trunkline-Z1A': 'Houston TX',
+    'Union-Dawn': 'Buffalo NY',
+    'Waha': 'Houston TX',
+}
+
+# --- New: Mapping storage regions to their corresponding weather cities (standardized names) ---
+WEATHER_REGION_CITY_MAP = {
+    "East Region Storage (Bcf)": [
+        'Boston MA', 'Buffalo NY', 'John F. Kennedy NY', 'Philadelphia PA',
+        'Pittsburgh PA', 'Washington National DC', 'Raleigh/Durham NC'
+    ],
+    "Midwest Region Storage (Bcf)": [
+        'Chicago IL', 'Detroit MI'
+    ],
+    "South Central Region Storage (Bcf)": [
+        'Little Rock AR', 'Houston TX', 'New Orleans LA', 'Oklahoma City OK', 'Atlanta GA'
+    ],
+    "Pacific Region Storage (Bcf)": [
+        'Los Angeles CA', 'San Francisco CA', 'Seattle WA'
+    ],
+    # Assuming these map to specific cities for weather reporting based on common practice or data availability
+    "Salt Region SC Storage (Bcf)": [
+        'Houston TX', 'New Orleans LA' # Added more relevant cities for SC Salt
+    ],
+    "Nonsalt Region SC Storage (Bcf)": [
+        'Dallas TX', 'San Antonio TX' # Example cities, adjust as needed
+    ],
+}
+
+# Aggregate all cities from the explicitly defined regions for "Lower 48 States Storage (Bcf)"
+all_explicitly_defined_weather_cities = set()
+for region, cities in WEATHER_REGION_CITY_MAP.items():
+    if region != "Mountain Region Storage (Bcf)": # Exclude Mountain if it's not well-defined
+        all_explicitly_defined_weather_cities.update(cities)
+WEATHER_REGION_CITY_MAP["Lower 48 States Storage (Bcf)"] = sorted(list(all_explicitly_defined_weather_cities))
+
+# Handle "Mountain Region Storage (Bcf)" - if not explicitly defined above, it will default to empty.
+# If you have specific cities for Mountain, add them to WEATHER_REGION_CITY_MAP directly.
+if "Mountain Region Storage (Bcf)" not in WEATHER_REGION_CITY_MAP:
+    WEATHER_REGION_CITY_MAP["Mountain Region Storage (Bcf)"] = ['Denver CO', 'Salt Lake City UT'] # Example cities, adjust as needed
+
+
+# --- Data Loading and Cleaning (Original Dashboard) ---
 def load_clean_df(file_key, fname, data_path):
     fpath = data_path / fname
     if not fpath.exists():
         print(f"❌ Error: Required file '{fname}' not found at {fpath}. Skipping this file.")
-        # Return None or an empty DataFrame to allow the script to continue without crashing
-        return None 
+        return None
     df = pd.read_csv(fpath)
 
-    # Specific cleaning for each file type to ensure correct column names
     if file_key in ["eia_totals", "eia_changes"]:
         df.columns = df.columns.str.lower().str.replace(" (bcf)", "", regex=False).str.replace(" ", "_").str.replace(":", "").str.strip()
         if "period" in df.columns:
@@ -68,7 +204,15 @@ def load_clean_df(file_key, fname, data_path):
             df = df.rename(columns={'Date': 'date'})
             df['date'] = pd.to_datetime(df['date'], errors='coerce')
         if 'City Title' in df.columns:
+            # Apply standardization for weather cities
             df = df.rename(columns={'City Title': 'city_title'})
+            df['city_title'] = df['city_title'].apply(standardize_city_name)
+            # --- DIAGNOSTIC PRINT ADDED HERE ---
+            unique_cities = df['city_title'].dropna().unique().tolist()
+            print(f"\n--- Diagnostic: Unique cities parsed from WEATHER.csv: {len(unique_cities)} ---")
+            print(f"Cities: {unique_cities}")
+            print("---------------------------------------------------\n")
+            # --- END DIAGNOSTIC PRINT ---
         if 'Avg Temp' in df.columns:
             df = df.rename(columns={'Avg Temp': 'avg_temp'})
         if 'avg_temp' in df.columns:
@@ -94,21 +238,19 @@ def load_clean_df(file_key, fname, data_path):
         df.columns = df.columns.str.strip()
         if 'Date' in df.columns:
             df['Date'] = pd.to_datetime(df['Date'], errors="coerce")
-    # New cleaning for criterion_storage_change
     elif file_key == "criterion_storage_change":
         df.columns = df.columns.str.strip()
         if 'eff_gas_day' in df.columns:
             df['eff_gas_day'] = pd.to_datetime(df['eff_gas_day'], errors="coerce")
         if 'daily_storage_change' in df.columns:
             df['daily_storage_change'] = pd.to_numeric(df['daily_storage_change'], errors="coerce")
-    # New cleaning for nuclear_forecast
     elif file_key == "nuclear_forecast":
         df.columns = df.columns.str.strip()
         if 'Date' in df.columns:
             df = df.rename(columns={'Date': 'date'})
             df['date'] = pd.to_datetime(df['date'], errors="coerce")
         if 'value' in df.columns:
-            df = df.rename(columns={'value': 'mw_generated'}) # Rename 'value' to 'mw_generated' for clarity
+            df = df.rename(columns={'value': 'mw_generated'})
             df['mw_generated'] = pd.to_numeric(df['mw_generated'], errors="coerce")
     return df
 
@@ -124,8 +266,24 @@ else:
     print("EIAtotals.csv was not loaded.")
 print("---------------------------------------------------\n")
 
+# --- Extract the EIA report date for weather alignment ---
+# This is derived from the latest EIA storage data for the default region
+default_eia_report_date_str_temp = None
+if "eia_totals" in raw_data and "period" in raw_data["eia_totals"].columns:
+    df_eia_period = raw_data["eia_totals"].dropna(subset=["period"])
+    if not df_eia_period.empty:
+        default_eia_report_date_str_temp = df_eia_period["period"].max().strftime("%Y-%m-%d")
+
+eia_report_date = None
+if default_eia_report_date_str_temp and default_eia_report_date_str_temp != "N/A":
+    try:
+        eia_report_date = datetime.strptime(default_eia_report_date_str_temp, "%Y-%m-%d").date()
+    except ValueError:
+        print(f"⚠️ Warning: Could not parse EIA report date '{default_eia_report_date_str_temp}' for weather alignment.")
+
+
 # --- Region Data Processing ---
-def process_region_data(display_name, internal_column_name, raw_data):
+def process_region_data(display_name, internal_column_name, raw_data, eia_report_date):
     try:
         price_col_name = 'henry' if 'prices' in raw_data and 'henry' in raw_data["prices"].columns else None
             
@@ -159,8 +317,8 @@ def process_region_data(display_name, internal_column_name, raw_data):
 
         latest_date = latest_valid_row_series["period"].date()
         latest_price = round(latest_valid_row_series["weekly_avg_price"], 2) \
-                                    if pd.notna(latest_valid_row_series.get("weekly_avg_price")) else "N/A"
-        
+                                             if pd.notna(latest_valid_row_series.get("weekly_avg_price")) else "N/A"
+            
         # --- Storage Position Calculation for Report Tab ---
         current_storage = "N/A"
         five_year_avg = "N/A"
@@ -168,7 +326,7 @@ def process_region_data(display_name, internal_column_name, raw_data):
         storage_position_label = "N/A"
 
         latest_bcf_value = latest_valid_row_series.get(internal_column_name)
-        
+            
         if pd.notna(latest_bcf_value):
             current_storage = round(latest_bcf_value, 1)
 
@@ -179,10 +337,10 @@ def process_region_data(display_name, internal_column_name, raw_data):
                 (merged["period"].dt.year < datetime.now().year)
             ]
             
-            min_years_for_avg = 5 
+            min_years_for_avg = 5
             num_historical_years = historical_data_for_week["period"].dt.year.nunique()
 
-            if num_historical_years >= min_years_for_avg: 
+            if num_historical_years >= min_years_for_avg:
                 mean_bcf_for_week = historical_data_for_week[internal_column_name].mean()
                 
                 if pd.notna(mean_bcf_for_week):
@@ -197,12 +355,74 @@ def process_region_data(display_name, internal_column_name, raw_data):
                         storage_position_label = f"🔴 Deficit: {storage_position_bcf:,.1f} Bcf (Bullish)"
                     else:
                         storage_position_label = f"⚪ In Line: {storage_position_bcf:,.1f} Bcf"
+                else:
+                    storage_position_label = f"Insufficient historical data (< {min_years_for_avg} years) for 5-Year Avg"
+
+        # --- Weather Data Calculation for Report Tab (MODIFIED) ---
+        region_avg_temp = "N/A"
+        region_total_cdd = "N/A"
+        region_total_hdd = "N/A"
+            
+        # Get cities for the current storage region from the new map
+        cities_for_weather = WEATHER_REGION_CITY_MAP.get(display_name, [])
+
+        weather_df_copy = raw_data.get("weather")
+
+        if cities_for_weather and weather_df_copy is not None and not weather_df_copy.empty:
+            required_weather_cols = ['date', 'city_title', 'avg_temp']
+            if all(col in weather_df_copy.columns for col in required_weather_cols):
+                if eia_report_date:
+                    # Filter weather data up to and including the EIA report date
+                    weather_data_up_to_eia_date = weather_df_copy[weather_df_copy["date"].dt.date <= eia_report_date].copy()
+
+                    if not weather_data_up_to_eia_date.empty:
+                        # Find the actual latest date available in the weather data that is <= EIA report date
+                        latest_relevant_weather_date = weather_data_up_to_eia_date["date"].max()
+                            
+                        # Define the 7-day period ending on this latest relevant weather date
+                        one_week_ago = latest_relevant_weather_date - timedelta(days=6)
+                        
+                        # Filter for the relevant cities and date range
+                        recent_week_df = weather_data_up_to_eia_date[
+                            (weather_data_up_to_eia_date["date"] >= one_week_ago) &
+                            (weather_data_up_to_eia_date["date"] <= latest_relevant_weather_date) &
+                            (weather_data_up_to_eia_date["city_title"].isin(cities_for_weather))
+                        ].copy()
+
+                        recent_week_df.dropna(subset=['avg_temp'], inplace=True)
+
+                        if not recent_week_df.empty:
+                            # Calculate daily average temperature for the entire region
+                            daily_region_avg_temp_df = recent_week_df.groupby('date')['avg_temp'].mean().reset_index()
+                            
+                            if not daily_region_avg_temp_df.empty:
+                                # Calculate the overall 7-day average temperature for the region
+                                region_avg_temp = round(daily_region_avg_temp_df['avg_temp'].mean(), 1)
+
+                                # Calculate daily CDD and HDD using the region's daily average temp
+                                daily_region_avg_temp_df['cdd_daily'] = (daily_region_avg_temp_df['avg_temp'] - BASE_TEMP_CDD_HDD).apply(lambda x: max(0, x))
+                                daily_region_avg_temp_df['hdd_daily'] = (BASE_TEMP_CDD_HDD - daily_region_avg_temp_df['avg_temp']).apply(lambda x: max(0, x))
+
+                                # Sum these daily CDD and HDD for the 7-day period
+                                region_total_cdd = round(daily_region_avg_temp_df['cdd_daily'].sum(), 1)
+                                region_total_hdd = round(daily_region_avg_temp_df['hdd_daily'].sum(), 1)
+                                
+                            else:
+                                print(f"⚠️ Warning: No daily regional average temperatures could be calculated for '{display_name}' in the last 7 days.")
+                        else:
+                            print(f"⚠️ Warning: No recent weather data found for selected cities in '{display_name}' for the period ending {latest_relevant_weather_date.strftime('%Y-%m-%d')}. Cities: {cities_for_weather}")
+                    else:
+                        print(f"⚠️ Warning: No weather data found up to EIA report date {eia_report_date.strftime('%Y-%m-%d')} for region {display_name}.")
+                else:
+                    print(f"⚠️ Warning: EIA report date is not available or valid for region {display_name}. Cannot calculate weather metrics.")
             else:
-                storage_position_label = f"Insufficient historical data (< {min_years_for_avg} years) for 5-Year Avg"
+                print(f"⚠️ Warning: Missing required columns in 'WEATHER.csv' for region {display_name}. Expected: {required_weather_cols}. Actual: {weather_df_copy.columns.tolist()}")
+        else:
+            print(f"⚠️ Warning: No weather cities defined for region '{display_name}' or 'WEATHER.csv' data not found/empty. Skipping regional weather calculations.")
 
         # Graph Data & Momentum calculations
         graph_cols = ["period", internal_column_name]
-        if "weekly_avg_price" in merged.columns: graph_cols.append("weekly_avg_price") 
+        if "weekly_avg_price" in merged.columns: graph_cols.append("weekly_avg_price")
 
         graph_df = merged[graph_cols].dropna(subset=["period", internal_column_name]).rename(columns={"period": "Date", internal_column_name: "Bcf"})
         graph_df["Week"], graph_df["Year"] = graph_df["Date"].dt.isocalendar().week.astype(int), graph_df["Date"].dt.year
@@ -231,7 +451,7 @@ def process_region_data(display_name, internal_column_name, raw_data):
 
         # --- LOGARITHMIC REGRESSION CALCULATION ---
         log_fit_data = []
-        
+            
         fit_df = merged.dropna(subset=[internal_column_name, 'weekly_avg_price']).copy()
         fit_df = fit_df[fit_df[internal_column_name] > 0]
 
@@ -260,10 +480,13 @@ def process_region_data(display_name, internal_column_name, raw_data):
             "report": {
                 "latest_date": str(latest_date),
                 "latest_price": latest_price,
-                "current_storage": current_storage, 
-                "five_year_avg": five_year_avg,     
-                "storage_position_bcf": storage_position_bcf, 
-                "storage_position_label": storage_position_label 
+                "current_storage": current_storage,
+                "five_year_avg": five_year_avg,
+                "storage_position_bcf": storage_position_bcf,
+                "storage_position_label": storage_position_label,
+                "avg_temp": region_avg_temp, # NEW: Regional average temperature
+                "avg_cdd": region_total_cdd,    # NEW: Regional total CDD
+                "avg_hdd": region_total_hdd      # NEW: Regional total HDD
             },
             "graph": graph_data_list,
             "log_fit": log_fit_data
@@ -272,77 +495,15 @@ def process_region_data(display_name, internal_column_name, raw_data):
         print(f"❌ Error processing region {display_name}: {e}")
         return None
 
-# --- Precompute Data ---
-region_outputs = {d_name: process_region_data(d_name, i_col_name, raw_data) for d_name, i_col_name in region_map.items()}
+# --- Precompute Data (Original Dashboard) ---
+# Pass eia_report_date to process_region_data
+region_outputs = {d_name: process_region_data(d_name, i_col_name, raw_data, eia_report_date) for d_name, i_col_name in region_map.items()}
 region_outputs = {k: v for k, v in region_outputs.items() if v is not None} # Filter out failed regions
-
-# --- Extract the EIA report date for weather alignment ---
-# This is derived from the latest EIA storage data for the default region
-default_eia_report_date_str = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("latest_date", "N/A")
-
-eia_report_date = None
-if default_eia_report_date_str != "N/A":
-    try:
-        eia_report_date = datetime.strptime(default_eia_report_date_str, "%Y-%m-%d").date()
-    except ValueError:
-        print(f"⚠️ Warning: Could not parse EIA report date '{default_eia_report_date_str}' for weather alignment.")
-
-# --- Recent US Temperature, CDD, and HDD Calculations (Aligned to EIA Report Date) ---
-avg_temp = "N/A"
-avg_cdd = "N/A"
-avg_hdd = "N/A"
-BASE_TEMP_CDD_HDD = 65 # Standard base temperature for CDD/HDD in natural gas markets
-
-weather_df_copy = raw_data.get("weather")
-
-if weather_df_copy is not None and not weather_df_copy.empty:
-    required_weather_cols = ['date', 'city_title', 'avg_temp']
-    if all(col in weather_df_copy.columns for col in required_weather_cols):
-        if eia_report_date and not weather_df_copy.empty:
-            # Filter weather data up to and including the EIA report date
-            weather_data_up_to_eia_date = weather_df_copy[weather_df_copy["date"].dt.date <= eia_report_date].copy()
-
-            if not weather_data_up_to_eia_date.empty:
-                # Find the actual latest date available in the weather data that is <= EIA report date
-                latest_relevant_weather_date = weather_data_up_to_eia_date["date"].max()
-                
-                # Define the 7-day period ending on this latest relevant weather date
-                one_week_ago = latest_relevant_weather_date - timedelta(days=6)
-                recent_week_df = weather_data_up_to_eia_date[
-                    (weather_data_up_to_eia_date["date"] >= one_week_ago) & 
-                    (weather_data_up_to_eia_date["date"] <= latest_relevant_weather_date)
-                ].copy()
-
-                recent_week_df.dropna(subset=['avg_temp'], inplace=True)
-
-                if not recent_week_df.empty:
-                    # Calculate average 'avg_temp' for each city for the past 7 days
-                    city_avg_temps_series = recent_week_df.groupby('city_title')['avg_temp'].mean()
-                    
-                    if not city_avg_temps_series.empty:
-                        avg_temp = round(city_avg_temps_series.mean(), 1) # Overall average for dashboard
-
-                        # Calculate CDD and HDD for each city and then average across cities
-                        recent_week_df['cdd'] = (recent_week_df['avg_temp'] - BASE_TEMP_CDD_HDD).apply(lambda x: max(0, x))
-                        recent_week_df['hdd'] = (BASE_TEMP_CDD_HDD - recent_week_df['avg_temp']).apply(lambda x: max(0, x))
-                        
-                        # Average CDD and HDD across all cities for the 7-day period
-                        city_avg_cdd_series = recent_week_df.groupby('city_title')['cdd'].mean()
-                        city_avg_hdd_series = recent_week_df.groupby('city_title')['hdd'].mean()
-
-                        if not city_avg_cdd_series.empty:
-                            avg_cdd = round(city_avg_cdd_series.mean(), 1)
-                        if not city_avg_hdd_series.empty:
-                            avg_hdd = round(city_avg_hdd_series.mean(), 1)
-    else:
-        print(f"⚠️ Warning: Missing required columns in 'WEATHER.csv'. Expected: {required_weather_cols}. Actual: {weather_df_copy.columns.tolist()}")
-else:
-    print("⚠️ Warning: 'WEATHER.csv' data not found or is empty. Skipping weather calculations.")
 
 
 # --- Fundy Data Processing (for Balance Trends tab) ---
 fundy_df = raw_data.get("fundy")
-forecast_df = raw_data.get("forecast")
+forecast_df_orig = raw_data.get("forecast") # Renamed to avoid clash with basis_forecast_df
 
 fundy_chart_data = {"labels": [], "values": []}
 forecast_chart_data = {"labels": [], "values": []}
@@ -356,8 +517,8 @@ if fundy_df is not None and not fundy_df.empty and "item" in fundy_df.columns an
 else:
     print("⚠️ Warning: 'Fundy.csv' data not found, empty, or missing required columns. Skipping historical balance data.")
 
-if forecast_df is not None and not forecast_df.empty and "item" in forecast_df.columns and "Date" in forecast_df.columns:
-    forecast_df_filtered = forecast_df[forecast_df["item"] == "CONUS - Balance"].sort_values("Date")
+if forecast_df_orig is not None and not forecast_df_orig.empty and "item" in forecast_df_orig.columns and "Date" in forecast_df_orig.columns:
+    forecast_df_filtered = forecast_df_orig[forecast_df_orig["item"] == "CONUS - Balance"].sort_values("Date")
     forecast_chart_data = {
         "labels": forecast_df_filtered["Date"].dt.strftime("%Y-%m-%d").tolist(),
         "values": forecast_df_filtered["value"].round(2).tolist(),
@@ -371,16 +532,13 @@ criterion_df = raw_data.get("criterion_storage_change")
 daily_change_chart_data = {}
 
 if criterion_df is not None and not criterion_df.empty:
-    # Ensure correct column names before grouping
     if 'storage_name' in criterion_df.columns and 'eff_gas_day' in criterion_df.columns and 'daily_storage_change' in criterion_df.columns:
         for storage_name, group_df in criterion_df.groupby('storage_name'):
-            # Sort by date to ensure correct line plotting
             group_df = group_df.sort_values('eff_gas_day')
             daily_change_chart_data[storage_name] = {
                 "dates": group_df["eff_gas_day"].dt.strftime("%Y-%m-%d").tolist(),
                 "values": group_df["daily_storage_change"].round(2).tolist()
             }
-        print("Daily change data processed for storage names:", daily_change_chart_data.keys())
     else:
         print(f"⚠️ Warning: Missing required columns in 'CriterionStorageChange.csv'. Expected: ['storage_name', 'eff_gas_day', 'daily_storage_change']. Actual: {criterion_df.columns.tolist()}")
 else:
@@ -393,33 +551,27 @@ nuclear_generation_chart_data = {"labels": [], "mw_values": [], "price_values": 
 if nuclear_df is not None and not nuclear_df.empty:
     required_nuclear_cols = ['date', 'mw_generated']
     if all(col in nuclear_df.columns for col in required_nuclear_cols):
-        # Aggregate total MW generated by date
         daily_nuclear_mw = nuclear_df.groupby('date')['mw_generated'].sum().reset_index()
         daily_nuclear_mw.rename(columns={'mw_generated': 'total_mw_generated'}, inplace=True)
-        
-        # Merge with Henry Hub prices
-        prices_df = raw_data.get("prices")
-        if prices_df is not None and not prices_df.empty and 'date' in prices_df.columns and 'henry' in prices_df.columns:
-            # Resample Henry Hub prices to daily average if needed, and ensure 'date' column for merging
-            # Using 'D' for daily frequency and 'mean' for aggregation
-            prices_daily = prices_df.set_index("date")['henry'].resample("D").mean().ffill().reset_index()
             
-            # Perform a left merge to keep all nuclear dates and add corresponding Henry Hub prices
+        prices_df_for_nuclear = raw_data.get("prices")
+        if prices_df_for_nuclear is not None and not prices_df_for_nuclear.empty and 'date' in prices_df_for_nuclear.columns and 'henry' in prices_df_for_nuclear.columns:
+            prices_daily = prices_df_for_nuclear.set_index("date")['henry'].resample("D").mean().ffill().reset_index()
+            
             merged_nuclear_price = pd.merge(daily_nuclear_mw, prices_daily, on='date', how='left')
-            merged_nuclear_price.dropna(subset=['total_mw_generated'], inplace=True) # Ensure we have nuclear data
+            merged_nuclear_price.dropna(subset=['total_mw_generated'], inplace=True)
             
             nuclear_generation_chart_data = {
                 "labels": merged_nuclear_price["date"].dt.strftime("%Y-%m-%d").tolist(),
                 "mw_values": merged_nuclear_price["total_mw_generated"].round(2).tolist(),
                 "price_values": merged_nuclear_price["henry"].round(2).tolist()
             }
-            print("Nuclear generation data processed and merged with Henry Hub prices.")
         else:
             print("⚠️ Warning: Henry Hub price data not available or missing required columns for merging with nuclear generation. Nuclear chart will display only MW values.")
             nuclear_generation_chart_data = {
                 "labels": daily_nuclear_mw["date"].dt.strftime("%Y-%m-%d").tolist(),
                 "mw_values": daily_nuclear_mw["total_mw_generated"].round(2).tolist(),
-                "price_values": [None] * len(daily_nuclear_mw) # Fill with None if no price data
+                "price_values": [None] * len(daily_nuclear_mw)
             }
     else:
         print(f"⚠️ Warning: Missing required columns in 'NuclearForecast.csv'. Expected: {required_nuclear_cols}. Actual: {nuclear_df.columns.tolist()}")
@@ -427,43 +579,302 @@ else:
     print("⚠️ Warning: 'NuclearForecast.csv' data not found or is empty. Nuclear generation chart will not be available.")
 
 
-# --- Extract Report Data for Initial HTML Render ---
-# These are now just placeholders to ensure the f-string formatting works on initial load.
-# The actual content is filled by JS updateReportContent.
-report_latest_date = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("latest_date", "N/A")
-report_latest_price = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("latest_price", "N/A")
-report_current_storage = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("current_storage", "N/A")
-report_five_year_avg = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("five_year_avg", "N/A")
-report_storage_position_label = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("storage_position_label", "N/A")
+# --- BASIS ANALYSIS DATA LOADING AND PREPARATION (NEW) ---
+def load_basis_data(prices_path, weather_hist_path, weather_forecast_path):
+    print("\n--- Starting Basis Data Loading ---")
+    prices_df_basis = None
+    weather_df_basis = None
+    forecast_df_basis = None
+
+    try:
+        prices_df_basis = pd.read_csv(prices_path)
+        prices_df_basis['Date'] = pd.to_datetime(prices_df_basis['Date'], errors='coerce')
+        print(f"Loaded {prices_path.name} for Basis Analysis successfully.")
+    except Exception as e:
+        print(f"ERROR: Failed to load PRICES.csv for Basis Analysis from {prices_path}: {e}")
+
+    try:
+        weather_df_basis = pd.read_csv(weather_hist_path)
+        weather_df_basis['Date'] = pd.to_datetime(weather_df_basis['Date'], errors='coerce')
+        if 'City Title' in weather_df_basis.columns:
+            weather_df_basis['City Title'] = weather_df_basis['City Title'].apply(standardize_city_name)
+            print(f"Loaded {weather_hist_path.name} for Basis Analysis successfully.")
+        else:
+            print(f"WARNING: '{weather_hist_path.name}' is missing 'City Title' column. Basis analysis might be affected.")
+            weather_df_basis = pd.DataFrame()
+    except Exception as e:
+        print(f"ERROR: Failed to load WEATHER.csv for Basis Analysis from {weather_hist_path}: {e}")
+
+    try:
+        forecast_df_basis = pd.read_csv(weather_forecast_path)
+        forecast_df_basis['Date'] = pd.to_datetime(forecast_df_basis['Date'], errors='coerce')
+        forecast_df_basis = forecast_df_basis.dropna(subset=['Date']).sort_values(by='Date')
+        if 'City Title' in forecast_df_basis.columns:
+            forecast_df_basis['City Title'] = forecast_df_basis['City Title'].apply(standardize_city_name)
+            
+            # Filter forecast data for dates starting from tomorrow's date for a consistent 7-day future view
+            forecast_start_date = datetime.now().date() + timedelta(days=1)
+            forecast_df_basis = forecast_df_basis[forecast_df_basis['Date'].dt.date >= forecast_start_date].copy()
+            print(f"Loaded and filtered {weather_forecast_path.name} for Basis Analysis.")
+        else:
+            print(f"WARNING: '{weather_forecast_path.name}' is missing 'City Title' column. Basis forecast might be affected.")
+            forecast_df_basis = pd.DataFrame()
+    except FileNotFoundError:
+        print(f"WARNING: WEATHERforecast.csv not found for Basis Analysis at {weather_forecast_path}. Forecast table will be empty.")
+    except Exception as e:
+        print(f"ERROR: Failed to load WEATHERforecast.csv for Basis Analysis: {e}. Forecast table will be empty.")
+
+    print("--- Basis Data Loading Complete ---")
+    return prices_df_basis, weather_df_basis, forecast_df_basis, COMPONENT_TO_CITY_MAP_HARDCODED
+
+def prepare_basis_dashboard_data(prices_df, weather_df, forecast_df, component_to_city, henry_hub_name):
+    """Prepares all data for the interactive Plotly dashboard and forecast table."""
+    
+    print("\n--- Starting Basis Data Preparation for Dashboard ---")
+
+    valid_components = []
+    if prices_df is not None and henry_hub_name in prices_df.columns and component_to_city:
+        for comp in prices_df.columns:
+            if comp != 'Date' and comp != henry_hub_name and comp in component_to_city:
+                if pd.to_numeric(prices_df[comp], errors='coerce').notna().sum() > 0:
+                    valid_components.append(comp)
+    else:
+        print("WARNING: Insufficient primary data (prices_df, Henry Hub, or city map) to identify valid components for Basis Analysis.")
+        return {}
+
+    basis_data_js = {}
+    colors = plotly.colors.qualitative.Plotly
+    current_year = datetime.now().year
+    start_year_for_analysis = current_year - 3 # Analyze last 4 years including current
+
+    for comp in valid_components:
+        city = component_to_city.get(comp)
+        if not city:
+            print(f"WARNING: Skipping component '{comp}': No city mapping found in hardcoded map for Basis Analysis.")
+            basis_data_js[comp] = {
+                'city': 'N/A',
+                'overall_x': [], 'overall_y': [], 'overall_fit_x': [], 'overall_fit_y': [],
+                'overall_formula': "N/A (No city mapping)",
+                'per_year_data': [],
+                'forecast_table_data': []
+            }
+            continue
+
+        city_weather = weather_df[weather_df['City Title'].astype(str).str.strip() == city].copy()
+
+        hist_merged_all = pd.merge(
+            prices_df[['Date', comp, henry_hub_name]],
+            city_weather[['Date', 'Avg Temp']],
+            on='Date', how='inner'
+        ).dropna(subset=[comp, henry_hub_name, 'Avg Temp'])
+
+        hist_merged_all = hist_merged_all[hist_merged_all['Date'].dt.year >= start_year_for_analysis].copy()
+
+        if hist_merged_all.empty or hist_merged_all['Avg Temp'].isnull().all() or hist_merged_all[comp].isnull().all():
+            print(f"WARNING: Skipping {comp} for Basis Analysis: Not enough historical data for plotting in the last 4 years or critical columns are empty.")
+            basis_data_js[comp] = {
+                'city': city,
+                'overall_x': [], 'overall_y': [], 'overall_fit_x': [], 'overall_fit_y': [],
+                'overall_formula': "N/A (Insufficient historical data)",
+                'per_year_data': [],
+                'forecast_table_data': []
+            }
+            continue
+
+        hist_merged_all[comp] = pd.to_numeric(hist_merged_all[comp], errors='coerce')
+        hist_merged_all[henry_hub_name] = pd.to_numeric(hist_merged_all[henry_hub_name], errors='coerce')
+        hist_merged_all['Basis'] = hist_merged_all[comp] - hist_merged_all[henry_hub_name]
+
+        overall_data_for_fit = hist_merged_all.dropna(subset=['Avg Temp', 'Basis']).copy()
+
+        overall_formula_str = "N/A (Insufficient data for overall quadratic fit)"
+        overall_fit_x_smooth = np.array([])
+        overall_fit_y_smooth = np.array([])
+        overall_coeffs = None
+
+        if len(overall_data_for_fit) >= 3:
+            try:
+                overall_coeffs = np.polyfit(overall_data_for_fit['Avg Temp'], overall_data_for_fit['Basis'], 2)
+                overall_formula_str = (
+                    f"Basis = {overall_coeffs[0]:.4f} * Temp² + "
+                    f"{overall_coeffs[1]:.4f} * Temp + {overall_coeffs[2]:.4f}"
+                )
+                
+                overall_temp_min = overall_data_for_fit['Avg Temp'].min()
+                overall_temp_max = overall_data_for_fit['Avg Temp'].max()
+                overall_fit_x_smooth = np.linspace(overall_temp_min, overall_temp_max, 100)
+                overall_poly_func = np.poly1d(overall_coeffs)
+                overall_fit_y_smooth = overall_poly_func(overall_fit_x_smooth)
+
+            except Exception as e:
+                print(f"WARNING: Error calculating overall quadratic fit for {comp}: {e}. Formula will be N/A.")
+                pass
+
+        per_year_data = []
+        unique_years_in_range = [int(y) for y in sorted(hist_merged_all['Date'].dt.year.unique())]
+            
+        for i, year in enumerate(unique_years_in_range):
+            year_data = hist_merged_all[hist_merged_all['Date'].dt.year == year].copy()
+            
+            if year_data.empty:
+                continue
+
+            x_year = year_data['Avg Temp'].values
+            y_year = year_data['Basis'].values
+            
+            year_data_for_fit = year_data.dropna(subset=['Avg Temp', 'Basis']).copy()
+
+            year_formula_str = "N/A"
+            year_fit_x_smooth = np.array([])
+            year_fit_y_smooth = np.array([])
+
+            if len(year_data_for_fit) >= 3:
+                try:
+                    year_coeffs = np.polyfit(year_data_for_fit['Avg Temp'], year_data_for_fit['Basis'], 2)
+                    year_formula_str = (
+                        f"Basis = {year_coeffs[0]:.4f} * Temp² + "
+                        f"{year_coeffs[1]:.4f} * Temp + {year_coeffs[2]:.4f} (Year {year})"
+                    )
+                    
+                    year_temp_min = year_data_for_fit['Avg Temp'].min()
+                    year_temp_max = year_data_for_fit['Avg Temp'].max()
+                    year_fit_x_smooth = np.linspace(year_temp_min, year_temp_max, 50)
+                    year_poly_func = np.poly1d(year_coeffs)
+                    year_fit_y_smooth = year_poly_func(year_fit_x_smooth)
+                except Exception as e:
+                    print(f"WARNING: Error calculating quadratic fit for {comp} year {year}: {e}. Formula will be N/A.")
+                    pass
+
+            valid_indices_year = ~np.isnan(y_year) & ~np.isnan(x_year)
+            clean_x_year = x_year[valid_indices_year].tolist()
+            clean_y_year = y_year[valid_indices_year].tolist()
+            
+            valid_fit_indices_year_smooth = ~np.isnan(year_fit_y_smooth)
+            clean_x_year_for_fit = year_fit_x_smooth[valid_fit_indices_year_smooth].tolist()
+            clean_y_year_for_fit_line = year_fit_y_smooth[valid_fit_indices_year_smooth].tolist()
 
 
-# --- HTML Components ---
-region_options_html = ''.join([f'<option value="{r}"{" selected" if r == DEFAULT_REGION_DISPLAY_NAME else ""}>{r}</option>' for r in region_outputs.keys()])
-storage_name_options_html = ''.join([f'<option value="{name}">{name}</option>' for name in sorted(daily_change_chart_data.keys())])
+            per_year_data.append({
+                'year': year,
+                'x': clean_x_year,
+                'y': clean_y_year,
+                'fit_x': clean_x_year_for_fit,
+                'fit_y': clean_y_year_for_fit_line,
+                'formula': year_formula_str,
+                'color': colors[i % len(colors)]
+            })
+
+        forecast_table_data = []
+        if overall_coeffs is not None and forecast_df is not None and not forecast_df.empty and 'City Title' in forecast_df.columns:
+            city_forecast = forecast_df[forecast_df['City Title'].astype(str).str.strip() == city].copy()
+            city_forecast = city_forecast.sort_values(by='Date').head(7).copy() # Take first 7 days for this city
+            
+            if not city_forecast.empty:
+                overall_poly_func_for_forecast = np.poly1d(overall_coeffs)
+                city_forecast['Predicted Basis'] = city_forecast['Avg Temp'].apply(
+                    lambda temp: overall_poly_func_for_forecast(temp) if pd.notna(temp) else np.nan
+                )
+                city_forecast = city_forecast.dropna(subset=['Predicted Basis']).copy()
+                
+                for _, row in city_forecast.iterrows():
+                    forecast_table_data.append({
+                        'Date': row['Date'].strftime('%Y-%m-%d'),
+                        'Avg Temp': round(row['Avg Temp'], 1),
+                        'Predicted Basis': round(row['Predicted Basis'], 3)
+                    })
+            else:
+                print(f"WARNING: No 7-day forecast data found for city '{city}' in WEATHERforecast.csv starting from the specified forecast start date.")
 
 
-region_outputs_json = json.dumps(region_outputs, default=str)
-fundy_chart_data_json = json.dumps(fundy_chart_data)
-forecast_chart_data_json = json.dumps(forecast_chart_data)
-daily_change_chart_data_json = json.dumps(daily_change_chart_data)
-nuclear_generation_chart_data_json = json.dumps(nuclear_generation_chart_data)
+        overall_valid_fit_indices_smooth = ~np.isnan(overall_fit_y_smooth)
+        clean_overall_x_for_fit = overall_fit_x_smooth[overall_valid_fit_indices_smooth].tolist()
+        clean_overall_y_for_fit = overall_fit_y_smooth[overall_valid_fit_indices_smooth].tolist()
+
+        clean_hist_x_all = hist_merged_all['Avg Temp'].values[~np.isnan(hist_merged_all['Basis'].values) & ~np.isnan(hist_merged_all['Avg Temp'].values)].tolist()
+        clean_hist_y_all = hist_merged_all['Basis'].values[~np.isnan(hist_merged_all['Basis'].values) & ~np.isnan(hist_merged_all['Avg Temp'].values)].tolist()
+
+        basis_data_js[comp] = {
+            'city': city,
+            'overall_x': clean_hist_x_all,
+            'overall_y': clean_hist_y_all,
+            'overall_fit_x': clean_overall_x_for_fit,
+            'overall_fit_y': clean_overall_y_for_fit,
+            'overall_formula': overall_formula_str,
+            'per_year_data': per_year_data,
+            'forecast_table_data': forecast_table_data
+        }
+    print("--- Basis Data Preparation Complete ---")
+    return basis_data_js
 
 
-# --- HTML Template (Consolidated and all {{ }} for literals) ---
-html_template_raw = f"""
+# --- Main Execution ---
+if __name__ == "__main__":
+    # --- Load and Process Original Dashboard Data ---
+    # raw_data is already loaded at the top using load_clean_df
+    # region_outputs is already processed
+    # avg_temp, avg_cdd, avg_hdd are already calculated
+    # fundy_chart_data, forecast_chart_data are already processed
+    # daily_change_chart_data is already processed
+    # nuclear_generation_chart_data is already processed
+
+    # --- Load and Process Basis Analysis Data ---
+    prices_df_basis, weather_df_basis, forecast_df_basis, component_to_city_map_basis = load_basis_data(
+        PRICES_FILE_BASIS, WEATHER_HISTORICAL_FILE_BASIS, WEATHER_FORECAST_FILE_BASIS
+    )
+
+    basis_data_for_js = {}
+    if prices_df_basis is not None and weather_df_basis is not None and forecast_df_basis is not None:
+        basis_data_for_js = prepare_basis_dashboard_data(
+            prices_df_basis, weather_df_basis, forecast_df_basis, component_to_city_map_basis, HENRY_HUB_NAME
+        )
+        
+    basis_data_json_str = json.dumps(basis_data_for_js, indent=2)
+
+    # --- Extract Report Data for Initial HTML Render ---
+    # These values will be updated dynamically by JavaScript based on selected region
+    report_latest_date = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("latest_date", "N/A")
+    report_latest_price = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("latest_price", "N/A")
+    report_current_storage = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("current_storage", "N/A")
+    report_five_year_avg = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("five_year_avg", "N/A")
+    report_storage_position_label = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("storage_position_label", "N/A")
+    # Initial regional weather values for the default region - these are now calculated within process_region_data
+    report_avg_temp = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("avg_temp", "N/A")
+    report_avg_cdd = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("avg_cdd", "N/A")
+    report_avg_hdd = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {}).get("avg_hdd", "N/A")
+
+
+    # --- HTML Components ---
+    region_options_html = ''.join([f'<option value="{r}"{" selected" if r == DEFAULT_REGION_DISPLAY_NAME else ""}>{r}</option>' for r in region_outputs.keys()])
+    storage_name_options_html = ''.join([f'<option value="{name}">{name}</option>' for name in sorted(daily_change_chart_data.keys())])
+
+    # Get valid components for basis analysis dropdown
+    valid_basis_components = sorted(list(basis_data_for_js.keys()))
+    basis_component_options_html = "".join(f"<option value='{comp}'>{comp}</option>" for comp in valid_basis_components)
+
+
+    region_outputs_json = json.dumps(region_outputs, default=str)
+    fundy_chart_data_json = json.dumps(fundy_chart_data)
+    forecast_chart_data_json = json.dumps(forecast_chart_data)
+    daily_change_chart_data_json = json.dumps(daily_change_chart_data)
+    nuclear_generation_chart_data_json = json.dumps(nuclear_generation_chart_data)
+
+
+    # --- HTML Template (Consolidated and all {{ }} for literals) ---
+    html_template_raw = f"""
 <!DOCTYPE html>
 <html>
 <head>
     <title>Natural Gas Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@latest/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {{font-family: 'Segoe UI', sans-serif; padding: 20px; background-color: #eef2f3; color: #333; line-height: 1.6;}}
         .container {{max-width: 960px; margin: 30px auto; background-color: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);}}
         h1 {{color: #2c3e50; text-align: center; margin-bottom: 30px; font-size: 2.5em; border-bottom: 3px solid #3498db; padding-bottom: 15px;}}
         h2 {{color: #34495e; font-size: 1.6em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid #dae1e7; padding-bottom: 12px;}}
         .controls {{text-align: center; margin-bottom: 20px;}}
-        .tab-buttons {{margin-top: 15px; display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;}}
+        .tab-buttons {{margin-top: 15px; display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;}}
         .tab-buttons button {{background-color: #3498db; color: white; border: none; padding: 14px 30px; border-radius: 10px; cursor: pointer; transition: background-color 0.3s, transform 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}}
         .tab-buttons button:hover {{background-color: #2980b9; transform: translateY(-2px);}}
         .tab-buttons button.active {{background-color: #2ecc71; box-shadow: 0 3px 8px rgba(46, 204, 113, 0.4);}}
@@ -479,6 +890,25 @@ html_template_raw = f"""
         .chart-legend-toggles label:hover {{color: #2c3e50;}}
         .chart-legend-toggles input[type="checkbox"] {{margin-right: 8px; transform: scale(1.1); cursor: pointer;}}
         .chart-legend-toggles .color-square {{display: inline-block; width: 14px; height: 14px; margin-right: 8px; border-radius: 4px; vertical-align: middle; border: 1px solid rgba(0,0,0,0.1);}}
+        
+        /* Styles for Basis Analysis tab */
+        #basis-analysis-tab #plot {{ width: 100%; height: 600px; margin-bottom: 20px; border: 1px solid #eee; border-radius: 8px; }}
+        #basis-analysis-tab #formula {{ text-align: center; font-size: 1.1em; font-weight: bold; margin-bottom: 30px; padding: 15px; background-color: #eaf6ff; border-radius: 8px; border: 1px solid #cce5ff; }}
+        #basis-analysis-tab #forecast_table {{ margin-top: 40px; text-align: center; }}
+        #basis-analysis-tab #forecast_table h3 {{ color: #2980b9; margin-bottom: 20px; font-size: 1.6em; }}
+        #basis-analysis-tab #forecast_table table {{
+            width: 80%; margin: 0 auto; border-collapse: separate; border-spacing: 0;
+            border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }}
+        #basis-analysis-tab #forecast_table th, #basis-analysis-tab #forecast_table td {{
+            border: 1px solid #e0e0e0; padding: 12px 15px; text-align: center;
+            font-size: 0.95em;
+        }}
+        #basis-analysis-tab #forecast_table th {{ background-color: #f0f0f0; color: #555; font-weight: bold; }}
+        #basis-analysis-tab #forecast_table tr:nth-child(even) {{ background-color: #f9f9f9; }}
+        #basis-analysis-tab #forecast_table tr:hover {{ background-color: #eef; }}
+
+
         @media (max-width: 768px) {{
             .container {{margin: 10px; padding: 20px;}} h1 {{font-size: 2em;}} h2 {{font-size: 1.4em;}}
             .tab-buttons {{flex-direction: column; gap: 8px;}} .tab-buttons button {{width: 90%; margin: 0 auto; padding: 10px 20px;}}
@@ -497,7 +927,7 @@ html_template_raw = f"""
                 <button id="balance-tab-button" onclick="showTab('balance')">⚙️ Balance Trends</button>
                 <button id="daily-changes-tab-button" onclick="showTab('daily-changes')">📈 Daily Changes</button>
                 <button id="nuclear-tab-button" onclick="showTab('nuclear')">⚡ Nuclear Generation</button>
-            </div>
+                <button id="basis-analysis-tab-button" onclick="showTab('basis-analysis')">🌡️ Basis Analysis</button> </div>
         </div>
         <div id="report" class="tab">
             <h2>Market Report</h2>
@@ -508,7 +938,7 @@ html_template_raw = f"""
                 </select>
             </div>
             <div id="report-content" class="summary">
-                </div>
+            </div>
         </div>
         <div id="storage-info" class="tab">
             <div class="graph-controls" style="margin-top: 20px;">
@@ -548,12 +978,25 @@ html_template_raw = f"""
             <h2>U.S. Nuclear Generation Trend</h2>
             <canvas id="nuclear-chart"></canvas>
         </div>
+        
+        <div id="basis-analysis" class="tab">
+            <h2>Market Basis and Temperature Analysis</h2>
+            <div class="graph-controls" style="margin-top: 20px;">
+                <label for="componentDropdown">Select Market Component:</label>
+                <select id='componentDropdown' onchange='updateBasisGraph()'>
+                    {"".join(f"<option value='{comp}'>{comp}</option>" for comp in valid_basis_components)}
+                </select>
+            </div>
+            <div id='plot'></div>
+            <div id='formula'></div>
+            <div id='forecast_table'></div>
+        </div>
+        
     </div>
 <script>
+    // --- Data for Original Dashboard Tabs ---
     const allRegionData = {region_outputs_json};
-    const globalAvgTemp = "{avg_temp}"; 
-    const globalAvgCDD = "{avg_cdd}"; 
-    const globalAvgHDD = "{avg_hdd}"; 
+    // Removed globalAvgTemp, globalAvgCDD, globalAvgHDD from here as they are now per-region
     const defaultRegion = "{DEFAULT_REGION_DISPLAY_NAME}";
 
     const fundyChartData = {fundy_chart_data_json};
@@ -561,17 +1004,38 @@ html_template_raw = f"""
     const dailyChangeChartData = {daily_change_chart_data_json};
     const nuclearGenerationChartData = {nuclear_generation_chart_data_json};
 
-    let myChart;
-    let balanceChart;
-    let scatterChart;
-    let dailyChangeChart;
-    let nuclearChart; // New chart variable
+    // --- Data for New Basis Analysis Tab ---
+    const basisData = {basis_data_json_str};
+
+    let myChart; // EIA Storage Chart.js
+    let balanceChart; // Balance Trends Chart.js
+    let scatterChart; // Storage vs Price Chart.js
+    let dailyChangeChart; // Daily Storage Change Chart.js
+    let nuclearChart; // Nuclear Generation Chart.js
+    let basisPlotlyChart; // New: Basis Analysis Plotly chart
 
     function showTab(tabId) {{
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         document.querySelectorAll('.tab-buttons button').forEach(btn => btn.classList.remove('active'));
         document.getElementById(tabId + '-tab-button').classList.add('active');
+
+        // Destroy charts from other tabs if switching away
+        if (tabId !== 'balance' && balanceChart) {{ balanceChart.destroy(); balanceChart = null; }}
+        if (tabId !== 'daily-changes' && dailyChangeChart) {{ dailyChangeChart.destroy(); dailyChangeChart = null; }}
+        if (tabId !== 'nuclear' && nuclearChart) {{ nuclearChart.destroy(); nuclearChart = null; }}
+        if (tabId !== 'storage-info') {{
+            if (myChart) {{ myChart.destroy(); myChart = null; }}
+            if (scatterChart) {{ scatterChart.destroy(); scatterChart = null; }}
+            document.getElementById("chart-legend-toggles").innerHTML = "";
+            document.getElementById("chart-legend-toggles").style.display = 'none';
+        }}
+        // NEW: Destroy Plotly chart if switching away from Basis Analysis tab
+        if (tabId !== 'basis-analysis' && basisPlotlyChart) {{
+            Plotly.purge('plot'); // Use Plotly.purge for Plotly charts
+            basisPlotlyChart = null;
+        }}
+
 
         // Handle specific tab initializations
         if (tabId === 'storage-info') {{
@@ -581,7 +1045,6 @@ html_template_raw = f"""
                 updateEIAStorageGraph(currentSelectedRegion);
                 updateStoragePriceScatter(currentSelectedRegion);
             }} else {{
-                // Clear existing charts if no region is selected
                 if (myChart) {{ myChart.destroy(); myChart = null; }}
                 if (scatterChart) {{ scatterChart.destroy(); scatterChart = null; }}
                 document.getElementById("chart").getContext("2d").clearRect(0, 0, document.getElementById("chart").width, document.getElementById("chart").height);
@@ -591,9 +1054,8 @@ html_template_raw = f"""
             }}
         }} else if (tabId === 'report') {{
             const reportRegionSelect = document.getElementById("report-region-select");
-            // Ensure the report dropdown is set to the default or last selected value
             if (!reportRegionSelect.value) {{
-                 reportRegionSelect.value = defaultRegion;
+                reportRegionSelect.value = defaultRegion;
             }}
             updateReportContent(reportRegionSelect.value);
         }} else if (tabId === 'balance') {{
@@ -606,28 +1068,21 @@ html_template_raw = f"""
                 if (dailyChangeChart) {{ dailyChangeChart.destroy(); dailyChangeChart = null; }}
                 document.getElementById("daily-change-chart").getContext("2d").clearRect(0, 0, document.getElementById("daily-change-chart").width, document.getElementById("daily-change-chart").height);
             }}
-        }} else if (tabId === 'nuclear') {{ // New tab initialization for nuclear
+        }} else if (tabId === 'nuclear') {{
             updateNuclearChart();
-        }}
-
-        // Destroy charts from other tabs if switching away
-        if (tabId !== 'balance' && balanceChart) {{
-            balanceChart.destroy();
-            balanceChart = null;
-        }}
-        if (tabId !== 'storage-info') {{
-            if (myChart) {{ myChart.destroy(); myChart = null; }}
-            if (scatterChart) {{ scatterChart.destroy(); scatterChart = null; }}
-            document.getElementById("chart-legend-toggles").innerHTML = "";
-            document.getElementById("chart-legend-toggles").style.display = 'none';
-        }}
-        if (tabId !== 'daily-changes' && dailyChangeChart) {{
-            dailyChangeChart.destroy();
-            dailyChangeChart = null;
-        }}
-        if (tabId !== 'nuclear' && nuclearChart) {{ // Destroy nuclearChart
-            nuclearChart.destroy();
-            nuclearChart = null;
+        }} else if (tabId === 'basis-analysis') {{ // NEW: Basis Analysis tab initialization
+            const componentDropdown = document.getElementById('componentDropdown');
+            if (componentDropdown.value) {{
+                updateBasisGraph(); // Call the Plotly update function
+            }} else if (componentDropdown.options.length > 0) {{
+                // Set default to first option if no value is set
+                componentDropdown.value = componentDropdown.options[0].value;
+                updateBasisGraph();
+            }} else {{
+                document.getElementById('plot').innerHTML = '<p style="text-align:center;">No market components available for Basis Analysis.</p>';
+                document.getElementById('formula').innerHTML = '';
+                document.getElementById('forecast_table').innerHTML = '';
+            }}
         }}
     }}
 
@@ -639,9 +1094,9 @@ html_template_raw = f"""
             reportContentDiv.innerHTML = `
                 <div class="summary-item"><strong>Date:</strong> ${{report.latest_date}}</div>
                 <div class="summary-item"><strong>Latest Price:</strong> ${{report.latest_price}}</div>
-                <div class="summary-item"><strong>Avg US Temp (Last 7 Days):</strong> ${{globalAvgTemp}}</div>
-                <div class="summary-item"><strong>Cooling Degree Days (7-day avg):</strong> ${{globalAvgCDD}}</div>
-                <div class="summary-item"><strong>Heating Degree Days (7-day avg):</strong> ${{globalAvgHDD}}</div>
+                <div class="summary-item"><strong>Avg Temp (${{selectedRegion.split(' ')[0]}} Region, Last 7 Days):</strong> ${{report.avg_temp}}</div>
+                <div class="summary-item"><strong>Cooling Degree Days (${{selectedRegion.split(' ')[0]}} Region, 7-day total):</strong> ${{report.avg_cdd}}</div>
+                <div class="summary-item"><strong>Heating Degree Days (${{selectedRegion.split(' ')[0]}} Region, 7-day total):</strong> ${{report.avg_hdd}}</div>
                 <div class="summary-item"><strong>Current Storage ${{selectedRegion.includes("Lower 48") ? "(L48)" : "(Regional)"}}:</strong> ${{report.current_storage}} Bcf</div>
                 <div class="summary-item"><strong>5-Year Avg ${{selectedRegion.includes("Lower 48") ? "(L48)" : "(Regional)"}}:</strong> ${{report.five_year_avg}} Bcf</div>
                 <div class="summary-item"><strong>Storage Position ${{selectedRegion.includes("Lower 48") ? "(L48)" : "(Regional)"}}:</strong> ${{report.storage_position_label}}</div>
@@ -664,7 +1119,7 @@ html_template_raw = f"""
         year_2015: "#FFC300", year_2016: "#FF5733", year_2017: "#C70039", year_2018: "#900C3F", year_2019: "#581845",
         year_2020: "#009688", year_2021: "#4CAF50", year_2022: "#8BC34A", year_2023: "#CDDC39", year_2024: "#FFEB3B",
         scatter_points: '#3498db',
-        log_fit_line: '#e74c3c' // Color for the logarithmic fit line
+        log_fit_line: '#e74c3c'
     }};
 
     function updateEIAStorageGraph(region_display_name) {{
@@ -731,7 +1186,6 @@ html_template_raw = f"""
         chartTogglesDiv.innerHTML = togglesHtml;
         chartTogglesDiv.style.display = 'flex'; chartTogglesDiv.style.marginTop = '20px';
 
-        // Add event listeners to the new checkboxes for toggling visibility
         chartTogglesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {{
             checkbox.onchange = (e) => {{
                 const index = e.target.dataset.datasetIndex;
@@ -752,15 +1206,14 @@ html_template_raw = f"""
         }}
 
         const graphData = allRegionData[regionDataKey].graph;
-        const logFitData = allRegionData[regionDataKey].log_fit; // Get the log fit data
+        const logFitData = allRegionData[regionDataKey].log_fit;
 
-        // Prepare data for scatter plot: {{ x: storage, y: price }}
         const scatterPoints = graphData.map(d => {{
             if (d.hasOwnProperty('Bcf') && d.hasOwnProperty('price') && d.Bcf !== null && d.price !== null) {{
                 return {{ x: d.Bcf, y: d.price }};
             }}
             return null;
-        }}).filter(Boolean); // Remove null entries
+        }}).filter(Boolean);
 
         if (scatterChart) {{ scatterChart.destroy(); }}
         scatterChart = new Chart(scatterCanvas, {{
@@ -776,14 +1229,14 @@ html_template_raw = f"""
                         pointHoverRadius: 5,
                     }},
                     {{
-                        type: 'line', // This is a line dataset
+                        type: 'line',
                         label: 'Logarithmic Line of Best Fit',
-                        data: logFitData, // Use the log fit data here
+                        data: logFitData,
                         borderColor: colors.log_fit_line,
                         borderWidth: 2,
                         fill: false,
-                        pointRadius: 0, // No points for the line
-                        tension: 0.1 // Smooth the line
+                        pointRadius: 0,
+                        tension: 0.1
                     }}
                 ]
             }},
@@ -801,7 +1254,7 @@ html_template_raw = f"""
                             label: function(context) {{
                                 if (context.dataset.type === 'scatter') {{
                                     return `Storage: ${{context.parsed.x.toFixed(1)}} Bcf, Price: ${{context.parsed.y.toFixed(2)}} $`;
-                                }} else {{ // For the line of best fit
+                                }} else {{
                                     return `Fit (Storage: ${{context.parsed.x.toFixed(1)}} Bcf, Price: ${{context.parsed.y.toFixed(2)}} $)`;
                                 }}
                             }}
@@ -885,7 +1338,6 @@ html_template_raw = f"""
         }});
     }}
 
-    // New function for daily storage change chart
     function updateDailyChangeChart(selectedStorageName) {{
         const ctx = document.getElementById("daily-change-chart").getContext("2d");
         if (dailyChangeChart) dailyChangeChart.destroy();
@@ -904,11 +1356,11 @@ html_template_raw = f"""
                 datasets: [{{
                     label: `Daily Storage Change for ${{selectedStorageName}}`,
                     data: data.values,
-                    borderColor: '#17a2b8', // A new color for this chart
+                    borderColor: '#17a2b8',
                     backgroundColor: 'rgba(23, 162, 184, 0.2)',
                     fill: false,
                     tension: 0.1,
-                    pointRadius: 1 // Smaller points for dense data
+                    pointRadius: 1
                 }}]
             }},
             options: {{
@@ -960,7 +1412,6 @@ html_template_raw = f"""
         }});
     }}
 
-    // New function for Nuclear Generation chart
     function updateNuclearChart() {{
         const ctx = document.getElementById("nuclear-chart").getContext("2d");
         if (nuclearChart) nuclearChart.destroy();
@@ -974,7 +1425,7 @@ html_template_raw = f"""
             {{
                 label: 'Total MW Generated',
                 data: nuclearGenerationChartData.mw_values,
-                borderColor: '#f39c12', // Orange color for MW
+                borderColor: '#f39c12',
                 backgroundColor: 'rgba(243, 156, 18, 0.2)',
                 fill: false,
                 tension: 0.1,
@@ -986,7 +1437,7 @@ html_template_raw = f"""
             datasets.push({{
                 label: 'Henry Hub Price ($/MMBtu)',
                 data: nuclearGenerationChartData.price_values,
-                borderColor: '#9b59b6', // Purple color for price (consistent with storage tab)
+                borderColor: '#9b59b6',
                 backgroundColor: 'transparent',
                 fill: false,
                 tension: 0.1,
@@ -1074,12 +1525,116 @@ html_template_raw = f"""
                             font: {{ size: 14, weight: 'bold' }}
                         }},
                         grid: {{
-                            drawOnChartArea: false // Only draw grid lines for the left axis
+                            drawOnChartArea: false
                         }}
                     }}
                 }}
             }}
         }});
+    }}
+
+    // --- NEW: Basis Analysis Chart (Plotly) Function ---
+    function updateBasisGraph() {{
+        const comp = document.getElementById('componentDropdown').value;
+        const data = basisData[comp];
+        
+        if (!data || data.per_year_data.length === 0) {{
+            document.getElementById('plot').innerHTML = '<p style="text-align:center;">No data available or insufficient valid data points for this component for any year.</p>';
+            document.getElementById('formula').innerHTML = '';
+            document.getElementById('forecast_table').innerHTML = '';
+            return;
+        }}
+
+        let traces = [];
+
+        // Add traces for each year's historical data points and their fit lines
+        data.per_year_data.forEach(year_info => {{
+            // Scatter points for the year
+            traces.push({{
+                x: year_info.x, y: year_info.y, mode: 'markers',
+                name: `${{year_info.year}}`,
+                marker: {{ size: 8, opacity: 0.7, color: year_info.color }}
+            }});
+
+            // Fit line for the year
+            if (year_info.fit_x && year_info.fit_x.length > 1) {{
+                traces.push({{
+                    x: year_info.fit_x, y: year_info.fit_y, mode: 'lines',
+                    name: `Fit ${{year_info.year}}`,
+                    line: {{ color: year_info.color, width: 2, dash: 'dot' }}
+                }});
+            }}
+        }});
+
+        // Add overall fit line
+        if (data.overall_fit_x && data.overall_fit_x.length > 1) {{
+            traces.push({{
+                x: data.overall_fit_x, y: data.overall_fit_y, mode: 'lines',
+                name: `Overall Quadratic Fit`,
+                line: {{ color: 'black', width: 3 }}
+            }});
+        }}
+
+        // If basisPlotlyChart exists, recreate it with new data, otherwise create new
+        if (basisPlotlyChart) {{
+            Plotly.newPlot('plot', traces, {{
+                title: {{ text: `${{comp}} Basis vs. ${{data.city}} Avg Temp`, font: {{ size: 20 }} }},
+                xaxis: {{ title: 'Average Temperature (°F)', automargin: true }},
+                yaxis: {{ title: 'Daily Basis ($/MMBtu)', automargin: true }},
+                hovermode: 'closest',
+                margin: {{ l: 50, r: 50, b: 80, t: 80, pad: 4 }},
+                plot_bgcolor: '#fcfcfc',
+                paper_bgcolor: '#fcfcfc',
+                showlegend: true,
+                legend: {{ x: 1.02, y: 1, xanchor: 'left', yanchor: 'top' }},
+                shapes: [
+                    {{
+                        type: 'line',
+                        xref: 'paper', yref: 'y',
+                        x0: 0, y0: 0, x1: 1, y1: 0,
+                        line: {{ color: 'grey', width: 1, dash: 'dot' }}
+                    }}
+                ]
+            }});
+        }} else {{
+            basisPlotlyChart = Plotly.newPlot('plot', traces, {{
+                title: {{ text: `${{comp}} Basis vs. ${{data.city}} Avg Temp`, font: {{ size: 20 }} }},
+                xaxis: {{ title: 'Average Temperature (°F)', automargin: true }},
+                yaxis: {{ title: 'Daily Basis ($/MMBtu)', automargin: true }},
+                hovermode: 'closest',
+                margin: {{ l: 50, r: 50, b: 80, t: 80, pad: 4 }},
+                plot_bgcolor: '#fcfcfc',
+                paper_bgcolor: '#fcfcfc',
+                showlegend: true,
+                legend: {{ x: 1.02, y: 1, xanchor: 'left', yanchor: 'top' }},
+                shapes: [
+                    {{
+                        type: 'line',
+                        xref: 'paper', yref: 'y',
+                        x0: 0, y0: 0, x1: 1, y1: 0,
+                        line: {{ color: 'grey', width: 1, dash: 'dot' }}
+                    }}
+                ]
+            }});
+        }}
+
+        document.getElementById('formula').innerHTML = `<b>Overall Best Fit Formula (Quadratic):</b> ${{data.overall_formula}}`;
+
+        // --- Populate Forecast Table ---
+        const forecastTableDiv = document.getElementById('forecast_table');
+        const forecastDataForComp = data.forecast_table_data;
+
+        if (forecastDataForComp && forecastDataForComp.length > 0) {{
+            let tableHtml = '<h3>7-Day Basis Forecast (using Overall Quadratic Fit)</h3>';
+            tableHtml += '<table><thead><tr><th>Date</th><th>Forecast Temp (°F)</th><th>Predicted Basis ($/MMBtu)</th></tr></thead><tbody>';
+            forecastDataForComp.forEach(row => {{
+                tableHtml += `<tr><td>${{row.Date}}</td><td>${{row['Avg Temp'].toFixed(1)}}</td><td>${{row['Predicted Basis'].toFixed(3)}}</td></tr>`;
+            }});
+            tableHtml += '</tbody></table>';
+            forecastTableDiv.innerHTML = tableHtml;
+        }} else {{
+            forecastTableDiv.innerHTML = '<p style="text-align:center;">No 7-day forecast data available or fit not possible for this component.</p>';
+        }}
     }}
 
     document.addEventListener("DOMContentLoaded", function() {{
@@ -1089,18 +1644,17 @@ html_template_raw = f"""
         const reportRegionSelect = document.getElementById("report-region-select");
         reportRegionSelect.value = defaultRegion; // Set default region for the report tab
         
-        // Add event listener for the NEW report region select
         reportRegionSelect.addEventListener("change", function() {{
             updateReportContent(this.value);
         }});
 
-        // Existing event listener for storage tab dropdown (kept separate for clarity)
         document.getElementById("region-select").addEventListener("change", function() {{
             const selectedRegion = this.value;
             const currentActiveTab = document.querySelector('.tab.active');
             if (currentActiveTab && currentActiveTab.id === 'storage-info') {{
                 if (selectedRegion && selectedRegion !== "") {{
                     updateEIAStorageGraph(selectedRegion);
+                    updateStoragePriceScatter(selectedRegion);
                 }} else {{
                     if (myChart) {{ myChart.destroy(); myChart = null; }}
                     if (scatterChart) {{ scatterChart.destroy(); scatterChart = null; }}
@@ -1112,7 +1666,6 @@ html_template_raw = f"""
             }}
         }});
 
-        // Add event listener for the new daily change dropdown
         document.getElementById("daily-change-select").addEventListener("change", function() {{
             const selectedStorageName = this.value;
             const currentActiveTab = document.querySelector('.tab.active');
@@ -1126,6 +1679,14 @@ html_template_raw = f"""
             }}
         }});
 
+        // NEW: Event listener for Basis Analysis dropdown
+        document.getElementById("componentDropdown").addEventListener("change", function() {{
+            const currentActiveTab = document.querySelector('.tab.active');
+            if (currentActiveTab && currentActiveTab.id === 'basis-analysis') {{
+                updateBasisGraph();
+            }}
+        }});
+
         showTab('report'); // Show report tab by default
     }});
 </script>
@@ -1133,11 +1694,11 @@ html_template_raw = f"""
 </html>
 """
 
-# --- Generate and Open HTML Report ---
-try:
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html_template_raw)
-    print(f"\n✅ HTML report successfully generated at: {output_path}")
-    webbrowser.open(f"file:///{output_path}")
-except Exception as e:
-    print(f"❌ Failed to write HTML report: {e}")
+    # --- Generate and Open HTML Report ---
+    try:
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(html_template_raw)
+        print(f"\n✅ HTML dashboard successfully generated at: {output_path}")
+        webbrowser.open(f"file:///{output_path}")
+    except Exception as e:
+        print(f"❌ Failed to write HTML dashboard: {e}")
