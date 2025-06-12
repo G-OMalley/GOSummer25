@@ -1,65 +1,151 @@
-# Criterion Folder
+# Criterion Folder – TraderHelper
 
-## Overview
+> **Mission**: Deliver clean, analysis-ready fundamentals for U.S. natural-gas trading—from CONUS down to individual pipeline segments—so that humans *and* automated agents can spot market-moving signals fast, retrain models, and stay ahead of the curve.
 
-This folder contains scripts and supporting data files related to interacting with the Criterion database. The primary purpose is to extract, process, and update fundamental energy data, including storage levels, location information, nuclear power output, and broader market fundamentals, which are then used to generate key analytical files like `Fundy.csv`, `FundyForecast.csv`, `CriterionExtra.csv`, `CriterionExtraForecast.csv`, `Nuclear.csv`, and `NuclearForecast.csv` (stored in the main `INFO` directory).  
+---
 
-## Key Data Files (Supporting Files within Criterion Folder)
+## 1 Why Criterion Exists
+Criterion is the data-harvesting nerve-center of the private **TraderHelper** repo.  
+It taps a Postgres database (or local CSV backups) and produces regional balances, LNG feed-gas, storage deltas, pipeline flows vs operationally available capacity (OA), and every other series listed in `all_database_tickers_and_descriptions.csv`.
 
-These CSV files provide metadata or input for the scripts in this folder:
+These outputs power:
 
-* **`all_database_tickers_and_descriptions.csv`**:
-    * **Purpose**: A comprehensive list of all available data tables and tickers within the Criterion database that we have access to. Serves as a reference.
-* **`database_tables_list.csv`**:
-    * **Purpose**: Specifies the subset of Criterion database tables that are actively used by the `UpdateAndForecastFundy.py` script to create the `Fundy.csv` and `FundyForecast.csv` files.
-* **`CriterionExtra_tables_list.csv`**:
-    * **Purpose**: Lists other specific tables from the Criterion database that have historical and forecast data. These are used by relevant scripts to generate the `CriterionExtra.csv` and `CriterionExtraForecast.csv` files.
-* **`CriterionLOCS.csv`**:
-    * **Purpose**: Contains important location identifiers relevant to the natural gas industry. These typically represent points of contact between pipelines and end-users (e.g., delivery points, interconnects). 
-* **`NuclearPairs.csv`**:
-    * **Purpose**: This file is used as an input for the `UpdateNuclear.py` script, containing mappings or parameters needed to process nuclear power plant data correctly.
+* Exploratory notebooks & dashboards  
+* Feature pipes for ML models (weekly EIA, monthly FoM, RL agents)  
+* Real-time anomaly alerts (coming soon)  
 
-## Scripts
+---
 
-The Python scripts in this folder are responsible for interacting with the Criterion database and processing the data:
+## 2 Folder Layout (⌂ = this folder)
+~~~text
+Criterion/⌂
+├─ CriterionOrchestrator.py         # One-click updater
+├─ UpdateCriterionStorage.py        # Storage deltas (net injections / withdrawals)
+├─ UpdateCriterionLNG.py            # Historical + forward LNG feed-gas
+├─ UpdateCriterionHenryFlows.py     # Henry Hub pipeline flows & OA
+├─ UpdateCriterionLocs.py           # Location metadata refresh
+├─ UpdateAndForecastFundy.py        # Big Fundy engine (actuals + forecasts)
+├─ UpdateCriterionNuclear.py        # Utility for nuclear-gen tickers
+├─ database_tables_list.csv         # Master mapping (core fundamentals)
+├─ CriterionExtra_tables_list.csv   # Extra fundamentals mapping
+├─ all_database_tickers_and_descriptions.csv  # “Full menu” of available series
+├─ NuclearPairs.csv                 # Plant ↔ ticker helper
+└─ INFO/                            # All CSV outputs drop here
+~~~
 
-* **`UpdateCriterionStorage.py`**:
-    * **Purpose**: Connects to the Criterion database to fetch and update data on daily changes in natural gas storage levels across various regions in the country.
-    * **Inputs**: Uses connection details for the Criterion database. References specific tickers or tables related to storage.
-    * **Outputs**: Produces or updates a data file (e.g., `CriterionStorageChange.csv` in the `INFO` directory) containing the latest storage change information.
-    * **Key Logic**: Queries storage-related tables, processes date/value information.
+---
 
-* **`UpdateCriterionLocs.py`**:
-    * **Purpose**: Checks the Criterion database to identify and update the list of available physical locations (points) relevant to our analysis.
-    * **Inputs**: Criterion database connection. May use `CriterionLOCS.csv` as a base or for comparison.
-    * **Outputs**: Updates `CriterionLOCS.csv` or another master list of locations if new ones are found or existing ones change status.
+## 3 Quick-Start (Ad-hoc runs)
 
-* **`UpdateAndForecastFundy.py`**:
-    * **Purpose**: This script is central to generating core fundamental data. It connects to the Criterion database, uses the tables listed in `database_tables_list.csv`, processes the data, and creates/updates the `Fundy.csv` (historical fundamentals) and `FundyForecast.csv` (forecasted fundamentals) files.
-    * **Inputs**:
-        * Criterion database connection.
-        * `database_tables_list.csv` (to know which tables to query).
-    * **Outputs**:
-        * `Fundy.csv` (likely in `INFO/`)
-        * `FundyForecast.csv` (likely in `INFO/`)
-    * **Key Logic**: Iterates through specified tables, extracts historical and forecast data, aggregates/transforms it as needed, and saves it in a structured format.
+1. **Clone & env**
 
-* **`UpdateNuclear.py`**:
-    * **Purpose**: Fetches and processes data related to nuclear power generation. This data is then used to create/update `Nuclear.csv` (historical nuclear output) and `NuclearForecast.csv` (forecasted nuclear output).
-    * **Inputs**:
-        * Criterion database connection.
-        * `NuclearPairs.csv` (for specific processing parameters or mappings).
-    * **Outputs**:
-        * `Nuclear.csv` (likely in `INFO/`)
-        * `NuclearForecast.csv` (likely in `INFO/`)
-    * **Key Logic**: Queries nuclear-related data from Criterion, applies logic based on `NuclearPairs.csv`, and structures the output for historical and forecast datasets.
+   ~~~bash
+   git clone <private-repo-url>
+   cd TraderHelper/Criterion
+   python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+   pip install -r ../requirements.txt                  # repo-root reqs
+   ~~~
 
-## Workflow & Dependencies
+2. **Create `.env`** (in *this* folder or next to each script)
 
-1.  **Metadata Setup**: Files like `all_database_tickers_and_descriptions.csv`, `database_tables_list.csv`, `CriterionExtra_tables_list.csv`, `CriterionLOCS.csv`, and `NuclearPairs.csv` should be accurate and present as they guide the behavior of the scripts.
-2.  **Data Fetching & Processing**:
-    * `UpdateCriterionStorage.py` can be run to get the latest storage figures.
-    * `UpdateCriterionLocs.py` can be run to ensure location data is current.
-    * `UpdateNuclear.py` can be run to get nuclear generation data.
-    * `UpdateAndForecastFundy.py` (and similar scripts for `CriterionExtra` if any) can then be run to generate the core analytical CSV files.
-3.  **Output Usage**: The CSV files generated by these scripts (presumably in the `INFO` folder) are then consumed by downstream analytical processes or models for the "trader helper."
+   ~~~env
+   DB_USER=xxx              # Optional – leave blank to run in offline/CSV mode
+   DB_PASSWORD=xxx
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=criterion
+   ~~~
+
+3. **Run everything**
+
+   ~~~bash
+   python CriterionOrchestrator.py
+   ~~~
+
+   Fresh CSVs will appear under `INFO/`.
+
+> *Tip*: Each script can also be called directly—handy while prototyping.
+
+---
+
+## 4 Script Matrix
+
+| Script | Purpose | Key Inputs | Main Outputs (→ INFO/) |
+|--------|---------|-----------|-------------------------|
+| `UpdateCriterionStorage.py` | Net storage change per facility & region (daily) | Postgres view `flows_schedule` | `CriterionStorageChange.csv` |
+| `UpdateCriterionLNG.py` | LNG feed-gas actuals & 60-day forecast | LNG ticker list (hard-coded) | `CriterionLNGHist.csv`, `CriterionLNGForecast.csv` |
+| `UpdateCriterionHenryFlows.py` | Henry Hub pipelines – scheduled vs OA | `locs_list.csv`, DB flows | `CriterionHenryFlows.csv` |
+| `UpdateAndForecastFundy.py` | **Big engine** – pulls every ticker in mapping files, pivots to wide table, computes regional balances, and builds ARIMA-style forecasts | `database_tables_list.csv`, `CriterionExtra_tables_list.csv`, Postgres function (see below) | `Fundy.csv`, `FundyForecast.csv`, `CriterionExtra.csv`, `CriterionExtraForecast.csv` |
+| `UpdateCriterionLocs.py` | Refresh location metadata, flag orphans | DB metadata tables | `locs_list.csv` (in-place) |
+| `UpdateNuclear.py` | Quick nuclear-generation sanity test | Nuclear ticker | Stdout only |
+
+---
+
+## 5 Postgres Helper Function
+
+All series pull through one stored procedure:
+
+~~~sql
+SELECT *
+FROM data_series.fin_json_to_excel_tickers(
+    ticker_array   => ARRAY['TICKER1','TICKER2'],
+    start_date     => '2010-01-01',
+    end_date       => NOW(),
+    frequency      => 'daily'      -- accepts daily, weekly, monthly
+);
+~~~
+
+Expected columns:
+
+| date | ticker | value | unit |
+|------|--------|-------|------|
+| 2025-06-10 | LNG.GOM.FEEDGAS | 10.25 | Bcf |
+
+If the DB is offline, scripts fall back to the latest CSVs in `INFO/`.
+
+---
+
+## 6 Data-Flow Snapshot
+
+~~~mermaid
+flowchart TD
+    subgraph Update_Run
+        Orchestrator -->|1| Storage[UpdateCriterionStorage]
+        Orchestrator -->|2| LNG[UpdateCriterionLNG]
+        Orchestrator -->|3| Fundy[UpdateAndForecastFundy]
+    end
+    Storage --> INFO["INFO/ CSV vault"]
+    LNG --> INFO
+    Fundy --> INFO
+~~~
+
+*Change scope freely—the mermaid above simply mirrors the current call order.*
+
+---
+
+## 7 Agents & Automation
+
+* **Refresh** – An AI agent can schedule the orchestrator (e.g., daily at 05:00 ET) and watch the `INFO/` folder for missing or zero-row files.  
+* **Anomaly detection** – Flag spikes > ±3 σ vs 30-day mean, or storage numbers that break physical limits.  
+* **Trend surfacing** – Auto-rank top movers (flow-minus-OA %, regional balance swings) and push to Slack.  
+* **Model retraining hooks** – When LNG feed-gas forecast error > x %, trigger a notebook that refits the ARIMA modules inside `UpdateAndForecastFundy.py`.
+
+---
+
+## 8 Testing & Validation (roadmap)
+
+| Check | Why it matters | Proposed tool |
+|-------|----------------|---------------|
+| **Row count drift** | Catch missing days | `pytest` + `pandas.testing` |
+| **Schema assert** | Columns haven’t disappeared | `pytest-schema` |
+| **Value sanity** | No negative LNG feed-gas | Custom assert helpers |
+
+Run `pytest` before every PR merge.
+
+---
+
+## 9 Contribution & Licensing
+
+This repo is **private**.  
+Feel free to branch and PR; commit messages should follow Conventional Commits (`feat:`, `fix:`, `refactor:`…).  
+No external redistribution without approval.

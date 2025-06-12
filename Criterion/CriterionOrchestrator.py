@@ -64,6 +64,8 @@ def main():
         "UpdateCriterionStorage.py",
         "UpdateCriterionLNG.py",
         "UpdateAndForecastFundy.py",
+        "UpdateCriterionHenryFlows.py",
+        "UpdateCriterionNuclear.py",
     ]
 
     for script in scripts_to_run:
