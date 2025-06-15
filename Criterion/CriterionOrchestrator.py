@@ -61,11 +61,11 @@ def main():
     # Define the order of execution for the scripts
     # This list now only contains the scripts you want to run.
     scripts_to_run = [
-        "UpdateCriterionStorage.py",
-        "UpdateCriterionLNG.py",
         "UpdateAndForecastFundy.py",
         "UpdateCriterionHenryFlows.py",
+        "UpdateCriterionLNG.py",  
         "UpdateCriterionNuclear.py",
+        "UpdateCriterionStorage.py"
     ]
 
     for script in scripts_to_run:
