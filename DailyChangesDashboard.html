@@ -1,0 +1,87 @@
+
+    <html>
+    <head>
+        <title>Storage Dashboard</title>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <style>
+            .tab-buttons button {
+                padding: 10px 20px;
+                cursor: pointer;
+                border: 1px solid #ccc;
+                background-color: #f0f0f0;
+                margin-right: 5px;
+            }
+            .tab {
+                border: 1px solid #ccc;
+                padding: 20px;
+                margin-top: 10px;
+            }
+        </style>
+        <script>
+        // Simple tab switching logic
+        function showTab(tabId) {
+            var tabs = document.getElementsByClassName('tab');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].style.display = 'none';
+            }
+            document.getElementById(tabId).style.display = 'block';
+        }
+
+        // Initial tab display (e.g., show the first tab by default)
+        document.addEventListener('DOMContentLoaded', function() {
+            // You might want to set a default tab here, e.g., 'report-tab'
+            // For this example, we will show daily-changes-tab by default
+            showTab('daily-changes-tab'); 
+        });
+        </script>
+    </head>
+    <body>
+        <h1>Gas Storage Dashboard</h1>
+        <div class="tab-buttons">
+            <button id="daily-changes-tab-button" onclick="showTab('daily-changes-tab')">📈 Daily Changes</button>
+        </div>
+
+        <div class="tab-content">
+
+<button id='daily-changes-tab-button' onclick="showTab('daily-changes-tab')">📈 Daily Changes</button>
+<div id='daily-changes-tab' class='tab' style='display: none;'>
+    <h2>Daily Changes</h2>
+    <p>Select a component to view normalized daily storage changes (Min = 0).</p>
+    <select id='daily-changes-dropdown' onchange='updateDailyChangesChart()'>
+        <option value='ANR Pipeline'>ANR Pipeline</option><option value='Other Pipeline'>Other Pipeline</option>
+    </select>
+    <div id='daily-changes-chart' style='height:500px;'></div>
+    <script>
+    var dailyChangesData = {"ANR Pipeline": {"dates": ["2025-01-01", "2025-01-02", "2025-01-03", "2025-01-04", "2025-01-05"], "values": [0, 15, 35, 50, 25]}, "Other Pipeline": {"dates": ["2025-01-06", "2025-01-07", "2025-01-08", "2025-01-09", "2025-01-10"], "values": [35, 45, 10, 30, 0]}};
+
+    function updateDailyChangesChart() {
+        var comp = document.getElementById('daily-changes-dropdown').value;
+        // Check if selected component has data before plotting
+        if (dailyChangesData[comp]) {
+            var trace = {
+                x: dailyChangesData[comp]['dates'],
+                y: dailyChangesData[comp]['values'],
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: comp
+            };
+            var layout = {
+                title: 'Normalized Daily Storage Change (Min = 0)',
+                xaxis: { title: 'Date' },
+                yaxis: { title: 'Normalized Change (Bcf)' }
+            };
+            Plotly.newPlot('daily-changes-chart', [trace], layout);
+        } else {
+            document.getElementById('daily-changes-chart').innerHTML = '<p>No data available for this component.</p>';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateDailyChangesChart(); // Call on page load to display default chart
+    });
+    </script>
+</div>
+
+        </div>
+    </body>
+    </html>
