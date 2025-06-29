@@ -1,3 +1,5 @@
+# UpdateCriterionNuclear.py
+
 import os
 import traceback
 from datetime import datetime, timedelta
@@ -16,7 +18,8 @@ from sqlalchemy import create_engine, text
 # pathlib is a modern way to handle file paths robustly.
 SCRIPT_DIR = Path(__file__).parent
 INFO_DIR = SCRIPT_DIR.parent / "INFO"
-PAIRS_FILE_PATH = SCRIPT_DIR / "NuclearPairs.csv"
+# MODIFIED: Added 'CriterionInfo' to the path to look inside the correct sub-folder
+PAIRS_FILE_PATH = SCRIPT_DIR / "CriterionInfo" / "NuclearPairs.csv"
 HIST_OUTPUT_PATH = INFO_DIR / "CriterionNuclearHist.csv"
 FORECAST_OUTPUT_PATH = INFO_DIR / "CriterionNuclearForecast.csv"
 

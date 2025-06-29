@@ -309,8 +309,9 @@ def main():
         engine = create_engine(DATABASE_URL)
 
         # --- Process for "Fundy" files ---
-        fundy_mapping_file_name = 'database_tables_list.csv' # Original mapping file
-        fundy_mapping_path = os.path.join(script_dir, fundy_mapping_file_name)
+        fundy_mapping_file_name = 'database_tables_list.csv' 
+        # MODIFIED: Added 'CriterionInfo' to the path to look inside the correct sub-folder
+        fundy_mapping_path = os.path.join(script_dir, 'CriterionInfo', fundy_mapping_file_name)
         print(f"Loading ticker mapping file for Fundy: {fundy_mapping_path}")
         try:
             fundy_mapping_df = pd.read_csv(fundy_mapping_path)
@@ -336,8 +337,9 @@ def main():
 
 
         # --- Process for "CriterionExtra" files ---
-        extra_mapping_file_name = 'CriterionExtra_tables_list.csv' # New mapping file
-        extra_mapping_path = os.path.join(script_dir, extra_mapping_file_name)
+        extra_mapping_file_name = 'CriterionExtra_tables_list.csv'
+        # MODIFIED: Added 'CriterionInfo' to the path to look inside the correct sub-folder
+        extra_mapping_path = os.path.join(script_dir, 'CriterionInfo', extra_mapping_file_name)
         print(f"\nLoading ticker mapping file for CriterionExtra: {extra_mapping_path}")
         try:
             extra_mapping_df = pd.read_csv(extra_mapping_path)

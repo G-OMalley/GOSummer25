@@ -36,17 +36,15 @@ KEY_FILE = INFO_DIR / "KEY.xlsx"
 WEATHER_FILE = INFO_DIR / "WEATHER.csv" 
 
 SPECIFIC_REGION_ORDER = [
-    "Northeast - Demand", 
-    "Rockies",
-    "Gulf Coast",
     "SouthCentral - Henry",
+    "SouthCentral - Perryville",
     "SouthCentral - Midcon",
     "Midwest - Chicago",
-    "SouthCentral - Perryville",
+    "Midwest - Demand",
     "Northeast - Appalachia",
+    "Northeast - Demand", 
     "Southeast",
     "SouthCentral - TexCoast",
-    "Midwest - Demand",
     "SouthCentral - WesTex"
 ]
 
