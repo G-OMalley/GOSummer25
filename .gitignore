@@ -16,6 +16,7 @@ __pycache__/
 Scripts/MarketAnalysis_Report_Output/
 Weather/Outputs/
 EIAGuesser/output
+Criterion/CriterionInfo
 
 
 # Specific directory file types

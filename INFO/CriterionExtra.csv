@@ -3818,6 +3818,20 @@ Date,item,value,region
 06/13/2025,CONUS - Balance,0.0,Conus
 06/14/2025,CONUS - Balance,0.0,Conus
 06/15/2025,CONUS - Balance,0.0,Conus
+06/16/2025,CONUS - Balance,0.0,Conus
+06/17/2025,CONUS - Balance,0.0,Conus
+06/18/2025,CONUS - Balance,0.0,Conus
+06/19/2025,CONUS - Balance,0.0,Conus
+06/20/2025,CONUS - Balance,0.0,Conus
+06/21/2025,CONUS - Balance,0.0,Conus
+06/22/2025,CONUS - Balance,0.0,Conus
+06/23/2025,CONUS - Balance,0.0,Conus
+06/24/2025,CONUS - Balance,0.0,Conus
+06/25/2025,CONUS - Balance,0.0,Conus
+06/26/2025,CONUS - Balance,0.0,Conus
+06/27/2025,CONUS - Balance,0.0,Conus
+06/28/2025,CONUS - Balance,0.0,Conus
+06/29/2025,CONUS - Balance,0.0,Conus
 07/01/2017,CONUS - STORAGE,15036.524,Conus
 07/02/2017,CONUS - STORAGE,13651.588,Conus
 07/03/2017,CONUS - STORAGE,9704.063,Conus
@@ -6664,67 +6678,81 @@ Date,item,value,region
 04/13/2025,CONUS - STORAGE,12761.549,Conus
 04/14/2025,CONUS - STORAGE,8654.183,Conus
 04/15/2025,CONUS - STORAGE,5100.5728,Conus
-04/16/2025,CONUS - STORAGE,2962.594,Conus
-04/17/2025,CONUS - STORAGE,6701.6943,Conus
-04/18/2025,CONUS - STORAGE,20455.186,Conus
-04/19/2025,CONUS - STORAGE,16795.693,Conus
-04/20/2025,CONUS - STORAGE,16224.144,Conus
-04/21/2025,CONUS - STORAGE,10194.318,Conus
-04/22/2025,CONUS - STORAGE,8131.178,Conus
-04/23/2025,CONUS - STORAGE,9225.938,Conus
-04/24/2025,CONUS - STORAGE,8444.522,Conus
-04/25/2025,CONUS - STORAGE,7940.1147,Conus
-04/26/2025,CONUS - STORAGE,14348.271,Conus
-04/27/2025,CONUS - STORAGE,13934.805,Conus
-04/28/2025,CONUS - STORAGE,9252.833,Conus
-04/29/2025,CONUS - STORAGE,8553.915,Conus
-04/30/2025,CONUS - STORAGE,8807.395,Conus
-05/01/2025,CONUS - STORAGE,9542.448,Conus
-05/02/2025,CONUS - STORAGE,10075.8125,Conus
-05/03/2025,CONUS - STORAGE,14899.915,Conus
-05/04/2025,CONUS - STORAGE,16494.957,Conus
-05/05/2025,CONUS - STORAGE,10588.744,Conus
-05/06/2025,CONUS - STORAGE,11988.806,Conus
-05/07/2025,CONUS - STORAGE,9935.886,Conus
-05/08/2025,CONUS - STORAGE,7956.498,Conus
-05/09/2025,CONUS - STORAGE,7593.825,Conus
-05/10/2025,CONUS - STORAGE,15876.608,Conus
-05/11/2025,CONUS - STORAGE,17535.59,Conus
-05/12/2025,CONUS - STORAGE,12294.435,Conus
-05/13/2025,CONUS - STORAGE,10036.753,Conus
-05/14/2025,CONUS - STORAGE,8858.783,Conus
-05/15/2025,CONUS - STORAGE,10632.369,Conus
-05/16/2025,CONUS - STORAGE,10242.248,Conus
-05/17/2025,CONUS - STORAGE,15889.367,Conus
-05/18/2025,CONUS - STORAGE,15611.193,Conus
-05/19/2025,CONUS - STORAGE,7565.937,Conus
-05/20/2025,CONUS - STORAGE,6568.581,Conus
-05/21/2025,CONUS - STORAGE,7167.044,Conus
-05/22/2025,CONUS - STORAGE,7349.472,Conus
-05/23/2025,CONUS - STORAGE,8342.752,Conus
-05/24/2025,CONUS - STORAGE,14768.677,Conus
-05/25/2025,CONUS - STORAGE,16468.818,Conus
-05/26/2025,CONUS - STORAGE,21058.377,Conus
-05/27/2025,CONUS - STORAGE,11696.035,Conus
-05/28/2025,CONUS - STORAGE,11305.079,Conus
-05/29/2025,CONUS - STORAGE,12098.4375,Conus
-05/30/2025,CONUS - STORAGE,13117.493,Conus
-05/31/2025,CONUS - STORAGE,18980.049,Conus
-06/01/2025,CONUS - STORAGE,18105.271,Conus
-06/02/2025,CONUS - STORAGE,12486.746,Conus
-06/03/2025,CONUS - STORAGE,11227.444,Conus
-06/04/2025,CONUS - STORAGE,11678.11,Conus
-06/05/2025,CONUS - STORAGE,9908.371,Conus
-06/06/2025,CONUS - STORAGE,10437.293,Conus
-06/07/2025,CONUS - STORAGE,18773.104,Conus
-06/08/2025,CONUS - STORAGE,18875.354,Conus
-06/09/2025,CONUS - STORAGE,11236.616,Conus
-06/10/2025,CONUS - STORAGE,10422.459,Conus
-06/11/2025,CONUS - STORAGE,11117.044,Conus
-06/12/2025,CONUS - STORAGE,9434.004,Conus
-06/13/2025,CONUS - STORAGE,10293.46,Conus
-06/14/2025,CONUS - STORAGE,18256.797,Conus
-06/15/2025,CONUS - STORAGE,32054.72,Conus
+04/16/2025,CONUS - STORAGE,3433.726,Conus
+04/17/2025,CONUS - STORAGE,7172.8193,Conus
+04/18/2025,CONUS - STORAGE,20926.31,Conus
+04/19/2025,CONUS - STORAGE,17285.426,Conus
+04/20/2025,CONUS - STORAGE,16713.867,Conus
+04/21/2025,CONUS - STORAGE,10665.451,Conus
+04/22/2025,CONUS - STORAGE,8602.311,Conus
+04/23/2025,CONUS - STORAGE,9697.063,Conus
+04/24/2025,CONUS - STORAGE,8915.647,Conus
+04/25/2025,CONUS - STORAGE,8383.34,Conus
+04/26/2025,CONUS - STORAGE,14819.404,Conus
+04/27/2025,CONUS - STORAGE,14359.437,Conus
+04/28/2025,CONUS - STORAGE,9668.158,Conus
+04/29/2025,CONUS - STORAGE,8956.228,Conus
+04/30/2025,CONUS - STORAGE,9262.717,Conus
+05/01/2025,CONUS - STORAGE,10016.37,Conus
+05/02/2025,CONUS - STORAGE,10526.484,Conus
+05/03/2025,CONUS - STORAGE,15359.887,Conus
+05/04/2025,CONUS - STORAGE,16954.928,Conus
+05/05/2025,CONUS - STORAGE,11048.716,Conus
+05/06/2025,CONUS - STORAGE,12439.47,Conus
+05/07/2025,CONUS - STORAGE,10386.551,Conus
+05/08/2025,CONUS - STORAGE,8383.921,Conus
+05/09/2025,CONUS - STORAGE,8007.2974,Conus
+05/10/2025,CONUS - STORAGE,16325.064,Conus
+05/11/2025,CONUS - STORAGE,17984.04,Conus
+05/12/2025,CONUS - STORAGE,12763.735,Conus
+05/13/2025,CONUS - STORAGE,10538.575,Conus
+05/14/2025,CONUS - STORAGE,9365.829,Conus
+05/15/2025,CONUS - STORAGE,11180.691,Conus
+05/16/2025,CONUS - STORAGE,10846.363,Conus
+05/17/2025,CONUS - STORAGE,16437.69,Conus
+05/18/2025,CONUS - STORAGE,16206.016,Conus
+05/19/2025,CONUS - STORAGE,8174.7017,Conus
+05/20/2025,CONUS - STORAGE,7330.796,Conus
+05/21/2025,CONUS - STORAGE,7896.7163,Conus
+05/22/2025,CONUS - STORAGE,8102.3945,Conus
+05/23/2025,CONUS - STORAGE,9118.917,Conus
+05/24/2025,CONUS - STORAGE,15468.582,Conus
+05/25/2025,CONUS - STORAGE,17168.73,Conus
+05/26/2025,CONUS - STORAGE,21758.281,Conus
+05/27/2025,CONUS - STORAGE,12323.72,Conus
+05/28/2025,CONUS - STORAGE,11882.696,Conus
+05/29/2025,CONUS - STORAGE,12868.237,Conus
+05/30/2025,CONUS - STORAGE,13972.715,Conus
+05/31/2025,CONUS - STORAGE,19835.271,Conus
+06/01/2025,CONUS - STORAGE,18944.684,Conus
+06/02/2025,CONUS - STORAGE,13344.758,Conus
+06/03/2025,CONUS - STORAGE,12076.148,Conus
+06/04/2025,CONUS - STORAGE,12517.522,Conus
+06/05/2025,CONUS - STORAGE,10747.572,Conus
+06/06/2025,CONUS - STORAGE,11276.698,Conus
+06/07/2025,CONUS - STORAGE,19541.443,Conus
+06/08/2025,CONUS - STORAGE,19645.016,Conus
+06/09/2025,CONUS - STORAGE,12086.956,Conus
+06/10/2025,CONUS - STORAGE,11280.464,Conus
+06/11/2025,CONUS - STORAGE,11975.049,Conus
+06/12/2025,CONUS - STORAGE,10142.719,Conus
+06/13/2025,CONUS - STORAGE,11054.107,Conus
+06/14/2025,CONUS - STORAGE,19190.59,Conus
+06/15/2025,CONUS - STORAGE,19224.406,Conus
+06/16/2025,CONUS - STORAGE,12867.225,Conus
+06/17/2025,CONUS - STORAGE,11494.863,Conus
+06/18/2025,CONUS - STORAGE,9530.7295,Conus
+06/19/2025,CONUS - STORAGE,19580.19,Conus
+06/20/2025,CONUS - STORAGE,9446.211,Conus
+06/21/2025,CONUS - STORAGE,14282.51,Conus
+06/22/2025,CONUS - STORAGE,12467.304,Conus
+06/23/2025,CONUS - STORAGE,3184.8047,Conus
+06/24/2025,CONUS - STORAGE,-589.9927,Conus
+06/25/2025,CONUS - STORAGE,3260.1624,Conus
+06/26/2025,CONUS - STORAGE,7062.346,Conus
+06/27/2025,CONUS - STORAGE,9045.576,Conus
+06/28/2025,CONUS - STORAGE,15170.593,Conus
+06/29/2025,CONUS - STORAGE,13942.903,Conus
 01/01/2015,Midwest - Balance,0.0,Midwest
 01/02/2015,Midwest - Balance,0.0,Midwest
 01/03/2015,Midwest - Balance,0.0,Midwest
@@ -10544,6 +10572,20 @@ Date,item,value,region
 06/13/2025,Midwest - Balance,0.0,Midwest
 06/14/2025,Midwest - Balance,0.0,Midwest
 06/15/2025,Midwest - Balance,0.0,Midwest
+06/16/2025,Midwest - Balance,0.0,Midwest
+06/17/2025,Midwest - Balance,0.0,Midwest
+06/18/2025,Midwest - Balance,0.0,Midwest
+06/19/2025,Midwest - Balance,0.0,Midwest
+06/20/2025,Midwest - Balance,0.0,Midwest
+06/21/2025,Midwest - Balance,0.0,Midwest
+06/22/2025,Midwest - Balance,0.0,Midwest
+06/23/2025,Midwest - Balance,0.0,Midwest
+06/24/2025,Midwest - Balance,0.0,Midwest
+06/25/2025,Midwest - Balance,0.0,Midwest
+06/26/2025,Midwest - Balance,0.0,Midwest
+06/27/2025,Midwest - Balance,0.0,Midwest
+06/28/2025,Midwest - Balance,0.0,Midwest
+06/29/2025,Midwest - Balance,0.0,Midwest
 01/01/2015,Northeast - Balance,0.0,Northeast
 01/02/2015,Northeast - Balance,0.0,Northeast
 01/03/2015,Northeast - Balance,0.0,Northeast
@@ -14363,6 +14405,20 @@ Date,item,value,region
 06/13/2025,Northeast - Balance,0.0,Northeast
 06/14/2025,Northeast - Balance,0.0,Northeast
 06/15/2025,Northeast - Balance,0.0,Northeast
+06/16/2025,Northeast - Balance,0.0,Northeast
+06/17/2025,Northeast - Balance,0.0,Northeast
+06/18/2025,Northeast - Balance,0.0,Northeast
+06/19/2025,Northeast - Balance,0.0,Northeast
+06/20/2025,Northeast - Balance,0.0,Northeast
+06/21/2025,Northeast - Balance,0.0,Northeast
+06/22/2025,Northeast - Balance,0.0,Northeast
+06/23/2025,Northeast - Balance,0.0,Northeast
+06/24/2025,Northeast - Balance,0.0,Northeast
+06/25/2025,Northeast - Balance,0.0,Northeast
+06/26/2025,Northeast - Balance,0.0,Northeast
+06/27/2025,Northeast - Balance,0.0,Northeast
+06/28/2025,Northeast - Balance,0.0,Northeast
+06/29/2025,Northeast - Balance,0.0,Northeast
 01/01/2015,Rockies - Balance,0.0,Rockies
 01/02/2015,Rockies - Balance,0.0,Rockies
 01/03/2015,Rockies - Balance,0.0,Rockies
@@ -18182,6 +18238,20 @@ Date,item,value,region
 06/13/2025,Rockies - Balance,0.0,Rockies
 06/14/2025,Rockies - Balance,0.0,Rockies
 06/15/2025,Rockies - Balance,0.0,Rockies
+06/16/2025,Rockies - Balance,0.0,Rockies
+06/17/2025,Rockies - Balance,0.0,Rockies
+06/18/2025,Rockies - Balance,0.0,Rockies
+06/19/2025,Rockies - Balance,0.0,Rockies
+06/20/2025,Rockies - Balance,0.0,Rockies
+06/21/2025,Rockies - Balance,0.0,Rockies
+06/22/2025,Rockies - Balance,0.0,Rockies
+06/23/2025,Rockies - Balance,0.0,Rockies
+06/24/2025,Rockies - Balance,0.0,Rockies
+06/25/2025,Rockies - Balance,0.0,Rockies
+06/26/2025,Rockies - Balance,0.0,Rockies
+06/27/2025,Rockies - Balance,0.0,Rockies
+06/28/2025,Rockies - Balance,0.0,Rockies
+06/29/2025,Rockies - Balance,0.0,Rockies
 01/01/2015,SouthCentral - Balance,0.0,SouthCentral
 01/02/2015,SouthCentral - Balance,0.0,SouthCentral
 01/03/2015,SouthCentral - Balance,0.0,SouthCentral
@@ -22001,6 +22071,20 @@ Date,item,value,region
 06/13/2025,SouthCentral - Balance,0.0,SouthCentral
 06/14/2025,SouthCentral - Balance,0.0,SouthCentral
 06/15/2025,SouthCentral - Balance,0.0,SouthCentral
+06/16/2025,SouthCentral - Balance,0.0,SouthCentral
+06/17/2025,SouthCentral - Balance,0.0,SouthCentral
+06/18/2025,SouthCentral - Balance,0.0,SouthCentral
+06/19/2025,SouthCentral - Balance,0.0,SouthCentral
+06/20/2025,SouthCentral - Balance,0.0,SouthCentral
+06/21/2025,SouthCentral - Balance,0.0,SouthCentral
+06/22/2025,SouthCentral - Balance,0.0,SouthCentral
+06/23/2025,SouthCentral - Balance,0.0,SouthCentral
+06/24/2025,SouthCentral - Balance,0.0,SouthCentral
+06/25/2025,SouthCentral - Balance,0.0,SouthCentral
+06/26/2025,SouthCentral - Balance,0.0,SouthCentral
+06/27/2025,SouthCentral - Balance,0.0,SouthCentral
+06/28/2025,SouthCentral - Balance,0.0,SouthCentral
+06/29/2025,SouthCentral - Balance,0.0,SouthCentral
 01/01/2015,SouthEast - Balance,0.0,SouthEast
 01/02/2015,SouthEast - Balance,0.0,SouthEast
 01/03/2015,SouthEast - Balance,0.0,SouthEast
@@ -25820,6 +25904,20 @@ Date,item,value,region
 06/13/2025,SouthEast - Balance,0.0,SouthEast
 06/14/2025,SouthEast - Balance,0.0,SouthEast
 06/15/2025,SouthEast - Balance,0.0,SouthEast
+06/16/2025,SouthEast - Balance,0.0,SouthEast
+06/17/2025,SouthEast - Balance,0.0,SouthEast
+06/18/2025,SouthEast - Balance,0.0,SouthEast
+06/19/2025,SouthEast - Balance,0.0,SouthEast
+06/20/2025,SouthEast - Balance,0.0,SouthEast
+06/21/2025,SouthEast - Balance,0.0,SouthEast
+06/22/2025,SouthEast - Balance,0.0,SouthEast
+06/23/2025,SouthEast - Balance,0.0,SouthEast
+06/24/2025,SouthEast - Balance,0.0,SouthEast
+06/25/2025,SouthEast - Balance,0.0,SouthEast
+06/26/2025,SouthEast - Balance,0.0,SouthEast
+06/27/2025,SouthEast - Balance,0.0,SouthEast
+06/28/2025,SouthEast - Balance,0.0,SouthEast
+06/29/2025,SouthEast - Balance,0.0,SouthEast
 03/30/2025,Total Demand - California ,4482.012,California
 03/31/2025,Total Demand - California ,5001.017,California
 04/01/2025,Total Demand - California ,5317.4995,California
@@ -25897,6 +25995,20 @@ Date,item,value,region
 06/12/2025,Total Demand - California ,4746.898,California
 06/13/2025,Total Demand - California ,4744.6973,California
 06/14/2025,Total Demand - California ,4279.4604,California
+06/15/2025,Total Demand - California ,4439.237,California
+06/16/2025,Total Demand - California ,4950.217,California
+06/17/2025,Total Demand - California ,5062.3125,California
+06/18/2025,Total Demand - California ,5240.1514,California
+06/19/2025,Total Demand - California ,4132.482,California
+06/20/2025,Total Demand - California ,4765.0146,California
+06/21/2025,Total Demand - California ,4298.0127,California
+06/22/2025,Total Demand - California ,4314.573,California
+06/23/2025,Total Demand - California ,4844.197,California
+06/24/2025,Total Demand - California ,4731.774,California
+06/25/2025,Total Demand - California ,4793.2715,California
+06/26/2025,Total Demand - California ,4838.0127,California
+06/27/2025,Total Demand - California ,4985.168,California
+06/28/2025,Total Demand - California ,4545.6304,California
 01/01/2015,Total Demand - Lower 48 ,112458.5,Lower 48
 01/02/2015,Total Demand - Lower 48 ,101881.48,Lower 48
 01/03/2015,Total Demand - Lower 48 ,86382.945,Lower 48
@@ -29715,6 +29827,20 @@ Date,item,value,region
 06/12/2025,Total Demand - Lower 48 ,69750.555,Lower 48
 06/13/2025,Total Demand - Lower 48 ,70010.9,Lower 48
 06/14/2025,Total Demand - Lower 48 ,62461.105,Lower 48
+06/15/2025,Total Demand - Lower 48 ,62859.797,Lower 48
+06/16/2025,Total Demand - Lower 48 ,69508.37,Lower 48
+06/17/2025,Total Demand - Lower 48 ,71036.516,Lower 48
+06/18/2025,Total Demand - Lower 48 ,71979.484,Lower 48
+06/19/2025,Total Demand - Lower 48 ,61378.44,Lower 48
+06/20/2025,Total Demand - Lower 48 ,71480.41,Lower 48
+06/21/2025,Total Demand - Lower 48 ,66563.32,Lower 48
+06/22/2025,Total Demand - Lower 48 ,69422.43,Lower 48
+06/23/2025,Total Demand - Lower 48 ,78784.14,Lower 48
+06/24/2025,Total Demand - Lower 48 ,80633.516,Lower 48
+06/25/2025,Total Demand - Lower 48 ,77737.29,Lower 48
+06/26/2025,Total Demand - Lower 48 ,72989.0,Lower 48
+06/27/2025,Total Demand - Lower 48 ,71407.34,Lower 48
+06/28/2025,Total Demand - Lower 48 ,65286.695,Lower 48
 03/30/2025,Total Demand - Midwest,12082.539,Midwest
 03/31/2025,Total Demand - Midwest,16677.674,Midwest
 04/01/2025,Total Demand - Midwest,17642.508,Midwest
@@ -29792,6 +29918,20 @@ Date,item,value,region
 06/12/2025,Total Demand - Midwest,10928.696,Midwest
 06/13/2025,Total Demand - Midwest,11148.444,Midwest
 06/14/2025,Total Demand - Midwest,10100.67,Midwest
+06/15/2025,Total Demand - Midwest,9887.114,Midwest
+06/16/2025,Total Demand - Midwest,10903.644,Midwest
+06/17/2025,Total Demand - Midwest,11418.505,Midwest
+06/18/2025,Total Demand - Midwest,10917.547,Midwest
+06/19/2025,Total Demand - Midwest,9254.033,Midwest
+06/20/2025,Total Demand - Midwest,11108.843,Midwest
+06/21/2025,Total Demand - Midwest,11041.115,Midwest
+06/22/2025,Total Demand - Midwest,11606.807,Midwest
+06/23/2025,Total Demand - Midwest,12686.941,Midwest
+06/24/2025,Total Demand - Midwest,12218.811,Midwest
+06/25/2025,Total Demand - Midwest,11383.6045,Midwest
+06/26/2025,Total Demand - Midwest,11695.56,Midwest
+06/27/2025,Total Demand - Midwest,11607.265,Midwest
+06/28/2025,Total Demand - Midwest,10184.387,Midwest
 01/01/2015,Total Demand - Northeast,26273.105,Northeast
 01/02/2015,Total Demand - Northeast,22710.045,Northeast
 01/03/2015,Total Demand - Northeast,20817.062,Northeast
@@ -33610,6 +33750,20 @@ Date,item,value,region
 06/12/2025,Total Demand - Northeast,15941.125,Northeast
 06/13/2025,Total Demand - Northeast,15241.49,Northeast
 06/14/2025,Total Demand - Northeast,12759.372,Northeast
+06/15/2025,Total Demand - Northeast,12724.581,Northeast
+06/16/2025,Total Demand - Northeast,14142.191,Northeast
+06/17/2025,Total Demand - Northeast,14376.24,Northeast
+06/18/2025,Total Demand - Northeast,15313.109,Northeast
+06/19/2025,Total Demand - Northeast,13687.699,Northeast
+06/20/2025,Total Demand - Northeast,14986.901,Northeast
+06/21/2025,Total Demand - Northeast,14507.9,Northeast
+06/22/2025,Total Demand - Northeast,16877.193,Northeast
+06/23/2025,Total Demand - Northeast,20321.871,Northeast
+06/24/2025,Total Demand - Northeast,22601.223,Northeast
+06/25/2025,Total Demand - Northeast,21345.93,Northeast
+06/26/2025,Total Demand - Northeast,16632.951,Northeast
+06/27/2025,Total Demand - Northeast,14908.515,Northeast
+06/28/2025,Total Demand - Northeast,14134.9795,Northeast
 01/01/2015,Total Demand - Pacific Northwest ,3176.1448,West
 01/02/2015,Total Demand - Pacific Northwest ,2871.833,West
 01/03/2015,Total Demand - Pacific Northwest ,2492.1394,West
@@ -37428,6 +37582,20 @@ Date,item,value,region
 06/12/2025,Total Demand - Pacific Northwest ,1320.1661,West
 06/13/2025,Total Demand - Pacific Northwest ,1382.2354,West
 06/14/2025,Total Demand - Pacific Northwest ,1214.7479,West
+06/15/2025,Total Demand - Pacific Northwest ,1195.9325,West
+06/16/2025,Total Demand - Pacific Northwest ,1302.1101,West
+06/17/2025,Total Demand - Pacific Northwest ,1300.7606,West
+06/18/2025,Total Demand - Pacific Northwest ,1311.8734,West
+06/19/2025,Total Demand - Pacific Northwest ,1133.1702,West
+06/20/2025,Total Demand - Pacific Northwest ,1445.1097,West
+06/21/2025,Total Demand - Pacific Northwest ,1325.9231,West
+06/22/2025,Total Demand - Pacific Northwest ,1194.5518,West
+06/23/2025,Total Demand - Pacific Northwest ,1298.9839,West
+06/24/2025,Total Demand - Pacific Northwest ,1300.9065,West
+06/25/2025,Total Demand - Pacific Northwest ,1308.2485,West
+06/26/2025,Total Demand - Pacific Northwest ,1313.1887,West
+06/27/2025,Total Demand - Pacific Northwest ,1312.415,West
+06/28/2025,Total Demand - Pacific Northwest ,1168.6315,West
 03/30/2025,Total Demand - Rockies,5095.0435,Rockies
 03/31/2025,Total Demand - Rockies,5379.2744,Rockies
 04/01/2025,Total Demand - Rockies,5991.4507,Rockies
@@ -37505,6 +37673,20 @@ Date,item,value,region
 06/12/2025,Total Demand - Rockies,4812.717,Rockies
 06/13/2025,Total Demand - Rockies,4796.5723,Rockies
 06/14/2025,Total Demand - Rockies,4397.2314,Rockies
+06/15/2025,Total Demand - Rockies,4495.6255,Rockies
+06/16/2025,Total Demand - Rockies,4986.2876,Rockies
+06/17/2025,Total Demand - Rockies,4851.921,Rockies
+06/18/2025,Total Demand - Rockies,4885.577,Rockies
+06/19/2025,Total Demand - Rockies,4312.5557,Rockies
+06/20/2025,Total Demand - Rockies,5040.092,Rockies
+06/21/2025,Total Demand - Rockies,4332.823,Rockies
+06/22/2025,Total Demand - Rockies,4144.0977,Rockies
+06/23/2025,Total Demand - Rockies,4694.3184,Rockies
+06/24/2025,Total Demand - Rockies,4656.0703,Rockies
+06/25/2025,Total Demand - Rockies,4651.659,Rockies
+06/26/2025,Total Demand - Rockies,4724.587,Rockies
+06/27/2025,Total Demand - Rockies,4868.265,Rockies
+06/28/2025,Total Demand - Rockies,4457.4717,Rockies
 03/30/2025,Total Demand - Rockies - SW,1671.0325,Rockies
 03/31/2025,Total Demand - Rockies - SW,1856.834,Rockies
 04/01/2025,Total Demand - Rockies - SW,1886.6682,Rockies
@@ -37582,6 +37764,20 @@ Date,item,value,region
 06/12/2025,Total Demand - Rockies - SW,2183.8613,Rockies
 06/13/2025,Total Demand - Rockies - SW,2149.734,Rockies
 06/14/2025,Total Demand - Rockies - SW,1971.4725,Rockies
+06/15/2025,Total Demand - Rockies - SW,2049.1533,Rockies
+06/16/2025,Total Demand - Rockies - SW,2304.3308,Rockies
+06/17/2025,Total Demand - Rockies - SW,2229.8699,Rockies
+06/18/2025,Total Demand - Rockies - SW,2270.272,Rockies
+06/19/2025,Total Demand - Rockies - SW,1978.6584,Rockies
+06/20/2025,Total Demand - Rockies - SW,2195.2036,Rockies
+06/21/2025,Total Demand - Rockies - SW,1879.2993,Rockies
+06/22/2025,Total Demand - Rockies - SW,1787.1182,Rockies
+06/23/2025,Total Demand - Rockies - SW,2019.7976,Rockies
+06/24/2025,Total Demand - Rockies - SW,2034.7653,Rockies
+06/25/2025,Total Demand - Rockies - SW,2044.7513,Rockies
+06/26/2025,Total Demand - Rockies - SW,2110.3357,Rockies
+06/27/2025,Total Demand - Rockies - SW,2149.734,Rockies
+06/28/2025,Total Demand - Rockies - SW,1997.2136,Rockies
 03/30/2025,Total Demand - Rockies - Upper,3424.011,Rockies
 03/31/2025,Total Demand - Rockies - Upper,3522.4407,Rockies
 04/01/2025,Total Demand - Rockies - Upper,4104.7827,Rockies
@@ -37659,6 +37855,20 @@ Date,item,value,region
 06/12/2025,Total Demand - Rockies - Upper,2628.8555,Rockies
 06/13/2025,Total Demand - Rockies - Upper,2646.8386,Rockies
 06/14/2025,Total Demand - Rockies - Upper,2425.7588,Rockies
+06/15/2025,Total Demand - Rockies - Upper,2446.4722,Rockies
+06/16/2025,Total Demand - Rockies - Upper,2681.957,Rockies
+06/17/2025,Total Demand - Rockies - Upper,2622.0513,Rockies
+06/18/2025,Total Demand - Rockies - Upper,2615.3052,Rockies
+06/19/2025,Total Demand - Rockies - Upper,2333.897,Rockies
+06/20/2025,Total Demand - Rockies - Upper,2844.888,Rockies
+06/21/2025,Total Demand - Rockies - Upper,2453.524,Rockies
+06/22/2025,Total Demand - Rockies - Upper,2356.9792,Rockies
+06/23/2025,Total Demand - Rockies - Upper,2674.5208,Rockies
+06/24/2025,Total Demand - Rockies - Upper,2621.3052,Rockies
+06/25/2025,Total Demand - Rockies - Upper,2606.9077,Rockies
+06/26/2025,Total Demand - Rockies - Upper,2614.2512,Rockies
+06/27/2025,Total Demand - Rockies - Upper,2718.5312,Rockies
+06/28/2025,Total Demand - Rockies - Upper,2460.2578,Rockies
 03/30/2025,Total Demand - South Central ,18280.145,South Central
 03/31/2025,Total Demand - South Central ,20240.37,South Central
 04/01/2025,Total Demand - South Central ,20213.71,South Central
@@ -37736,6 +37946,20 @@ Date,item,value,region
 06/12/2025,Total Demand - South Central ,20734.963,South Central
 06/13/2025,Total Demand - South Central ,21158.328,South Central
 06/14/2025,Total Demand - South Central ,19277.203,South Central
+06/15/2025,Total Demand - South Central ,19674.594,South Central
+06/16/2025,Total Demand - South Central ,21381.615,South Central
+06/17/2025,Total Demand - South Central ,22139.738,South Central
+06/18/2025,Total Demand - South Central ,22623.178,South Central
+06/19/2025,Total Demand - South Central ,19065.86,South Central
+06/20/2025,Total Demand - South Central ,22801.467,South Central
+06/21/2025,Total Demand - South Central ,20506.291,South Central
+06/22/2025,Total Demand - South Central ,20569.65,South Central
+06/23/2025,Total Demand - South Central ,22715.057,South Central
+06/24/2025,Total Demand - South Central ,22500.447,South Central
+06/25/2025,Total Demand - South Central ,21816.312,South Central
+06/26/2025,Total Demand - South Central ,22094.63,South Central
+06/27/2025,Total Demand - South Central ,22240.215,South Central
+06/28/2025,Total Demand - South Central ,20407.979,South Central
 01/01/2015,Total Demand - Southeast - Florida ,3145.1306,Southeast
 01/02/2015,Total Demand - Southeast - Florida ,3213.3538,Southeast
 01/03/2015,Total Demand - Southeast - Florida ,2796.7483,Southeast
@@ -41554,6 +41778,20 @@ Date,item,value,region
 06/12/2025,Total Demand - Southeast - Florida ,4793.4775,Southeast
 06/13/2025,Total Demand - Southeast - Florida ,5056.44,Southeast
 06/14/2025,Total Demand - Southeast - Florida ,4610.4795,Southeast
+06/15/2025,Total Demand - Southeast - Florida ,4630.683,Southeast
+06/16/2025,Total Demand - Southeast - Florida ,5234.7773,Southeast
+06/17/2025,Total Demand - Southeast - Florida ,5303.1943,Southeast
+06/18/2025,Total Demand - Southeast - Florida ,5162.152,Southeast
+06/19/2025,Total Demand - Southeast - Florida ,4265.699,Southeast
+06/20/2025,Total Demand - Southeast - Florida ,4809.931,Southeast
+06/21/2025,Total Demand - Southeast - Florida ,4494.104,Southeast
+06/22/2025,Total Demand - Southeast - Florida ,4375.5254,Southeast
+06/23/2025,Total Demand - Southeast - Florida ,4963.38,Southeast
+06/24/2025,Total Demand - Southeast - Florida ,4952.8486,Southeast
+06/25/2025,Total Demand - Southeast - Florida ,4683.1953,Southeast
+06/26/2025,Total Demand - Southeast - Florida ,4593.397,Southeast
+06/27/2025,Total Demand - Southeast - Florida ,4669.2285,Southeast
+06/28/2025,Total Demand - Southeast - Florida ,4367.9414,Southeast
 03/30/2025,Total Demand - Southeast - Other,5386.703,Southeast
 03/31/2025,Total Demand - Southeast - Other,5998.9785,Southeast
 04/01/2025,Total Demand - Southeast - Other,6100.6855,Southeast
@@ -41631,6 +41869,20 @@ Date,item,value,region
 06/12/2025,Total Demand - Southeast - Other,6472.509,Southeast
 06/13/2025,Total Demand - Southeast - Other,6482.6865,Southeast
 06/14/2025,Total Demand - Southeast - Other,5821.9404,Southeast
+06/15/2025,Total Demand - Southeast - Other,5812.0312,Southeast
+06/16/2025,Total Demand - Southeast - Other,6607.5273,Southeast
+06/17/2025,Total Demand - Southeast - Other,6583.8477,Southeast
+06/18/2025,Total Demand - Southeast - Other,6525.9,Southeast
+06/19/2025,Total Demand - Southeast - Other,5526.941,Southeast
+06/20/2025,Total Demand - Southeast - Other,6523.0493,Southeast
+06/21/2025,Total Demand - Southeast - Other,6057.1543,Southeast
+06/22/2025,Total Demand - Southeast - Other,6340.028,Southeast
+06/23/2025,Total Demand - Southeast - Other,7259.3896,Southeast
+06/24/2025,Total Demand - Southeast - Other,7671.437,Southeast
+06/25/2025,Total Demand - Southeast - Other,7755.0645,Southeast
+06/26/2025,Total Demand - Southeast - Other,7096.674,Southeast
+06/27/2025,Total Demand - Southeast - Other,6816.2705,Southeast
+06/28/2025,Total Demand - Southeast - Other,6019.6777,Southeast
 01/01/2015,West - Balance,0.0,West
 01/02/2015,West - Balance,0.0,West
 01/03/2015,West - Balance,0.0,West
@@ -45450,6 +45702,20 @@ Date,item,value,region
 06/13/2025,West - Balance,0.0,West
 06/14/2025,West - Balance,0.0,West
 06/15/2025,West - Balance,0.0,West
+06/16/2025,West - Balance,0.0,West
+06/17/2025,West - Balance,0.0,West
+06/18/2025,West - Balance,0.0,West
+06/19/2025,West - Balance,0.0,West
+06/20/2025,West - Balance,0.0,West
+06/21/2025,West - Balance,0.0,West
+06/22/2025,West - Balance,0.0,West
+06/23/2025,West - Balance,0.0,West
+06/24/2025,West - Balance,0.0,West
+06/25/2025,West - Balance,0.0,West
+06/26/2025,West - Balance,0.0,West
+06/27/2025,West - Balance,0.0,West
+06/28/2025,West - Balance,0.0,West
+06/29/2025,West - Balance,0.0,West
 01/01/2015,West - Ind,0.0,West
 01/02/2015,West - Ind,0.0,West
 01/03/2015,West - Ind,0.0,West
@@ -49269,6 +49535,20 @@ Date,item,value,region
 06/13/2025,West - Ind,0.0,West
 06/14/2025,West - Ind,0.0,West
 06/15/2025,West - Ind,0.0,West
+06/16/2025,West - Ind,0.0,West
+06/17/2025,West - Ind,0.0,West
+06/18/2025,West - Ind,0.0,West
+06/19/2025,West - Ind,0.0,West
+06/20/2025,West - Ind,0.0,West
+06/21/2025,West - Ind,0.0,West
+06/22/2025,West - Ind,0.0,West
+06/23/2025,West - Ind,0.0,West
+06/24/2025,West - Ind,0.0,West
+06/25/2025,West - Ind,0.0,West
+06/26/2025,West - Ind,0.0,West
+06/27/2025,West - Ind,0.0,West
+06/28/2025,West - Ind,0.0,West
+06/29/2025,West - Ind,0.0,West
 01/01/2015,West - Power,0.0,West
 01/02/2015,West - Power,0.0,West
 01/03/2015,West - Power,0.0,West
@@ -53088,6 +53368,20 @@ Date,item,value,region
 06/13/2025,West - Power,0.0,West
 06/14/2025,West - Power,0.0,West
 06/15/2025,West - Power,0.0,West
+06/16/2025,West - Power,0.0,West
+06/17/2025,West - Power,0.0,West
+06/18/2025,West - Power,0.0,West
+06/19/2025,West - Power,0.0,West
+06/20/2025,West - Power,0.0,West
+06/21/2025,West - Power,0.0,West
+06/22/2025,West - Power,0.0,West
+06/23/2025,West - Power,0.0,West
+06/24/2025,West - Power,0.0,West
+06/25/2025,West - Power,0.0,West
+06/26/2025,West - Power,0.0,West
+06/27/2025,West - Power,0.0,West
+06/28/2025,West - Power,0.0,West
+06/29/2025,West - Power,0.0,West
 01/01/2015,West - ResCom,0.0,West
 01/02/2015,West - ResCom,0.0,West
 01/03/2015,West - ResCom,0.0,West
@@ -56907,3 +57201,17 @@ Date,item,value,region
 06/13/2025,West - ResCom,0.0,West
 06/14/2025,West - ResCom,0.0,West
 06/15/2025,West - ResCom,0.0,West
+06/16/2025,West - ResCom,0.0,West
+06/17/2025,West - ResCom,0.0,West
+06/18/2025,West - ResCom,0.0,West
+06/19/2025,West - ResCom,0.0,West
+06/20/2025,West - ResCom,0.0,West
+06/21/2025,West - ResCom,0.0,West
+06/22/2025,West - ResCom,0.0,West
+06/23/2025,West - ResCom,0.0,West
+06/24/2025,West - ResCom,0.0,West
+06/25/2025,West - ResCom,0.0,West
+06/26/2025,West - ResCom,0.0,West
+06/27/2025,West - ResCom,0.0,West
+06/28/2025,West - ResCom,0.0,West
+06/29/2025,West - ResCom,0.0,West

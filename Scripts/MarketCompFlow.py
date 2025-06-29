@@ -18,10 +18,10 @@ from scipy.stats import wilcoxon
 # ==============================================================================
 SCRIPT_DIR = Path(__file__).parent
 INFO_DIR = SCRIPT_DIR.parent / "INFO"
+OUTPUT_DIR = SCRIPT_DIR / "MarketAnalysis_Report_Output" # Define the output directory
 LOCS_FILE_PATH = INFO_DIR / "locs_list.csv"
 PRICES_FILE_PATH = INFO_DIR / "PRICES.csv"
-CACHE_FILE_PATH = INFO_DIR / "ComprehensiveFlow_DataCache.csv" # Dedicated cache for this script
-OUTPUT_DIR = SCRIPT_DIR / "ComprehensiveFlowReport_Output"
+CACHE_FILE_PATH = OUTPUT_DIR / "ComprehensiveFlow_DataCache.csv" # Dedicated cache for this script
 OUTPUT_FILENAME = "Comprehensive_Flow_Report.html"
 
 DB_HOST = "dda.criterionrsch.com"
@@ -95,6 +95,9 @@ def get_flow_data(engine, all_tickers, locs_metadata_df):
     Fetches, prepares, and caches all necessary flow data.
     This function now handles merging and value adjustments internally.
     """
+    # Ensure output directory exists before trying to access cache
+    OUTPUT_DIR.mkdir(exist_ok=True)
+    
     # Define required columns for cache validation
     required_cache_cols = {'date', 'ticker', 'value', 'loc_name', 'market_component', 'category_short'}
 
@@ -181,7 +184,12 @@ def analyze_forward_month_patterns(all_data):
     
     results = []
     for loc_name, loc_data in all_data.groupby('loc_name'):
-        monthly_totals = loc_data.groupby(loc_data['date'].dt.to_period('M'))['value'].sum().unstack(level=-1)
+        # Correctly group by year and month, then unstack to create a DataFrame
+        # with years as index and months as columns.
+        monthly_totals = loc_data.groupby([loc_data['date'].dt.year, loc_data['date'].dt.month])['value'].sum().unstack()
+        monthly_totals.index.name = 'year'
+        monthly_totals.columns.name = 'month'
+
         if prior_month not in monthly_totals.columns or forward_month not in monthly_totals.columns: continue
             
         comparison_df = monthly_totals[[prior_month, forward_month]].dropna()
