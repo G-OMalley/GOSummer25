@@ -1,0 +1,429 @@
+from dotenv import load_dotenv
+import os
+import requests
+import pandas as pd
+import matplotlib
+matplotlib.use('TkAgg') # Explicitly set backend for wider compatibility
+import matplotlib.pyplot as plt
+from io import StringIO
+from datetime import datetime
+from pathlib import Path
+import questionary
+import numpy as np
+
+# --- Define Base Path ---
+# This script is in 'trader-helper/GOScripts/your_script_name.py'
+# We want BASE_DIR to be 'trader-helper'
+try:
+    # Get the current script's path, resolve symlinks, and then go up two levels.
+    # Example: /path/to/trader-helper/GOScripts/your_script.py -> /path/to/trader-helper
+    BASE_DIR = Path(__file__).resolve().parents[1]
+except NameError:
+    # Fallback for interactive environments (like Jupyter or direct console execution)
+    # where __file__ might not be defined.
+    # Assumes script is run from 'trader-helper' or 'trader-helper/GOScripts'.
+    current_path = Path(".").resolve()
+    if current_path.name == "GOScripts":
+        # If run from trader-helper/GOScripts, then BASE_DIR is the parent
+        BASE_DIR = current_path.parent
+    elif (current_path / "GOScripts").exists() and (current_path / "Weather").exists():
+        # If run from trader-helper, then BASE_DIR is the current path
+        BASE_DIR = current_path
+    else:
+        # If unable to determine, raise an error or set a default that needs user adjustment
+        raise RuntimeError("Could not determine BASE_DIR. Please run the script from 'trader-helper' or 'trader-helper/GOScripts'.")
+
+# --- Define paths relative to BASE_DIR ---
+ENV_PATH = BASE_DIR / "Weather" / ".env"
+INFO_DIR = BASE_DIR / "INFO"
+
+# --- Load credentials from .env ---
+load_dotenv(dotenv_path=ENV_PATH)
+USERNAME = os.getenv("WSI_ACCOUNT_USERNAME")
+PROFILE = os.getenv("WSI_PROFILE_EMAIL")
+PASSWORD = os.getenv("WSI_PASSWORD")
+
+if not USERNAME or not PROFILE or not PASSWORD:
+    print(f"Attempted to load .env from: {ENV_PATH}")
+    raise EnvironmentError("❌ Missing WSI credentials. Ensure .env exists at trader-helper/Weather/.env and is correctly formatted.")
+
+# --- Load city to ISO and location mapping ---
+mapping_file = INFO_DIR / "City_to_ISO_and_Location_Mapping.csv"
+if not mapping_file.exists():
+    raise FileNotFoundError(f"❌ Mapping file not found: {mapping_file}")
+city_location_df = pd.read_csv(mapping_file)
+city_location_df.columns = city_location_df.columns.str.strip().str.title()
+CITY_TO_ISO = dict(zip(city_location_df["City"], city_location_df["Iso"]))
+CITY_TO_LOCATION = dict(zip(city_location_df["City"], city_location_df["Location"]))
+
+
+# --- WSI API Functions (No Change) ---
+def get_city_map():
+    """Fetches the city to SiteId mapping from WSI."""
+    url = "https://www.wsitrader.com/Services/CSVDownloadService.svc/GetCityIds"
+    params = {"Account": USERNAME, "Profile": PROFILE, "Password": PASSWORD}
+    try:
+        response = requests.get(url, params=params, timeout=20)
+        response.raise_for_status() # Raises an HTTPError for bad responses (4XX or 5XX)
+    except requests.exceptions.RequestException as e:
+        raise ConnectionError(f"Failed to connect to WSI API (GetCityIds): {e}")
+
+    df = pd.read_csv(StringIO(response.text), sep=",", engine="python", on_bad_lines='skip')
+    df.columns = df.columns.str.strip()
+    if not {"Station Name", "SiteId"}.issubset(df.columns):
+        raise KeyError(f"Expected columns 'Station Name', 'SiteId' not found in WSI city map. Columns are: {df.columns.tolist()}")
+    return dict(zip(df["Station Name"], df["SiteId"]))
+
+def fetch_year_data(station_id, city_name, year):
+    """Fetches historical daily average temperature data for a given year from WSI."""
+    def fmt(d): return d.strftime("%m/%d/%Y")
+    url = "https://www.wsitrader.com/Services/CSVDownloadService.svc/GetHistoricalObservations"
+    params = {
+        "Account": USERNAME, "Profile": PROFILE, "Password": PASSWORD,
+        "CityIds[]": station_id, "StartDate": fmt(datetime(year, 1, 1)), "EndDate": fmt(datetime(year, 12, 31)),
+        "HistoricalProductId": "HISTORICAL_DAILY_AVERAGE", "DataTypes[]": "temperature",
+        "TempUnits": "F", "IsTemp": "true", "IsDaily": "true", "IsDisplayDates": "false"
+    }
+    try:
+        response = requests.get(url, params=params, timeout=60) # Increased timeout for potentially large data
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"⚠️ Warning: Failed to fetch data for {city_name} year {year} from WSI: {e}")
+        return pd.DataFrame()
+
+    try:
+        df = pd.read_csv(StringIO(response.text), sep=",", engine="python", on_bad_lines='skip')
+    except pd.errors.EmptyDataError:
+        print(f"ℹ️ No data returned for {city_name} year {year}.")
+        return pd.DataFrame()
+
+    if df.empty or len(df.columns) < 3:
+        print(f"ℹ️ Empty or malformed data for {city_name} year {year}. Columns: {df.columns.tolist() if not df.empty else 'N/A'}")
+        return pd.DataFrame()
+
+    df.columns = df.columns.str.strip()
+    # Ensure the renaming is robust to potential slight column name variations
+    # The first column is Date, next two are temperature readings.
+    date_col_name = df.columns[0]
+    min_temp_col_name = df.columns[1]
+    max_temp_col_name = df.columns[2]
+
+    df = df.rename(columns={date_col_name: "Date", min_temp_col_name: "Min Temp", max_temp_col_name: "Max Temp"})
+    df["Date"] = pd.to_datetime(df["Date"] + f" {year}", format="%d-%b %Y", errors="coerce")
+    df = df.dropna(subset=["Date"]) # Drop rows where date conversion failed
+
+    df["Min Temp"] = pd.to_numeric(df["Min Temp"], errors="coerce")
+    df["Max Temp"] = pd.to_numeric(df["Max Temp"], errors="coerce")
+    df["Avg Temp"] = (df["Min Temp"] + df["Max Temp"]) / 2
+    df["CDD"] = (df["Avg Temp"] - 65).clip(lower=0).round(1)
+    df["HDD"] = (65 - df["Avg Temp"]).clip(lower=0).round(1)
+    df["Month-Day"] = df["Date"].dt.strftime("%m-%d")
+    return df[["Date", "Min Temp", "Max Temp", "Avg Temp", "CDD", "HDD", "Month-Day"]]
+
+def fetch_all_years(station_id, city_name, start_year=2005, end_year_override=None):
+    """Fetches weather data for a range of years."""
+    current_year = datetime.today().year
+    end_year = end_year_override if end_year_override else current_year
+    
+    all_data = []
+    for year_idx in range(start_year, end_year + 1):
+        print(f"Fetching weather data for {city_name}, year {year_idx}...")
+        year_df = fetch_year_data(station_id, city_name, year_idx)
+        if not year_df.empty:
+            all_data.append(year_df)
+    if not all_data:
+        return pd.DataFrame()
+    return pd.concat(all_data, ignore_index=True)
+
+def compute_10yr_stats(df):
+    """Computes 10-year historical statistics for weather data."""
+    if df.empty or "Month-Day" not in df.columns or "Date" not in df.columns:
+        print("⚠️ compute_10yr_stats: Input DataFrame is empty or missing required columns.")
+        return df # Return original df if it's not suitable for processing
+
+    # Ensure Date is datetime
+    df["Date"] = pd.to_datetime(df["Date"])
+    
+    # Sort by date to ensure correct historical lookup
+    df = df.sort_values(by="Date").reset_index(drop=True)
+
+    output_rows = []
+    for idx, row in df.iterrows():
+        current_date = row["Date"]
+        current_month_day = row["Month-Day"]
+        
+        # Look at the previous 10 years of data for the same month-day
+        # Ensure we don't look into the future relative to the row's date
+        historical_window_start = current_date - pd.DateOffset(years=10)
+        
+        same_day_historical = df[
+            (df["Month-Day"] == current_month_day) &
+            (df["Date"] < current_date) &
+            (df["Date"] >= historical_window_start)
+        ]
+        
+        stats = {
+            "10yr Min Temp": np.nan, "10yr Max Temp": np.nan, "10yr Avg Temp": np.nan,
+            "10yr CDD": np.nan, "10yr HDD": np.nan
+        }
+
+        if not same_day_historical.empty:
+            tmin_10yr = same_day_historical["Min Temp"].min()
+            tmax_10yr = same_day_historical["Max Temp"].max()
+            
+            avg_temp_10yr_values = same_day_historical["Avg Temp"].dropna()
+            tavg_10yr = avg_temp_10yr_values.mean() if not avg_temp_10yr_values.empty else np.nan
+
+            if not np.isnan(tavg_10yr):
+                stats["10yr Min Temp"] = round(tmin_10yr, 1)
+                stats["10yr Max Temp"] = round(tmax_10yr, 1)
+                stats["10yr Avg Temp"] = round(tavg_10yr, 1)
+                stats["10yr CDD"] = round(max(0, tavg_10yr - 65), 1)
+                stats["10yr HDD"] = round(max(0, 65 - tavg_10yr), 1)
+        
+        output_rows.append({**row.to_dict(), **stats})
+        
+    return pd.DataFrame(output_rows)
+
+# --- LMP Data Function (MODIFIED FOR ISO NAME STANDARDIZATION) ---
+def load_lmp_data(iso, location, start_date, end_date):
+    """Loads LMP data from the single PowerPrices.csv file."""
+    
+    # Define the path to the single PowerPrices.csv file
+    file_path = INFO_DIR / "PowerPrices.csv"
+
+    if not file_path.exists():
+        print(f"❌ LMP data file not found: {file_path}")
+        return pd.DataFrame()
+
+    try:
+        df = pd.read_csv(file_path)
+        df.columns = df.columns.str.strip() # Strip spaces from column names
+
+        # --- Standardize Column Names (based on your provided head) ---
+        required_cols = ['ISO', 'Location', 'Date', 'Max LMP']
+        if not all(col in df.columns for col in required_cols):
+            print(f"❌ PowerPrices.csv missing one or more required columns ({required_cols}). Found: {df.columns.tolist()}")
+            return pd.DataFrame()
+
+        df = df.rename(columns={'Max LMP': 'max_lmp'}) # Standardize LMP column name
+
+        # Convert date column to datetime objects
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+        
+        # --- MODIFIED LINE: Standardize ISO names for consistency ---
+        df["ISO"] = df["ISO"].astype(str).str.strip().str.upper().replace('ISONE', 'ISO-NE')
+        # --- END MODIFIED LINE ---
+
+        # Handles '-APND' suffix and ensures uppercase for Location
+        df["Location"] = df["Location"].astype(str).str.strip().str.upper().str.replace('-APND', '')
+        
+        df["max_lmp"] = pd.to_numeric(df["max_lmp"], errors="coerce") # Ensure numeric
+
+        # Filter by ISO, Location, and Date
+        start_dt = pd.to_datetime(start_date)
+        end_dt = pd.to_datetime(end_date)
+        
+        filtered_df = df[
+            (df["ISO"] == iso.upper()) &
+            (df["Location"] == location.upper()) &
+            (df["Date"] >= start_dt) &
+            (df["Date"] <= end_dt)
+        ].copy() # Use .copy() to avoid SettingWithCopyWarning
+
+        # Drop rows where date or lmp conversion failed if they exist
+        filtered_df = filtered_df.dropna(subset=["Date", "max_lmp"])
+        
+        return filtered_df
+    except Exception as e:
+        print(f"❌ Error loading LMP data from {file_path}: {e}")
+        import traceback
+        traceback.print_exc() 
+        return pd.DataFrame()
+
+# --- Main Execution (No Change except call to load_lmp_data) ---
+def main():
+    print("Fetching WSI City ID map...")
+    try:
+        city_map_wsi = get_city_map()
+    except Exception as e:
+        print(f"CRITICAL ERROR: Could not fetch WSI city map. {e}")
+        return
+
+    # --- User Selections ---
+    available_isos = sorted(list(set(city_location_df["Iso"].dropna().astype(str).str.upper())))
+    if not available_isos:
+        print("❌ No ISOs found in the mapping file.")
+        return
+    iso_choice_q = questionary.select("🔌 Choose an ISO:", choices=available_isos).ask()
+    if not iso_choice_q: return
+    iso_choice = iso_choice_q.upper() # Standardize ISO choice
+
+    locations_in_iso = sorted(list(set(
+        city_location_df[city_location_df["Iso"].astype(str).str.upper() == iso_choice]["Location"].dropna().astype(str).str.upper()
+    )))
+    if not locations_in_iso:
+        print(f"❌ No locations found for ISO {iso_choice} in the mapping file.")
+        return
+    location_choice_q = questionary.select(f"📍 Choose a location in {iso_choice}:", choices=locations_in_iso).ask()
+    if not location_choice_q: return
+    location_choice = location_choice_q.upper() # Standardize location choice
+
+    cities_in_location = sorted(list(set(
+        city_location_df[
+            (city_location_df["Iso"].astype(str).str.upper() == iso_choice) &
+            (city_location_df["Location"].astype(str).str.upper() == location_choice)
+        ]["City"].dropna()
+    )))
+    if not cities_in_location:
+        print(f"❌ No cities found for location {location_choice} in ISO {iso_choice}.")
+        return
+    city_choice = questionary.select(f"🏙️ Choose a city at {location_choice} ({iso_choice}):", choices=cities_in_location).ask()
+    if not city_choice: return
+
+    while True:
+        start_str = questionary.text(
+            "🗓️ Enter start date (YYYY-MM-DD):",
+            default=datetime(datetime.today().year - 1, 1, 1).strftime("%Y-%m-%d")
+        ).ask()
+        if not start_str: return
+        try:
+            start_date = pd.to_datetime(start_str)
+            break
+        except ValueError:
+            print("❌ Invalid start date format. Please use Букмекерлар-MM-DD.")
+
+    while True:
+        end_str = questionary.text(
+            "🗓️ Enter end date (YYYY-MM-DD):",
+            default=datetime.today().strftime("%Y-%m-%d")
+        ).ask()
+        if not end_str: return
+        try:
+            end_date = pd.to_datetime(end_str)
+            if end_date < start_date:
+                print("❌ End date cannot be before start date.")
+                continue
+            break
+        except ValueError:
+            print("❌ Invalid end date format. Please use Букмекерлар-MM-DD.")
+
+    station_id = city_map_wsi.get(city_choice)
+    if not station_id:
+        for wsi_city_name, s_id in city_map_wsi.items():
+            if city_choice.lower() in wsi_city_name.lower():
+                station_id = s_id
+                print(f"ℹ️ Matched '{city_choice}' to WSI station '{wsi_city_name}' (ID: {station_id})")
+                break
+        if not station_id:
+            print(f"❌ Station ID not found for city '{city_choice}' in WSI map.")
+            print(f"   Available WSI station names near your choice: {[name for name in city_map_wsi.keys() if city_choice.split()[0].lower() in name.lower()][:10]}")
+            return
+
+    print(f"\nFetching weather data for {city_choice} (Station ID: {station_id}). This may take a few minutes...")
+    weather_fetch_start_year = 2005 
+    weather_df = fetch_all_years(station_id, city_choice, start_year=weather_fetch_start_year, end_year_override=end_date.year)
+
+    if weather_df.empty:
+        print(f"❌ No weather data found for {city_choice} between {weather_fetch_start_year} and {end_date.year}.")
+        return
+
+    print("Computing 10-year historical weather statistics...")
+    weather_df = compute_10yr_stats(weather_df)
+    
+    weather_df_filtered = weather_df[weather_df["Date"].between(start_date, end_date, inclusive="both")].copy()
+    
+    if weather_df_filtered.empty:
+        print(f"❌ No weather data available for {city_choice} in the selected period: {start_str} to {end_str}.")
+        return
+    weather_df_filtered["Year"] = weather_df_filtered["Date"].dt.year
+
+    print(f"\nLoading LMP data for {location_choice} ({iso_choice})...")
+    # The load_lmp_data function now expects the ISO and Location as arguments
+    lmp_df = load_lmp_data(iso_choice, location_choice, start_date, end_date)
+
+    if lmp_df.empty:
+        print(f"❌ No LMP data found for location {location_choice} ({iso_choice}) in the selected period from PowerPrices.csv.")
+        return
+    
+    # After load_lmp_data, the LMP price column should be named 'max_lmp'
+    if 'max_lmp' not in lmp_df.columns:
+        print(f"❌ Critical Error: 'max_lmp' column is missing from LMP data after processing. Columns: {lmp_df.columns.tolist()}")
+        return
+    
+    y_axis_label_price_col_name = "Max LMP" 
+
+
+    print("\nMerging weather and LMP data...")
+    # Ensure 'date' column in lmp_df is consistently named for the merge
+    # In the new load_lmp_data, it's standardized to 'Date' from the original 'Date' column.
+    # We'll merge on 'Date' from weather_df and 'Date' from lmp_df
+    merged_df = pd.merge(weather_df_filtered, lmp_df, left_on="Date", right_on="Date", how="inner") # Changed right_on to "Date"
+
+    if merged_df.empty:
+        print("❌ No matching data found after merging weather and LMP for the selected period and location.")
+        print(f"   Weather data points: {len(weather_df_filtered)}, LMP data points: {len(lmp_df)}")
+        if not weather_df_filtered.empty:
+            print(f"   Date range weather: {weather_df_filtered['Date'].min()} to {weather_df_filtered['Date'].max()}")
+        if not lmp_df.empty:
+            print(f"   Date range LMP: {lmp_df['Date'].min()} to {lmp_df['Date'].max()}") # Changed to 'Date'
+        return
+
+    merged_df["Year"] = merged_df["Date"].dt.year 
+
+    print("Generating plot...")
+    plt.figure(figsize=(14, 8))
+    
+    num_years = merged_df["Year"].nunique()
+    cmap_name = 'viridis' # Default continuous map
+    if num_years <= 10: cmap_name = 'tab10'
+    elif num_years <=20: cmap_name = 'tab20'
+    
+    # Get a color for each unique year
+    unique_years_sorted = sorted(merged_df["Year"].unique())
+    year_colors = {year_val: plt.cm.get_cmap(cmap_name)(i / max(1, num_years -1 if num_years > 1 else 1)) 
+                    for i, year_val in enumerate(unique_years_sorted)}
+
+
+    for year_val_loop in unique_years_sorted:
+        year_data = merged_df[merged_df["Year"] == year_val_loop]
+        if year_data.empty or year_data["Avg Temp"].isnull().all() or year_data["max_lmp"].isnull().all():
+            continue
+
+        color = year_colors[year_val_loop]
+        plt.scatter(year_data["Avg Temp"], year_data["max_lmp"], color=color, label=f"{year_val_loop}", alpha=0.6, s=50)
+        
+        valid_points = year_data.dropna(subset=["Avg Temp", "max_lmp"])
+        if len(valid_points) >= 2:
+            try:
+                z = np.polyfit(valid_points["Avg Temp"], valid_points["max_lmp"], 1) 
+                p = np.poly1d(z)
+                min_temp_val = valid_points["Avg Temp"].min()
+                max_temp_val = valid_points["Avg Temp"].max()
+                if min_temp_val == max_temp_val: # Avoids issue with linspace if only one unique x value
+                    x_vals = np.array([min_temp_val, max_temp_val])
+                else:
+                    x_vals = np.linspace(min_temp_val, max_temp_val, 100)
+                plt.plot(x_vals, p(x_vals), color=color, linestyle="--", linewidth=2)
+            except (np.linalg.LinAlgError, TypeError) as e:
+                print(f"Could not compute trendline for {year_val_loop}: {e}")
+
+    plt.title(f"Daily Average Temperature vs. Max LMP for {city_choice} ({location_choice}, {iso_choice})\n({start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')})", fontsize=16)
+    plt.xlabel("Average Temperature (°F)", fontsize=14)
+    plt.ylabel(f"{y_axis_label_price_col_name} ($/MWh)", fontsize=14) # Use the determined label
+    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.legend(title="Year", bbox_to_anchor=(1.03, 1), loc='upper left')
+    plt.tight_layout(rect=[0, 0, 0.88, 1]) 
+    
+    print("\nDisplaying plot. Close the plot window to exit.")
+    plt.show()
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        import traceback
+        traceback.print_exc()
+    finally:
+        input("\nPress Enter to exit...")

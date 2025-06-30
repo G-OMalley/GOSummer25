@@ -1,0 +1,134 @@
+import os
+import dotenv
+import google.generativeai as genai
+from datetime import datetime, timedelta
+import pandas as pd
+from pathlib import Path
+
+# Load .env and configure Gemini
+dotenv.load_dotenv()
+api_key = os.getenv("GeminiKey")
+if not api_key:
+    raise ValueError("GeminiKey not found in .env file.")
+genai.configure(api_key=api_key)
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+# Resolve file paths
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent
+
+# Per-file location resolution
+info_folder = {
+    "totals": project_root / "INFO",
+    "changes": project_root / "INFO",
+    "weather": project_root / "INFO",
+    "prices": project_root / "INFO",
+    "fundy": project_root / "INFO",
+    "nuclear": project_root / "INFO",
+    "lng": project_root / "GOScripts"  # LNG file lives here
+}
+
+# Load key data
+files = {
+    "totals": "EIAtotals.csv",
+    "changes": "EIAchanges.csv",
+    "weather": "WEATHER.csv",
+    "prices": "PRICES.csv",
+    "fundy": "EIAFundamentalMonthlydayAvg.csv",
+    "nuclear": "CriterionNuclearHist.csv",
+    "lng": "LNG_Outage_Report.csv",
+}
+
+def load_csv(name):
+    path = info_folder[name] / files[name]
+    if not path.exists():
+        print(f"Missing: {path}")
+        return None
+    df = pd.read_csv(path)
+    df.columns = df.columns.str.strip().str.lower()
+    if 'date' in df.columns:
+        df['date'] = pd.to_datetime(df['date'], errors='coerce')
+    if 'period' in df.columns:
+        df['period'] = pd.to_datetime(df['period'], errors='coerce')
+    return df
+
+# Load all dataframes
+data = {k: load_csv(k) for k in files}
+data = {k: v for k, v in data.items() if v is not None}
+
+latest_date = data['totals']['period'].max()
+summary = f"You are a U.S. energy market analyst. Below is the current natural gas storage data by region from the EIA report.\n\n"
+
+def extract_storage():
+    storage_lines = []
+    for col in data['totals'].columns:
+        if "storage" in col and col != "period":
+            latest = data['totals'].loc[data['totals']['period'] == latest_date, col].values[0]
+            fiveyr_avg = data['totals'][col].tail(260).mean()
+            delta = latest - fiveyr_avg
+            sentiment = "🟢 Surplus" if delta > 0 else "🔴 Deficit"
+            storage_lines.append(
+                f"- {col.replace('_', ' ').title()}:\n  - Date: {latest_date.strftime('%Y-%m-%d')}\n  - Current Storage: {latest:.1f} Bcf\n  - 5-Year Avg: {fiveyr_avg:.1f} Bcf\n  - Surplus/Deficit: {sentiment}: {delta:+.1f} Bcf"
+            )
+    return "\n\n".join(storage_lines)
+
+def extract_weather():
+    recent = data['weather'].sort_values(by='date').dropna(subset=['avg temp']).tail(7)
+    avg_temp = recent['avg temp'].mean()
+    cdd = (recent['avg temp'] - 65).clip(lower=0).sum()
+    hdd = (65 - recent['avg temp']).clip(lower=0).sum()
+    return f"- Temp: {avg_temp:.1f}°F, CDD: {cdd:.1f}, HDD: {hdd:.1f}"
+
+def extract_lng():
+    if 'lng' not in data:
+        return "- LNG Outages: Not available (file missing)"
+    df = data['lng']
+    # Try several column name options to avoid KeyError
+    for col in ['end_date', 'end date']:
+        if col in df.columns:
+            df = df.rename(columns={col: 'end_date'})
+            break
+    for col in ['start_date', 'start date']:
+        if col in df.columns:
+            df = df.rename(columns={col: 'start_date'})
+            break
+    if 'end_date' not in df.columns or 'start_date' not in df.columns:
+        return "- LNG Outages: Missing start/end date columns"
+    recent = df.sort_values(by='end_date', ascending=False).head(3)
+    outages = "\n".join([
+        f"  - {row.get('lng name', 'Unknown')} | {row['start_date'].date()} to {row['end_date'].date()} | {row.get('duration (days)', 'N/A')} days"
+        for _, row in recent.iterrows()
+    ])
+    return f"- LNG Outages:\n{outages}"
+
+def extract_nuclear():
+    recent = data['nuclear'].sort_values(by='date').tail(7)
+    avg_gen = recent['mw_generated'].mean()
+    return f"- Avg Nuclear Generation Last 7 Days: {avg_gen:.1f} MW"
+
+def extract_balance():
+    recent = data['fundy'].sort_values(by='date').tail(1).iloc[0]
+    supply = recent.get('supply', 'N/A')
+    demand = recent.get('demand', 'N/A')
+    balance = float(supply) - float(demand) if supply != 'N/A' and demand != 'N/A' else 'N/A'
+    return f"- Total Demand: {demand}, Total Supply: {supply}, Net Balance: {balance}"
+
+# Build full prompt
+summary += "Lower 48 States Storage (Bcf):\n" + extract_storage() + "\n\n"
+summary += extract_weather() + "\n"
+summary += extract_lng() + "\n"
+summary += extract_nuclear() + "\n"
+summary += extract_balance() + "\n"
+
+summary += "\nBased on this information, estimate next week's EIA storage levels in Bcf for each region and briefly explain your reasoning."
+
+print("\n--- Prompt Sent to Gemini ---\n")
+print(summary)
+print("\n--- Gemini Response ---\n")
+
+# Call Gemini API
+try:
+    response = model.generate_content(summary)
+    print(response.text)
+except Exception as e:
+    print(f"❌ Gemini API error: {e}")
