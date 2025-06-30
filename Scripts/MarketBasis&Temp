@@ -13,6 +13,7 @@ from datetime import datetime, timedelta # Import datetime and timedelta to get 
 # Assuming this script is in a 'Scripts' folder, and 'INFO' is a sibling folder
 BASE_DIR = Path(__file__).resolve().parent
 INFO_DIR = BASE_DIR.parent / "INFO"
+OUTPUT_DIR = BASE_DIR / "MarketAnalysis_Report_Output" # Define the output directory
 
 # Use Path objects for file paths
 PRICES_FILE = INFO_DIR / "PRICES.csv"
@@ -547,7 +548,10 @@ if __name__ == "__main__":
         html_output = generate_html_content(basis_data_json_str)
 
         # Define the output HTML file path
-        output_html_file = BASE_DIR / "basis_dashboard.html"
+        output_html_file = OUTPUT_DIR / "basis_dashboard.html"
+        
+        # Create the output directory if it doesn't exist
+        output_html_file.parent.mkdir(parents=True, exist_ok=True)
 
         # Write the HTML content to the file
         try:
