@@ -1,0 +1,350 @@
+import pandas as pd
+import numpy as np
+from scipy.stats import pearsonr
+import os
+import logging
+import sys
+
+# --- Configure Logging ---
+log_folder = '.' # Log file in the same directory as the script
+log_file_path = os.path.join(log_folder, 'correlation_log.txt')
+
+# Create a logger
+logger = logging.getLogger('CorrelationAnalysis')
+logger.setLevel(logging.INFO) # Set the minimum level of messages to log
+
+# Ensure handlers are not duplicated if script is run multiple times in same session
+if not logger.handlers:
+    # Create a formatter for console output (less verbose, but includes emojis)
+    console_formatter = logging.Formatter('%(message)s')
+    # Create a formatter for file output (more verbose)
+    file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+    # Create file handler which logs even debug messages
+    # Explicitly set encoding to utf-8 for the file to ensure emojis are saved correctly
+    fh = logging.FileHandler(log_file_path, mode='w', encoding='utf-8')
+    fh.setLevel(logging.INFO)
+    fh.setFormatter(file_formatter) # Use verbose formatter for file
+
+    # Create console handler
+    ch = logging.StreamHandler(sys.stdout) # Explicitly target stdout
+    ch.setLevel(logging.INFO) # INFO and above to console
+    ch.setFormatter(console_formatter) # Use less verbose formatter for console
+
+    # Attempt to set the encoding for the console handler's stream
+    # This is a common workaround for Windows cmd/PowerShell.
+    try:
+        ch.stream.reconfigure(encoding='utf-8')
+    except AttributeError:
+        # For older Python versions or environments where reconfigure is not available
+        # You might need to set PYTHONIOENCODING=utf-8 in your environment variables
+        logger.warning("Could not reconfigure console stream encoding. Emojis might not display correctly.")
+        pass # Fallback to default encoding
+
+    # Add the handlers to the logger
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+
+logger.info("--- Starting Natural Gas Price-Weather Correlation Analysis ---")
+
+# --- File paths ---
+# Get the directory where the script itself is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Define the 'INFO' folder path relative to the Current Working Directory (CWD)
+# This assumes 'INFO' is always a direct child of where you *run* the script from.
+info_folder = 'INFO' # This definition is for files like PRICES.csv, WEATHER.csv
+
+# Define paths to CSVs within the INFO folder
+prices_path = os.path.join(info_folder, 'PRICES.csv')
+weather_path = os.path.join(info_folder, 'WEATHER.csv')
+admin_path = os.path.join(info_folder, 'PriceAdmin.csv')
+
+# Define PriceAdminTest.csv path directly in the script's directory (GOScripts)
+# This assumes PriceAdminTest.csv is *next to* your Python script.
+price_admin_test_path = os.path.join(script_dir, 'PriceAdminTest.csv')
+
+# --- Load CSVs ---
+try:
+    prices_df = pd.read_csv(prices_path)
+    weather_df = pd.read_csv(weather_path)
+    admin_df = pd.read_csv(admin_path) # Loaded but not used in this script
+    price_admin_test_df = pd.read_csv(price_admin_test_path) # Load the test file
+    logger.info("Successfully loaded PRICES.csv, WEATHER.csv, PriceAdmin.csv, and PriceAdminTest.csv.")
+except FileNotFoundError as e:
+    logger.critical(f"CRITICAL ERROR: Required file not found. Please ensure '{e.filename}' exists at the correct path.")
+    logger.critical(f"Attempted to find INFO files in: '{os.path.abspath(info_folder)}'") # Show absolute path for clarity
+    logger.critical(f"Attempted to find PriceAdminTest.csv in: '{price_admin_test_path}'")
+    logger.critical(f"Current script directory: '{script_dir}'")
+    logger.critical(f"Current working directory: '{os.getcwd()}'")
+    exit()
+except Exception as e:
+    logger.critical(f"CRITICAL ERROR: An unexpected error occurred while loading CSVs: {e}")
+    exit()
+
+# --- Region Definitions (Hardcoded) ---
+# IMPORTANT: Update these dictionaries if new components or cities appear in your data
+component_to_region = {
+    'AGT-CG': 'Northeast', 'AGT-CG (non-G)': 'Northeast', 'ANR-SE-T': 'Gulf', 'ANR-SW': 'Southwest',
+    'APC-ACE': 'Midwest', 'CG-Mainline': 'Midwest', 'CG-Onshore': 'Midwest', 'Carthage': 'Gulf',
+    'Chicago': 'Midwest', 'Dracut': 'Northeast', 'Eastern Gas-South': 'Mid-Atlantic', 'FGT-Z3': 'Gulf',
+    'HSC-HPL Pool': 'Gulf', 'Henry': 'Gulf', 'Iroquois (into)': 'Northeast', 'Iroquois-Z2': 'Northeast',
+    'Leidy-Transco': 'Mid-Atlantic', 'Michcon': 'Midwest', 'NBPL-Vector': 'Midwest',
+    'NGPL-Midcont Pool': 'Midwest', 'NGPL-STX': 'Gulf', 'NGPL-TXOK East': 'Southwest',
+    'NNG-Demarc': 'Midwest', 'NNG-Ventura': 'Midwest', 'Panhandle': 'Southwest',
+    'Pine Prairie': 'Gulf', 'REX E-NGPL': 'Midwest', 'REX-Z3 (receipt)': 'Midwest',
+    'Sonat-Z0 South': 'Gulf', 'TCO': 'Mid-Atlantic', 'TETCO-ELA': 'Gulf', 'TETCO-M2 (receipt)': 'Northeast',
+    'TETCO-M3': 'Northeast', 'TETCO-STX': 'Gulf', 'TETCO-WLA': 'Gulf', 'TGP-500L': 'Midwest',
+    'TGP-800L': 'Gulf', 'TGP-Z0 South': 'Gulf', 'TGP-Z1 100L': 'Northeast', 'TGP-Z1 Sta-87': 'Northeast',
+    'TGP-Z4 Marcellus': 'Northeast', 'TGP-Z4 Sta-219': 'Northeast', 'TGP-Z4 Sta-313': 'Northeast',
+    'TGT-Mainline': 'Midwest', 'Transco Zn3': 'Mid-Atlantic', 'Transco-165': 'Northeast',
+    'Transco-30': 'Northeast', 'Transco-45': 'Northeast', 'Transco-65': 'Mid-Atlantic',
+    'Transco-85': 'Mid-Atlantic', 'Transco-Z5 South': 'Mid-Atlantic', 'Transco-Z6 (NY)': 'Northeast',
+    'Transco-Z6 (non-NY north)': 'Northeast', 'Transco-Z6 (non-NY)': 'Northeast',
+    'Transco-Z6 Sta-210': 'Northeast', 'Trunkline-Z1A': 'Midwest', 'Union-Dawn': 'Canada', 'Waha': 'Southwest'
+}
+
+city_to_region = {
+    'KORD': 'Midwest', 'KDTW': 'Midwest', 'KBUF': 'Northeast', 'KBOS': 'Northeast', 'KJFK': 'Northeast',
+    'KPIT': 'Mid-Atlantic', 'KPHL': 'Mid-Atlantic', 'KDCA': 'Mid-Atlantic', 'KIAH': 'Gulf', 'KMSY': 'Gulf',
+    'KLIT': 'Gulf', 'KATL': 'Mid-Atlantic',
+    'KOKC': 'Southwest', 'KLAX': 'West', 'KDEN': 'Southwest', 'KSEA': 'West', 'KSFO': 'West',
+    'KTPA': 'Gulf', 'KRDU': 'Mid-Atlantic'
+}
+logger.info("Region mappings are hardcoded within the script.")
+
+# --- Preprocess ---
+weather_df['Date'] = pd.to_datetime(weather_df['Date'])
+prices_df['Date'] = pd.to_datetime(prices_df['Date'])
+logger.info("Converted 'Date' columns to datetime objects.")
+
+# --- Early Check for Unmapped Cities ---
+if 'City Symbol' not in weather_df.columns:
+    logger.critical("CRITICAL ERROR: 'City Symbol' column not found in WEATHER.csv. Cannot proceed with city mapping check.")
+    exit()
+
+weather_cities_in_data = set(weather_df['City Symbol'].unique())
+mapped_cities_in_code = set(city_to_region.keys())
+
+unmapped_cities_in_data = weather_cities_in_data - mapped_cities_in_code
+if unmapped_cities_in_data:
+    logger.critical("\n--- CRITICAL ERROR: Unmapped Cities Found ---")
+    logger.critical("New city symbols found in WEATHER.csv that are not mapped to a region in the 'city_to_region' dictionary.")
+    logger.critical("Please add the following city symbols to the 'city_to_region' dictionary in the script (at line approx 120):")
+    for city in sorted(list(unmapped_cities_in_data)):
+        logger.critical(f"  - '{city}': 'Your_Region_Here',")
+    logger.critical("Script will now exit. Please update the code and re-run.")
+    exit()
+else:
+    logger.info("All cities in WEATHER.csv are mapped to a region in the script.")
+
+# --- Create Deviation Metrics in Weather DataFrame ---
+try:
+    # Ensure 10yr HDD/CDD columns exist
+    if '10yr HDD' not in weather_df.columns or '10yr CDD' not in weather_df.columns:
+        raise KeyError("Columns '10yr HDD' or '10yr CDD' not found in WEATHER.csv. Cannot compute deviations.")
+
+    weather_df['HDD_Deviation'] = weather_df['HDD'] - weather_df['10yr HDD']
+    weather_df['CDD_Deviation'] = weather_df['CDD'] - weather_df['10yr CDD']
+    logger.info("Computed HDD_Deviation and CDD_Deviation.")
+
+except KeyError as e:
+    logger.critical(f"CRITICAL ERROR: Column '{e}' needed for deviation calculation not found in WEATHER.csv.")
+    logger.critical("Please ensure your WEATHER.csv has 'HDD', 'CDD', '10yr HDD', and '10yr CDD' columns exactly as spelled (case-sensitive).")
+    logger.critical(f"Available WEATHER.csv columns: {weather_df.columns.tolist()}")
+    exit()
+except Exception as e:
+    logger.critical(f"CRITICAL ERROR: An unexpected error occurred during deviation calculation: {e}")
+    exit()
+
+
+# --- Pivot weather: rows = Date, cols = City Symbol, values for all relevant metrics ---
+try:
+    weather_pivot_hdd = weather_df.pivot(index='Date', columns='City Symbol', values='HDD')
+    weather_pivot_cdd = weather_df.pivot(index='Date', columns='City Symbol', values='CDD')
+    weather_pivot_hdd_dev = weather_df.pivot(index='Date', columns='City Symbol', values='HDD_Deviation')
+    weather_pivot_cdd_dev = weather_df.pivot(index='Date', columns='City Symbol', values='CDD_Deviation')
+    logger.info("Pivoted weather data for HDD, CDD, and their deviations.")
+except KeyError as e:
+    logger.critical(f"CRITICAL ERROR: Column '{e}' not found after creating deviation metrics or during pivot in WEATHER.csv.")
+    logger.critical("Please ensure 'City Symbol' column is correctly named and available. Available WEATHER.csv columns: {weather_df.columns.tolist()}")
+    exit()
+except Exception as e:
+    logger.critical(f"CRITICAL ERROR: An unexpected error occurred during weather data pivoting: {e}")
+    exit()
+
+
+# Extract unique components from PRICES.csv (skip Date and Unnamed columns)
+component_names = [
+    col.strip()
+    for col in prices_df.columns
+    if not col.lower().startswith('date')
+    and not col.lower().startswith('unnamed')
+    and col.strip() != ''
+]
+
+logger.info(f"--- Analyzing {len(component_names)} Market Components ---")
+
+# --- Early Check for Unmapped Market Components ---
+mapped_components_in_code = set(component_to_region.keys())
+unmapped_components_in_data = set(component_names) - mapped_components_in_code
+
+if unmapped_components_in_data:
+    logger.critical("\n--- CRITICAL ERROR: Unmapped Market Components Found ---")
+    logger.critical("New market components found in PRICES.csv that are not mapped to a region in 'component_to_region' dictionary.")
+    logger.critical("Please add the following components to the 'component_to_region' dictionary in the script (at line approx 90):")
+    for comp in sorted(list(unmapped_components_in_data)):
+        logger.critical(f"  - '{comp}': 'Your_Region_Here',")
+    logger.critical("Script will now exit. Please update the code and re-run.")
+    exit()
+else:
+    logger.info("All market components in PRICES.csv are mapped to a region in the script.")
+
+
+# --- Perform correlation-based matching within regions ---
+component_to_best_city_data = {}
+
+for component in component_names:
+    # Basic check if component exists in prices_df (should be covered by earlier check but good for robustness)
+    if component not in prices_df.columns:
+        logger.warning(f"WARNING: Market component '{component}' was identified, but not found as a column in PRICES.csv. Skipping.")
+        component_to_best_city_data[component] = {'best_city': 'Component Not In PRICES.csv', 'correlation': np.nan, 'metric': 'N/A'}
+        continue # This should ideally not happen if 'component_names' is derived directly from prices_df columns
+
+    region = component_to_region.get(component)
+    # This 'if not region' block should technically not be hit if the early check works
+    # But it's left as a safeguard.
+    if not region:
+        logger.error(f"LOGIC ERROR: Component '{component}' passed early check but has no region. Skipping.")
+        component_to_best_city_data[component] = {'best_city': 'Logic Error: No Region Map', 'correlation': np.nan, 'metric': 'N/A'}
+        continue
+
+
+    price_series = prices_df[['Date', component]].dropna()
+    price_series.set_index('Date', inplace=True)
+
+    best_corr_abs = -1
+    best_corr_raw = np.nan
+    best_city_match = None
+    best_metric = None
+
+    # All cities in regional_cities are guaranteed to be in city_to_region due to early checks
+    regional_cities = {city: r for city, r in city_to_region.items() if r == region}
+
+    if not regional_cities:
+        # This can still happen if a *region* is defined for a component but no cities are mapped to that region in city_to_region.
+        logger.warning(f"WARNING: No weather cities found for region: '{region}' (component: {component}). Skipping.")
+        component_to_best_city_data[component] = {'best_city': 'No Regional Cities', 'correlation': np.nan, 'metric': 'N/A'}
+        continue
+
+    # Define the weather metrics to test
+    weather_metrics_to_test = {
+        'HDD': weather_pivot_hdd,
+        'CDD': weather_pivot_cdd,
+        'HDD_Deviation': weather_pivot_hdd_dev,
+        'CDD_Deviation': weather_pivot_cdd_dev
+    }
+
+    for city in regional_cities:
+        for metric_name, weather_pivot_df in weather_metrics_to_test.items():
+            if city not in weather_pivot_df.columns:
+                # This city might not have data for this specific metric or was dropped during pivot due to NaNs.
+                # This is okay, we just skip this city-metric combo for now.
+                logger.debug(f"DEBUG: City '{city}' not found in '{metric_name}' pivoted weather data. Skipping this combination.")
+                continue
+
+            temp_series = weather_pivot_df[[city]].dropna()
+            combined_df = price_series.join(temp_series, how='inner').dropna()
+
+            min_overlap_days = 30
+            current_r = np.nan
+
+            if len(combined_df) >= min_overlap_days:
+                try:
+                    # Pearsonr returns (correlation_coefficient, p_value)
+                    r, _ = pearsonr(combined_df[component], combined_df[city])
+                    if not np.isnan(r):
+                        current_r = r
+                except Exception as ex:
+                    logger.debug(f"DEBUG: Could not calculate correlation for {component} and {city} ({metric_name}): {ex}. Possibly constant series.")
+                    pass # Keep as NaN if correlation fails
+
+            if not np.isnan(current_r) and abs(current_r) > best_corr_abs:
+                best_corr_abs = abs(current_r)
+                best_corr_raw = current_r
+                best_city_match = city
+                best_metric = metric_name
+
+    if best_city_match and best_metric:
+        # Using specific unicode characters for checkmark and X mark
+        # Ensure your terminal supports UTF-8 for these to display correctly
+        logger.info(f"✅ {component} (Region: {region}) --> Best Match: {best_city_match} (Corr: {best_corr_raw:.2f} with {best_metric})")
+        component_to_best_city_data[component] = {'best_city': best_city_match, 'correlation': best_corr_raw, 'metric': best_metric}
+    else:
+        # If it reached here, it means it had a region and was in prices_df,
+        # but no strong correlation was found within its regional cities after trying all.
+        logger.info(f"❌ No strong correlation match found for {component} in region {region}.")
+        component_to_best_city_data[component] = {'best_city': 'No Strong Match', 'correlation': np.nan, 'metric': 'N/A'}
+
+
+logger.info("\n--- Correlation Analysis Complete ---")
+
+# --- Update PriceAdminTest.csv ---
+logger.info(f"\n--- Updating '{os.path.basename(price_admin_test_path)}' 'City Symbol' column ---")
+
+# Ensure 'Market Component' column exists in PriceAdminTest.csv for merging/indexing
+if 'Market Component' not in price_admin_test_df.columns:
+    logger.critical(f"CRITICAL ERROR: '{os.path.basename(price_admin_test_path)}' must contain a 'Market Component' column to match prices data. Script exiting.")
+    exit()
+
+# Set 'Market Component' as index for easier lookup and update
+price_admin_test_df_indexed = price_admin_test_df.set_index('Market Component')
+
+# Add 'City Symbol' column if it doesn't exist
+if 'City Symbol' not in price_admin_test_df_indexed.columns:
+    price_admin_test_df_indexed['City Symbol'] = pd.NA # Use pandas NA for better NaN handling
+    logger.info(f"Created new 'City Symbol' column in '{os.path.basename(price_admin_test_path)}'.")
+
+updated_count = 0
+not_found_in_admin_test = []
+
+for component, data in component_to_best_city_data.items():
+    best_city = data['best_city']
+    correlation_status = data['best_city'] # This holds the reason if no match was found
+
+    # Only attempt to update if the correlation analysis provided a valid best_city (not a status string)
+    if correlation_status not in ['No Region Map', 'No Regional Cities', 'Component Not In PRICES.csv', 'Logic Error: No Region Map', 'No Strong Match']:
+        if component in price_admin_test_df_indexed.index:
+            price_admin_test_df_indexed.loc[component, 'City Symbol'] = best_city
+            logger.debug(f"DEBUG: Updated '{component}' in {os.path.basename(price_admin_test_path)} with '{best_city}'.")
+            updated_count += 1
+        else:
+            not_found_in_admin_test.append(component)
+    else:
+        # If no strong match or other reason for skipping correlation, ensure it's cleared in PriceAdminTest
+        # Only clear if the component actually exists in the PriceAdminTest_df
+        if component in price_admin_test_df_indexed.index:
+            current_city_symbol = price_admin_test_df_indexed.loc[component, 'City Symbol']
+            # If the current value is not already NA and not what we would have set, clear it.
+            # This handles "don't remove anything it doesn't have to" by only changing if it's not already clear
+            # or if it was a value that needs to be cleared based on our analysis.
+            if pd.notna(current_city_symbol): # Only clear if there's a value there
+                 price_admin_test_df_indexed.loc[component, 'City Symbol'] = pd.NA
+                 logger.debug(f"DEBUG: Cleared 'City Symbol' for '{component}' in {os.path.basename(price_admin_test_path)} (reason: {correlation_status}).")
+
+
+# Reset index back to original DataFrame format before saving
+price_admin_test_df_updated = price_admin_test_df_indexed.reset_index()
+
+# Save the updated DataFrame back to CSV
+try:
+    # Use utf-8 encoding for saving the CSV, as the emojis might have been correctly processed internally
+    price_admin_test_df_updated.to_csv(price_admin_test_path, index=False, encoding='utf-8')
+    logger.info(f"Successfully updated '{os.path.basename(price_admin_test_path)}'. {updated_count} components were assigned a City Symbol.")
+    if not_found_in_admin_test:
+        logger.warning(f"WARNING: The following {len(not_found_in_admin_test)} components had a correlation match but were not found in '{os.path.basename(price_admin_test_path)}' to update: {', '.join(not_found_in_admin_test)}")
+except Exception as e:
+    logger.critical(f"CRITICAL ERROR: Failed to save updated '{os.path.basename(price_admin_test_path)}': {e}")
+    exit()
+
+logger.info("--- Script Finished ---")
