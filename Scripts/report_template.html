@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ report_title }}</title>
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        h1, h2 { color: #343a40; }
+        .header {
+            text-align: center;
+            color: #1a252f;
+            padding: 20px 0;
+            background-color: #e9ecef;
+            border-bottom: 2px solid #dee2e6;
+            margin: 0;
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .container {
+            padding: 20px;
+            max-width: 1600px; /* Wider content area */
+            margin: auto;
+        }
+        .component-section h2 {
+            color: #343a40;
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            border-bottom: 2px solid #adb5bd;
+            margin-top: 40px;
+            border-radius: 5px;
+        }
+        .chart-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center; /* Center charts if they don't fill the row */
+        }
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            padding: 15px;
+            box-sizing: border-box;
+            /* Flex properties for responsive sizing */
+            flex: 1 1 700px; /* Flex-grow, flex-shrink, basis */
+            min-width: 500px; /* Prevent charts from becoming too small */
+            max-width: 100%;
+        }
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .tables-container {
+            margin-top: 1.5em;
+            overflow-x: auto; /* Allow horizontal scrolling for large tables */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5em 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #e9ecef;
+            font-weight: 600;
+        }
+        td {
+             white-space: nowrap; /* Prevent line breaks in cells */
+        }
+        caption {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 1em 0;
+            text-align: left;
+            color: #343a40;
+        }
+        .no-anomalies {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            margin-top: 20px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ report_title }}</h1>
+        <p>Generated on: {{ generation_date }}</p>
+    </div>
+
+    <div class="container">
+        {% for section in sections %}
+            <div class="component-section">
+                <h2>{{ section.title }}</h2>
+                
+                {% if section.tables_html %}
+                    <div class="tables-container">
+                        {{ section.tables_html | safe }}
+                    </div>
+                {% else %}
+                    <div class="no-anomalies">
+                        <p>No significant anomalies detected for this component.</p>
+                    </div>
+                {% endif %}
+
+                <div class="chart-grid">
+                    {{ section.charts_html | safe }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
