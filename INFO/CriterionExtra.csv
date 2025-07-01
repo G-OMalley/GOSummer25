@@ -3832,6 +3832,8 @@ Date,item,value,region
 06/27/2025,CONUS - Balance,0.0,Conus
 06/28/2025,CONUS - Balance,0.0,Conus
 06/29/2025,CONUS - Balance,0.0,Conus
+06/30/2025,CONUS - Balance,0.0,Conus
+07/01/2025,CONUS - Balance,0.0,Conus
 07/01/2017,CONUS - STORAGE,15036.524,Conus
 07/02/2017,CONUS - STORAGE,13651.588,Conus
 07/03/2017,CONUS - STORAGE,9704.063,Conus
@@ -6748,11 +6750,13 @@ Date,item,value,region
 06/22/2025,CONUS - STORAGE,12467.304,Conus
 06/23/2025,CONUS - STORAGE,3184.8047,Conus
 06/24/2025,CONUS - STORAGE,-589.9927,Conus
-06/25/2025,CONUS - STORAGE,3260.1624,Conus
-06/26/2025,CONUS - STORAGE,7062.346,Conus
-06/27/2025,CONUS - STORAGE,9045.576,Conus
-06/28/2025,CONUS - STORAGE,15170.593,Conus
-06/29/2025,CONUS - STORAGE,13942.903,Conus
+06/25/2025,CONUS - STORAGE,3260.1584,Conus
+06/26/2025,CONUS - STORAGE,7042.247,Conus
+06/27/2025,CONUS - STORAGE,8941.64,Conus
+06/28/2025,CONUS - STORAGE,15273.745,Conus
+06/29/2025,CONUS - STORAGE,14747.945,Conus
+06/30/2025,CONUS - STORAGE,7899.3057,Conus
+07/01/2025,CONUS - STORAGE,5307.017,Conus
 01/01/2015,Midwest - Balance,0.0,Midwest
 01/02/2015,Midwest - Balance,0.0,Midwest
 01/03/2015,Midwest - Balance,0.0,Midwest
@@ -10586,6 +10590,8 @@ Date,item,value,region
 06/27/2025,Midwest - Balance,0.0,Midwest
 06/28/2025,Midwest - Balance,0.0,Midwest
 06/29/2025,Midwest - Balance,0.0,Midwest
+06/30/2025,Midwest - Balance,0.0,Midwest
+07/01/2025,Midwest - Balance,0.0,Midwest
 01/01/2015,Northeast - Balance,0.0,Northeast
 01/02/2015,Northeast - Balance,0.0,Northeast
 01/03/2015,Northeast - Balance,0.0,Northeast
@@ -14419,6 +14425,8 @@ Date,item,value,region
 06/27/2025,Northeast - Balance,0.0,Northeast
 06/28/2025,Northeast - Balance,0.0,Northeast
 06/29/2025,Northeast - Balance,0.0,Northeast
+06/30/2025,Northeast - Balance,0.0,Northeast
+07/01/2025,Northeast - Balance,0.0,Northeast
 01/01/2015,Rockies - Balance,0.0,Rockies
 01/02/2015,Rockies - Balance,0.0,Rockies
 01/03/2015,Rockies - Balance,0.0,Rockies
@@ -18252,6 +18260,8 @@ Date,item,value,region
 06/27/2025,Rockies - Balance,0.0,Rockies
 06/28/2025,Rockies - Balance,0.0,Rockies
 06/29/2025,Rockies - Balance,0.0,Rockies
+06/30/2025,Rockies - Balance,0.0,Rockies
+07/01/2025,Rockies - Balance,0.0,Rockies
 01/01/2015,SouthCentral - Balance,0.0,SouthCentral
 01/02/2015,SouthCentral - Balance,0.0,SouthCentral
 01/03/2015,SouthCentral - Balance,0.0,SouthCentral
@@ -22085,6 +22095,8 @@ Date,item,value,region
 06/27/2025,SouthCentral - Balance,0.0,SouthCentral
 06/28/2025,SouthCentral - Balance,0.0,SouthCentral
 06/29/2025,SouthCentral - Balance,0.0,SouthCentral
+06/30/2025,SouthCentral - Balance,0.0,SouthCentral
+07/01/2025,SouthCentral - Balance,0.0,SouthCentral
 01/01/2015,SouthEast - Balance,0.0,SouthEast
 01/02/2015,SouthEast - Balance,0.0,SouthEast
 01/03/2015,SouthEast - Balance,0.0,SouthEast
@@ -25918,6 +25930,8 @@ Date,item,value,region
 06/27/2025,SouthEast - Balance,0.0,SouthEast
 06/28/2025,SouthEast - Balance,0.0,SouthEast
 06/29/2025,SouthEast - Balance,0.0,SouthEast
+06/30/2025,SouthEast - Balance,0.0,SouthEast
+07/01/2025,SouthEast - Balance,0.0,SouthEast
 03/30/2025,Total Demand - California ,4482.012,California
 03/31/2025,Total Demand - California ,5001.017,California
 04/01/2025,Total Demand - California ,5317.4995,California
@@ -26009,6 +26023,8 @@ Date,item,value,region
 06/26/2025,Total Demand - California ,4838.0127,California
 06/27/2025,Total Demand - California ,4985.168,California
 06/28/2025,Total Demand - California ,4545.6304,California
+06/29/2025,Total Demand - California ,4451.9536,California
+06/30/2025,Total Demand - California ,4883.448,California
 01/01/2015,Total Demand - Lower 48 ,112458.5,Lower 48
 01/02/2015,Total Demand - Lower 48 ,101881.48,Lower 48
 01/03/2015,Total Demand - Lower 48 ,86382.945,Lower 48
@@ -29841,6 +29857,8 @@ Date,item,value,region
 06/26/2025,Total Demand - Lower 48 ,72989.0,Lower 48
 06/27/2025,Total Demand - Lower 48 ,71407.34,Lower 48
 06/28/2025,Total Demand - Lower 48 ,65286.695,Lower 48
+06/29/2025,Total Demand - Lower 48 ,66363.73,Lower 48
+06/30/2025,Total Demand - Lower 48 ,73409.76,Lower 48
 03/30/2025,Total Demand - Midwest,12082.539,Midwest
 03/31/2025,Total Demand - Midwest,16677.674,Midwest
 04/01/2025,Total Demand - Midwest,17642.508,Midwest
@@ -29932,6 +29950,8 @@ Date,item,value,region
 06/26/2025,Total Demand - Midwest,11695.56,Midwest
 06/27/2025,Total Demand - Midwest,11607.265,Midwest
 06/28/2025,Total Demand - Midwest,10184.387,Midwest
+06/29/2025,Total Demand - Midwest,10442.602,Midwest
+06/30/2025,Total Demand - Midwest,11449.44,Midwest
 01/01/2015,Total Demand - Northeast,26273.105,Northeast
 01/02/2015,Total Demand - Northeast,22710.045,Northeast
 01/03/2015,Total Demand - Northeast,20817.062,Northeast
@@ -33764,6 +33784,8 @@ Date,item,value,region
 06/26/2025,Total Demand - Northeast,16632.951,Northeast
 06/27/2025,Total Demand - Northeast,14908.515,Northeast
 06/28/2025,Total Demand - Northeast,14134.9795,Northeast
+06/29/2025,Total Demand - Northeast,15358.089,Northeast
+06/30/2025,Total Demand - Northeast,16796.855,Northeast
 01/01/2015,Total Demand - Pacific Northwest ,3176.1448,West
 01/02/2015,Total Demand - Pacific Northwest ,2871.833,West
 01/03/2015,Total Demand - Pacific Northwest ,2492.1394,West
@@ -37596,6 +37618,8 @@ Date,item,value,region
 06/26/2025,Total Demand - Pacific Northwest ,1313.1887,West
 06/27/2025,Total Demand - Pacific Northwest ,1312.415,West
 06/28/2025,Total Demand - Pacific Northwest ,1168.6315,West
+06/29/2025,Total Demand - Pacific Northwest ,1175.9962,West
+06/30/2025,Total Demand - Pacific Northwest ,1406.734,West
 03/30/2025,Total Demand - Rockies,5095.0435,Rockies
 03/31/2025,Total Demand - Rockies,5379.2744,Rockies
 04/01/2025,Total Demand - Rockies,5991.4507,Rockies
@@ -37687,6 +37711,8 @@ Date,item,value,region
 06/26/2025,Total Demand - Rockies,4724.587,Rockies
 06/27/2025,Total Demand - Rockies,4868.265,Rockies
 06/28/2025,Total Demand - Rockies,4457.4717,Rockies
+06/29/2025,Total Demand - Rockies,4452.6597,Rockies
+06/30/2025,Total Demand - Rockies,4992.063,Rockies
 03/30/2025,Total Demand - Rockies - SW,1671.0325,Rockies
 03/31/2025,Total Demand - Rockies - SW,1856.834,Rockies
 04/01/2025,Total Demand - Rockies - SW,1886.6682,Rockies
@@ -37778,6 +37804,8 @@ Date,item,value,region
 06/26/2025,Total Demand - Rockies - SW,2110.3357,Rockies
 06/27/2025,Total Demand - Rockies - SW,2149.734,Rockies
 06/28/2025,Total Demand - Rockies - SW,1997.2136,Rockies
+06/29/2025,Total Demand - Rockies - SW,2060.2153,Rockies
+06/30/2025,Total Demand - Rockies - SW,2370.8638,Rockies
 03/30/2025,Total Demand - Rockies - Upper,3424.011,Rockies
 03/31/2025,Total Demand - Rockies - Upper,3522.4407,Rockies
 04/01/2025,Total Demand - Rockies - Upper,4104.7827,Rockies
@@ -37869,6 +37897,8 @@ Date,item,value,region
 06/26/2025,Total Demand - Rockies - Upper,2614.2512,Rockies
 06/27/2025,Total Demand - Rockies - Upper,2718.5312,Rockies
 06/28/2025,Total Demand - Rockies - Upper,2460.2578,Rockies
+06/29/2025,Total Demand - Rockies - Upper,2392.4443,Rockies
+06/30/2025,Total Demand - Rockies - Upper,2621.1992,Rockies
 03/30/2025,Total Demand - South Central ,18280.145,South Central
 03/31/2025,Total Demand - South Central ,20240.37,South Central
 04/01/2025,Total Demand - South Central ,20213.71,South Central
@@ -37960,6 +37990,8 @@ Date,item,value,region
 06/26/2025,Total Demand - South Central ,22094.63,South Central
 06/27/2025,Total Demand - South Central ,22240.215,South Central
 06/28/2025,Total Demand - South Central ,20407.979,South Central
+06/29/2025,Total Demand - South Central ,20201.645,South Central
+06/30/2025,Total Demand - South Central ,22571.229,South Central
 01/01/2015,Total Demand - Southeast - Florida ,3145.1306,Southeast
 01/02/2015,Total Demand - Southeast - Florida ,3213.3538,Southeast
 01/03/2015,Total Demand - Southeast - Florida ,2796.7483,Southeast
@@ -41792,6 +41824,8 @@ Date,item,value,region
 06/26/2025,Total Demand - Southeast - Florida ,4593.397,Southeast
 06/27/2025,Total Demand - Southeast - Florida ,4669.2285,Southeast
 06/28/2025,Total Demand - Southeast - Florida ,4367.9414,Southeast
+06/29/2025,Total Demand - Southeast - Florida ,4212.074,Southeast
+06/30/2025,Total Demand - Southeast - Florida ,4520.546,Southeast
 03/30/2025,Total Demand - Southeast - Other,5386.703,Southeast
 03/31/2025,Total Demand - Southeast - Other,5998.9785,Southeast
 04/01/2025,Total Demand - Southeast - Other,6100.6855,Southeast
@@ -41883,6 +41917,8 @@ Date,item,value,region
 06/26/2025,Total Demand - Southeast - Other,7096.674,Southeast
 06/27/2025,Total Demand - Southeast - Other,6816.2705,Southeast
 06/28/2025,Total Demand - Southeast - Other,6019.6777,Southeast
+06/29/2025,Total Demand - Southeast - Other,6068.709,Southeast
+06/30/2025,Total Demand - Southeast - Other,6789.4453,Southeast
 01/01/2015,West - Balance,0.0,West
 01/02/2015,West - Balance,0.0,West
 01/03/2015,West - Balance,0.0,West
@@ -45716,6 +45752,8 @@ Date,item,value,region
 06/27/2025,West - Balance,0.0,West
 06/28/2025,West - Balance,0.0,West
 06/29/2025,West - Balance,0.0,West
+06/30/2025,West - Balance,0.0,West
+07/01/2025,West - Balance,0.0,West
 01/01/2015,West - Ind,0.0,West
 01/02/2015,West - Ind,0.0,West
 01/03/2015,West - Ind,0.0,West
@@ -49549,6 +49587,8 @@ Date,item,value,region
 06/27/2025,West - Ind,0.0,West
 06/28/2025,West - Ind,0.0,West
 06/29/2025,West - Ind,0.0,West
+06/30/2025,West - Ind,0.0,West
+07/01/2025,West - Ind,0.0,West
 01/01/2015,West - Power,0.0,West
 01/02/2015,West - Power,0.0,West
 01/03/2015,West - Power,0.0,West
@@ -53382,6 +53422,8 @@ Date,item,value,region
 06/27/2025,West - Power,0.0,West
 06/28/2025,West - Power,0.0,West
 06/29/2025,West - Power,0.0,West
+06/30/2025,West - Power,0.0,West
+07/01/2025,West - Power,0.0,West
 01/01/2015,West - ResCom,0.0,West
 01/02/2015,West - ResCom,0.0,West
 01/03/2015,West - ResCom,0.0,West
@@ -57215,3 +57257,5 @@ Date,item,value,region
 06/27/2025,West - ResCom,0.0,West
 06/28/2025,West - ResCom,0.0,West
 06/29/2025,West - ResCom,0.0,West
+06/30/2025,West - ResCom,0.0,West
+07/01/2025,West - ResCom,0.0,West

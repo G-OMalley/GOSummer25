@@ -1,6 +1,4 @@
 Date,Item,Value,state_name
-06/30/2025,Calcasieu Pass LNG Feed Gas,1781.3309,Louisiana
-07/01/2025,Calcasieu Pass LNG Feed Gas,1780.1035,Louisiana
 07/02/2025,Calcasieu Pass LNG Feed Gas,1781.3309,Louisiana
 07/03/2025,Calcasieu Pass LNG Feed Gas,1782.3657,Louisiana
 07/04/2025,Calcasieu Pass LNG Feed Gas,1782.1027,Louisiana
@@ -59,8 +57,8 @@ Date,Item,Value,state_name
 08/26/2025,Calcasieu Pass LNG Feed Gas,1778.9495,Louisiana
 08/27/2025,Calcasieu Pass LNG Feed Gas,1780.5857,Louisiana
 08/28/2025,Calcasieu Pass LNG Feed Gas,1780.1035,Louisiana
-06/30/2025,Cameron LNG Feed Gas,1942.2345,Louisiana
-07/01/2025,Cameron LNG Feed Gas,1950.4773,Louisiana
+08/29/2025,Calcasieu Pass LNG Feed Gas,1779.4022,Louisiana
+08/30/2025,Calcasieu Pass LNG Feed Gas,1781.8425,Louisiana
 07/02/2025,Cameron LNG Feed Gas,1942.2345,Louisiana
 07/03/2025,Cameron LNG Feed Gas,1935.5903,Louisiana
 07/04/2025,Cameron LNG Feed Gas,1937.2555,Louisiana
@@ -119,8 +117,8 @@ Date,Item,Value,state_name
 08/26/2025,Cameron LNG Feed Gas,1958.6505,Louisiana
 08/27/2025,Cameron LNG Feed Gas,1947.1886,Louisiana
 08/28/2025,Cameron LNG Feed Gas,1950.4773,Louisiana
-06/30/2025,Corpus Christi LNG Feed Gas,2535.8826,Texas
-07/01/2025,Corpus Christi LNG Feed Gas,2587.2385,Texas
+08/29/2025,Cameron LNG Feed Gas,1955.3895,Louisiana
+08/30/2025,Cameron LNG Feed Gas,1938.918,Louisiana
 07/02/2025,Corpus Christi LNG Feed Gas,2585.8826,Texas
 07/03/2025,Corpus Christi LNG Feed Gas,2584.7988,Texas
 07/04/2025,Corpus Christi LNG Feed Gas,2585.0696,Texas
@@ -179,8 +177,8 @@ Date,Item,Value,state_name
 08/26/2025,Corpus Christi LNG Feed Gas,2638.5952,Texas
 08/27/2025,Corpus Christi LNG Feed Gas,2636.696,Texas
 08/28/2025,Corpus Christi LNG Feed Gas,2637.2385,Texas
-06/30/2025,Cove Point LNG Feed Gas,831.97375,
-07/01/2025,Cove Point LNG Feed Gas,831.95746,
+08/29/2025,Corpus Christi LNG Feed Gas,2638.0525,Texas
+08/30/2025,Corpus Christi LNG Feed Gas,2635.3406,Texas
 07/02/2025,Cove Point LNG Feed Gas,831.95135,
 07/03/2025,Cove Point LNG Feed Gas,831.9433,
 07/04/2025,Cove Point LNG Feed Gas,831.9488,
@@ -239,8 +237,8 @@ Date,Item,Value,state_name
 08/26/2025,Cove Point LNG Feed Gas,832.0304,
 08/27/2025,Cove Point LNG Feed Gas,832.11475,
 08/28/2025,Cove Point LNG Feed Gas,832.06445,
-06/30/2025,Elba Island LNG Feed Gas,357.50723,
-07/01/2025,Elba Island LNG Feed Gas,357.06088,
+08/29/2025,Cove Point LNG Feed Gas,832.04675,
+08/30/2025,Cove Point LNG Feed Gas,832.0018,
 07/02/2025,Elba Island LNG Feed Gas,356.83554,
 07/03/2025,Elba Island LNG Feed Gas,356.38052,
 07/04/2025,Elba Island LNG Feed Gas,356.72232,
@@ -299,8 +297,8 @@ Date,Item,Value,state_name
 08/26/2025,Elba Island LNG Feed Gas,358.49048,
 08/27/2025,Elba Island LNG Feed Gas,359.44458,
 08/28/2025,Elba Island LNG Feed Gas,358.91812,
-06/30/2025,Freeport LNG Feed Gas,1989.4211,Texas
-07/01/2025,Freeport LNG Feed Gas,1990.5804,Texas
+08/29/2025,Elba Island LNG Feed Gas,358.70502,
+08/30/2025,Elba Island LNG Feed Gas,358.05707,
 07/02/2025,Freeport LNG Feed Gas,1989.4211,Texas
 07/03/2025,Freeport LNG Feed Gas,1988.4843,Texas
 07/04/2025,Freeport LNG Feed Gas,1988.7192,Texas
@@ -359,8 +357,8 @@ Date,Item,Value,state_name
 08/26/2025,Freeport LNG Feed Gas,1991.7266,Texas
 08/27/2025,Freeport LNG Feed Gas,1990.1183,Texas
 08/28/2025,Freeport LNG Feed Gas,1990.5804,Texas
-06/30/2025,Sabine Pass LNG Feed Gas,3852.3425,Louisiana
-07/01/2025,Sabine Pass LNG Feed Gas,4417.3887,Louisiana
+08/29/2025,Freeport LNG Feed Gas,1991.2697,Texas
+08/30/2025,Freeport LNG Feed Gas,1988.9537,Texas
 07/02/2025,Sabine Pass LNG Feed Gas,4402.6772,Louisiana
 07/03/2025,Sabine Pass LNG Feed Gas,4390.8276,Louisiana
 07/04/2025,Sabine Pass LNG Feed Gas,4393.797,Louisiana
@@ -419,38 +417,38 @@ Date,Item,Value,state_name
 08/26/2025,Sabine Pass LNG Feed Gas,4431.988,Louisiana
 08/27/2025,Sabine Pass LNG Feed Gas,4411.5176,Louisiana
 08/28/2025,Sabine Pass LNG Feed Gas,4417.3887,Louisiana
-06/30/2025,US LNG Exports - Plaquemines LNG,2554.0,
-07/01/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/02/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/03/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/04/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/05/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/06/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/07/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/08/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/09/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/10/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/11/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/12/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/13/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/14/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/15/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/16/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/17/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/18/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/19/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/20/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/21/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/22/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/23/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/24/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/25/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/26/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/27/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/28/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/29/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/30/2025,US LNG Exports - Plaquemines LNG,2682.0,
-07/31/2025,US LNG Exports - Plaquemines LNG,2682.0,
+08/29/2025,Sabine Pass LNG Feed Gas,4426.1616,Louisiana
+08/30/2025,Sabine Pass LNG Feed Gas,4396.761,Louisiana
+07/02/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/03/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/04/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/05/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/06/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/07/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/08/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/09/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/10/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/11/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/12/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/13/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/14/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/15/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/16/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/17/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/18/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/19/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/20/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/21/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/22/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/23/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/24/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/25/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/26/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/27/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/28/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/29/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/30/2025,US LNG Exports - Plaquemines LNG,2606.0,
+07/31/2025,US LNG Exports - Plaquemines LNG,2606.0,
 08/01/2025,US LNG Exports - Plaquemines LNG,2952.0,
 08/02/2025,US LNG Exports - Plaquemines LNG,2952.0,
 08/03/2025,US LNG Exports - Plaquemines LNG,2952.0,
@@ -479,3 +477,5 @@ Date,Item,Value,state_name
 08/26/2025,US LNG Exports - Plaquemines LNG,2952.0,
 08/27/2025,US LNG Exports - Plaquemines LNG,2952.0,
 08/28/2025,US LNG Exports - Plaquemines LNG,2952.0,
+08/29/2025,US LNG Exports - Plaquemines LNG,2952.0,
+08/30/2025,US LNG Exports - Plaquemines LNG,2952.0,
