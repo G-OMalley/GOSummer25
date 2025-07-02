@@ -1,0 +1,101 @@
+import cot_reports as cot # Alias as cot as per example
+import pandas as pd
+import os
+from datetime import datetime
+
+# Define the directory where you want to save the data
+# (Consistent with your INFO folder setup from the strategy script)
+# This assumes your 'test' script is in the GOScripts folder, and INFO is a subfolder of GOScripts.
+script_dir = os.path.dirname(os.path.abspath(__file__))
+info_folder = os.path.join(script_dir, 'INFO')
+os.makedirs(info_folder, exist_ok=True) # Ensure INFO folder exists
+
+# Define the output folder for the strategy's final output
+output_strategy_folder = os.path.join(script_dir, 'GOScripts', 'GOutput')
+os.makedirs(output_strategy_folder, exist_ok=True) # Ensure GOutput folder exists
+
+output_file_info = os.path.join(info_folder, 'Natural_Gas_Data positioning.csv') # Original INFO folder output
+output_file_goutput = os.path.join(output_strategy_folder, 'Natural_Gas_Data positioning.csv') # New GOutput folder output
+
+
+print("--- Attempting to Fetch Historical COT Data for Natural Gas ---")
+
+try:
+    # Use cot.cot_all() as per the documentation for complete historical data
+    # The correct cot_report_type for "Disaggregated Report Futures-and-Options Combined" is 'disaggregated_futopt'
+    print("Fetching complete historical 'disaggregated_futopt' report...")
+    df_cot_raw = cot.cot_all(cot_report_type='disaggregated_futopt')
+
+    print("Raw COT data fetched. Processing for Natural Gas and calculating net positions...")
+
+    # --- UPDATED COLUMN NAMES BASED ON YOUR OUTPUT ---
+    # Identify the specific Natural Gas contract we want to analyze.
+    # The 'Market_and_Exchange_Names' column is confirmed from your output.
+    market_col = 'Market_and_Exchange_Names'
+    ng_contract_identifier = 'NAT GAS NYME - NEW YORK MERCANTILE EXCHANGE' # This string is common for main NYMEX NG contract
+
+    # Filter the DataFrame for the specific Natural Gas contract
+    df_ng = df_cot_raw[df_cot_raw[market_col] == ng_contract_identifier].copy()
+
+    if df_ng.empty:
+        raise ValueError(f"No data found for Natural Gas contract '{ng_contract_identifier}'. "
+                         "Please ensure this exact string matches a contract in the fetched data. "
+                         "You can inspect unique contract names by running: "
+                         "`import cot_reports as cot; df_test = cot.cot_all(cot_report_type='disaggregated_futopt'); print(df_test['Market_and_Exchange_Names'].unique())`")
+
+    # Calculate net positions using the EXACT column names from your output
+    # Note the double underscore for Swap__Positions_Short_All
+    expected_long_short_cols = {
+        'Managed Money': ('M_Money_Positions_Long_All', 'M_Money_Positions_Short_All'),
+        'Producers': ('Prod_Merc_Positions_Long_All', 'Prod_Merc_Positions_Short_All'),
+        'Swaps': ('Swap_Positions_Long_All', 'Swap__Positions_Short_All')
+    }
+    
+    # Confirmed date column name from your output
+    report_date_col = 'Report_Date_as_YYYY-MM-DD'
+
+    missing_net_calc_cols = []
+    for net_cat, (long_col, short_col) in expected_long_short_cols.items():
+        if long_col not in df_ng.columns or short_col not in df_ng.columns:
+            missing_net_calc_cols.append(f"{long_col} or {short_col} for {net_cat}")
+
+    if missing_net_calc_cols:
+        # If this happens, it means the column names changed again or are different for NG
+        raise ValueError(f"Missing columns required for net position calculation: {missing_net_calc_cols}. "
+                         f"Available columns in filtered NG data: {df_ng.columns.tolist()}")
+
+    df_ng['Managed Money'] = df_ng[expected_long_short_cols['Managed Money'][0]] - df_ng[expected_long_short_cols['Managed Money'][1]]
+    df_ng['Producers'] = df_ng[expected_long_short_cols['Producers'][0]] - df_ng[expected_long_short_cols['Producers'][1]]
+    df_ng['Swaps'] = df_ng[expected_long_short_cols['Swaps'][0]] - df_ng[expected_long_short_cols['Swaps'][1]]
+
+    # Convert date column
+    if report_date_col in df_ng.columns:
+        df_ng['Date'] = pd.to_datetime(df_ng[report_date_col], errors='coerce')
+        # Drop rows where date parsing might have failed (e.g., NaT values)
+        df_ng.dropna(subset=['Date'], inplace=True) 
+    else:
+        raise ValueError(f"Missing '{report_date_col}' column in fetched COT data.")
+
+    # Select only the necessary columns for the strategy
+    final_cot_df = df_ng[['Date', 'Managed Money', 'Producers', 'Swaps']].copy()
+
+    # Sort by date
+    final_cot_df.sort_values('Date', inplace=True)
+
+    # Save to CSV in both INFO and GOutput folders
+    final_cot_df.to_csv(output_file_info, index=False)
+    print(f"✅ Successfully downloaded and saved positioning data to: {output_file_info}")
+    
+    final_cot_df.to_csv(output_file_goutput, index=False)
+    print(f"✅ Successfully downloaded and saved positioning data to: {output_file_goutput}")
+
+    print(f"Number of rows in saved positioning data: {len(final_cot_df)}")
+
+
+except Exception as e:
+    print(f"❌ Error fetching or processing COT data: {e}")
+    print("\nTroubleshooting Tips:")
+    print("- Ensure you have an active internet connection.")
+    print("- If the 'No data found for Natural Gas contract' error appears, verify the exact commodity string using the `print(df_test['Market_and_Exchange_Names'].unique())` tip below.")
+    print("- For deeper debugging, run `import cot_reports as cot; df_test = cot.cot_all(cot_report_type='disaggregated_futopt'); print(df_test.columns.tolist())` in a Python console. Inspect all column names.")
+    print("- As a last resort, manually download the .txt file from CFTC and provide it for custom parsing.")

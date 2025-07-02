@@ -1,0 +1,72 @@
+2025-07-02 08:31:53,253 - INFO - --- Starting Natural Gas Price-Weather Correlation Analysis ---
+2025-07-02 08:31:53,368 - INFO - Successfully loaded PRICES.csv, WEATHER.csv, PriceAdmin.csv, and PriceAdminTest.csv.
+2025-07-02 08:31:53,368 - INFO - Region mappings are hardcoded within the script.
+2025-07-02 08:31:53,384 - INFO - Converted 'Date' columns to datetime objects.
+2025-07-02 08:31:53,392 - INFO - All cities in WEATHER.csv are mapped to a region in the script.
+2025-07-02 08:31:53,394 - INFO - Computed HDD_Deviation and CDD_Deviation.
+2025-07-02 08:31:53,443 - INFO - Pivoted weather data for HDD, CDD, and their deviations.
+2025-07-02 08:31:53,479 - INFO - --- Analyzing 57 Market Components ---
+2025-07-02 08:31:53,479 - INFO - All market components in PRICES.csv are mapped to a region in the script.
+2025-07-02 08:31:53,517 - INFO - ✅ AGT-CG (non-G) (Region: Northeast) --> Best Match: KJFK (Corr: 0.51 with HDD)
+2025-07-02 08:31:53,538 - INFO - ✅ ANR-SE-T (Region: Gulf) --> Best Match: KIAH (Corr: 0.18 with HDD_Deviation)
+2025-07-02 08:31:53,555 - INFO - ✅ ANR-SW (Region: Southwest) --> Best Match: KOKC (Corr: 0.24 with HDD_Deviation)
+2025-07-02 08:31:53,580 - INFO - ✅ APC-ACE (Region: Midwest) --> Best Match: KORD (Corr: 0.19 with HDD_Deviation)
+2025-07-02 08:31:53,597 - INFO - ✅ CG-Mainline (Region: Midwest) --> Best Match: KORD (Corr: 0.18 with HDD_Deviation)
+2025-07-02 08:31:53,620 - INFO - ✅ CG-Onshore (Region: Midwest) --> Best Match: KORD (Corr: 0.16 with HDD_Deviation)
+2025-07-02 08:31:53,646 - INFO - ✅ Carthage (Region: Gulf) --> Best Match: KIAH (Corr: 0.26 with HDD_Deviation)
+2025-07-02 08:31:53,661 - INFO - ✅ Chicago (Region: Midwest) --> Best Match: KORD (Corr: 0.16 with HDD_Deviation)
+2025-07-02 08:31:53,685 - INFO - ✅ Dracut (Region: Northeast) --> Best Match: KJFK (Corr: 0.53 with HDD)
+2025-07-02 08:31:53,721 - INFO - ✅ Eastern Gas-South (Region: Mid-Atlantic) --> Best Match: KPIT (Corr: 0.16 with HDD)
+2025-07-02 08:31:53,750 - INFO - ✅ FGT-Z3 (Region: Gulf) --> Best Match: KIAH (Corr: 0.17 with HDD_Deviation)
+2025-07-02 08:31:53,775 - INFO - ✅ HSC-HPL Pool (Region: Gulf) --> Best Match: KIAH (Corr: 0.20 with HDD_Deviation)
+2025-07-02 08:31:53,806 - INFO - ✅ Henry (Region: Gulf) --> Best Match: KIAH (Corr: 0.18 with HDD_Deviation)
+2025-07-02 08:31:53,827 - INFO - ✅ Iroquois (into) (Region: Northeast) --> Best Match: KJFK (Corr: 0.36 with HDD)
+2025-07-02 08:31:53,853 - INFO - ✅ Iroquois-Z2 (Region: Northeast) --> Best Match: KJFK (Corr: 0.42 with HDD)
+2025-07-02 08:31:53,888 - INFO - ✅ Leidy-Transco (Region: Mid-Atlantic) --> Best Match: KATL (Corr: 0.16 with HDD)
+2025-07-02 08:31:53,902 - INFO - ✅ Michcon (Region: Midwest) --> Best Match: KORD (Corr: 0.15 with HDD_Deviation)
+2025-07-02 08:31:53,915 - INFO - ✅ NBPL-Vector (Region: Midwest) --> Best Match: KORD (Corr: 0.36 with HDD_Deviation)
+2025-07-02 08:31:53,927 - INFO - ✅ NGPL-Midcont Pool (Region: Midwest) --> Best Match: KORD (Corr: 0.10 with HDD_Deviation)
+2025-07-02 08:31:53,963 - INFO - ✅ NGPL-STX (Region: Gulf) --> Best Match: KIAH (Corr: 0.27 with HDD_Deviation)
+2025-07-02 08:31:53,975 - INFO - ✅ NGPL-TXOK East (Region: Southwest) --> Best Match: KOKC (Corr: 0.20 with HDD_Deviation)
+2025-07-02 08:31:53,988 - INFO - ✅ NNG-Demarc (Region: Midwest) --> Best Match: KORD (Corr: 0.13 with HDD_Deviation)
+2025-07-02 08:31:54,015 - INFO - ✅ NNG-Ventura (Region: Midwest) --> Best Match: KORD (Corr: 0.15 with HDD_Deviation)
+2025-07-02 08:31:54,029 - INFO - ✅ Panhandle (Region: Southwest) --> Best Match: KOKC (Corr: 0.23 with HDD_Deviation)
+2025-07-02 08:31:54,051 - INFO - ✅ Pine Prairie (Region: Gulf) --> Best Match: KIAH (Corr: 0.18 with HDD_Deviation)
+2025-07-02 08:31:54,067 - INFO - ✅ REX E-NGPL (Region: Midwest) --> Best Match: KORD (Corr: 0.19 with HDD_Deviation)
+2025-07-02 08:31:54,067 - WARNING - WARNING: Market component 'REX-Z3 (receipt)' was identified, but not found as a column in PRICES.csv. Skipping.
+2025-07-02 08:31:54,111 - INFO - ✅ Sonat-Z0 South (Region: Gulf) --> Best Match: KIAH (Corr: 0.17 with HDD_Deviation)
+2025-07-02 08:31:54,149 - INFO - ✅ TCO (Region: Mid-Atlantic) --> Best Match: KPIT (Corr: 0.17 with HDD_Deviation)
+2025-07-02 08:31:54,176 - INFO - ✅ TETCO-ELA (Region: Gulf) --> Best Match: KIAH (Corr: 0.18 with HDD_Deviation)
+2025-07-02 08:31:54,197 - INFO - ✅ TETCO-M2 (receipt) (Region: Northeast) --> Best Match: KJFK (Corr: 0.17 with HDD)
+2025-07-02 08:31:54,229 - INFO - ✅ TETCO-M3 (Region: Northeast) --> Best Match: KJFK (Corr: 0.36 with HDD)
+2025-07-02 08:31:54,256 - INFO - ✅ TETCO-STX (Region: Gulf) --> Best Match: KIAH (Corr: 0.22 with HDD_Deviation)
+2025-07-02 08:31:54,282 - INFO - ✅ TETCO-WLA (Region: Gulf) --> Best Match: KIAH (Corr: 0.17 with HDD_Deviation)
+2025-07-02 08:31:54,293 - INFO - ✅ TGP-500L (Region: Midwest) --> Best Match: KORD (Corr: 0.15 with HDD_Deviation)
+2025-07-02 08:31:54,315 - INFO - ✅ TGP-800L (Region: Gulf) --> Best Match: KIAH (Corr: 0.17 with HDD_Deviation)
+2025-07-02 08:31:54,349 - INFO - ✅ TGP-Z0 South (Region: Gulf) --> Best Match: KIAH (Corr: 0.20 with HDD_Deviation)
+2025-07-02 08:31:54,370 - INFO - ✅ TGP-Z1 100L (Region: Northeast) --> Best Match: KBUF (Corr: 0.11 with HDD_Deviation)
+2025-07-02 08:31:54,386 - INFO - ✅ TGP-Z1 Sta-87 (Region: Northeast) --> Best Match: KBUF (Corr: 0.12 with HDD_Deviation)
+2025-07-02 08:31:54,414 - INFO - ✅ TGP-Z4 Marcellus (Region: Northeast) --> Best Match: KJFK (Corr: 0.14 with HDD)
+2025-07-02 08:31:54,427 - INFO - ✅ TGP-Z4 Sta-219 (Region: Northeast) --> Best Match: KJFK (Corr: 0.15 with HDD)
+2025-07-02 08:31:54,452 - INFO - ✅ TGP-Z4 Sta-313 (Region: Northeast) --> Best Match: KJFK (Corr: 0.09 with HDD_Deviation)
+2025-07-02 08:31:54,469 - INFO - ✅ TGT-Mainline (Region: Midwest) --> Best Match: KORD (Corr: 0.18 with HDD_Deviation)
+2025-07-02 08:31:54,512 - INFO - ✅ Transco Zn3 (Region: Mid-Atlantic) --> Best Match: KPIT (Corr: 0.13 with HDD_Deviation)
+2025-07-02 08:31:54,600 - INFO - ✅ Transco-165 (Region: Northeast) --> Best Match: KJFK (Corr: 0.51 with HDD)
+2025-07-02 08:31:54,622 - INFO - ✅ Transco-30 (Region: Northeast) --> Best Match: KJFK (Corr: 0.10 with HDD_Deviation)
+2025-07-02 08:31:54,645 - INFO - ✅ Transco-45 (Region: Northeast) --> Best Match: KJFK (Corr: 0.10 with HDD_Deviation)
+2025-07-02 08:31:54,680 - INFO - ✅ Transco-65 (Region: Mid-Atlantic) --> Best Match: KPIT (Corr: 0.13 with HDD_Deviation)
+2025-07-02 08:31:54,716 - INFO - ✅ Transco-85 (Region: Mid-Atlantic) --> Best Match: KPIT (Corr: 0.14 with HDD_Deviation)
+2025-07-02 08:31:54,746 - INFO - ✅ Transco-Z5 South (Region: Mid-Atlantic) --> Best Match: KATL (Corr: 0.34 with HDD)
+2025-07-02 08:31:54,765 - INFO - ✅ Transco-Z6 (NY) (Region: Northeast) --> Best Match: KJFK (Corr: 0.34 with HDD)
+2025-07-02 08:31:54,784 - INFO - ✅ Transco-Z6 (non-NY north) (Region: Northeast) --> Best Match: KJFK (Corr: 0.34 with HDD)
+2025-07-02 08:31:54,802 - INFO - ✅ Transco-Z6 (non-NY) (Region: Northeast) --> Best Match: KJFK (Corr: 0.32 with HDD)
+2025-07-02 08:31:54,827 - INFO - ✅ Transco-Z6 Sta-210 (Region: Northeast) --> Best Match: KJFK (Corr: 0.28 with HDD)
+2025-07-02 08:31:54,843 - INFO - ✅ Trunkline-Z1A (Region: Midwest) --> Best Match: KORD (Corr: 0.14 with HDD_Deviation)
+2025-07-02 08:31:54,843 - WARNING - WARNING: No weather cities found for region: 'Canada' (component: Union-Dawn). Skipping.
+2025-07-02 08:31:54,867 - INFO - ✅ Waha (Region: Southwest) --> Best Match: KOKC (Corr: 0.21 with HDD_Deviation)
+2025-07-02 08:31:54,867 - INFO - 
+--- Correlation Analysis Complete ---
+2025-07-02 08:31:54,875 - INFO - 
+--- Updating 'PriceAdminTest.csv' 'City Symbol' column ---
+2025-07-02 08:31:54,883 - INFO - Successfully updated 'PriceAdminTest.csv'. 55 components were assigned a City Symbol.
+2025-07-02 08:31:54,883 - INFO - --- Script Finished ---
