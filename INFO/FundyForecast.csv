@@ -1,24 +1,19 @@
 Date,item,value,region
-07/01/2025,CONUS - Balance,-74214.475,Conus
-07/02/2025,CONUS - Balance,-81593.46260000001,Conus
-07/03/2025,CONUS - Balance,-81921.4878,Conus
-07/04/2025,CONUS - Balance,-70973.67790000001,Conus
-07/05/2025,CONUS - Balance,-75727.49089999999,Conus
-07/06/2025,CONUS - Balance,-76836.1994,Conus
-07/07/2025,CONUS - Balance,-85876.8802,Conus
-07/08/2025,CONUS - Balance,-85888.6895,Conus
-07/09/2025,CONUS - Balance,-85027.02249999999,Conus
-07/10/2025,CONUS - Balance,-84150.2856,Conus
-07/11/2025,CONUS - Balance,-83813.02460000002,Conus
-07/12/2025,CONUS - Balance,-75728.98719999999,Conus
-07/13/2025,CONUS - Balance,-75532.5012,Conus
-07/14/2025,CONUS - Balance,-83429.8947,Conus
-07/15/2025,CONUS - Balance,-83892.406,Conus
-07/16/2025,CONUS - Balance,-7855.9312,Conus
-07/17/2025,CONUS - Balance,-7855.3425,Conus
-07/18/2025,CONUS - Balance,-7854.7546,Conus
-07/19/2025,CONUS - Balance,-7854.1666,Conus
-07/20/2025,CONUS - Balance,-7853.5786,Conus
+07/06/2025,CONUS - Balance,-67497.2507,Conus
+07/07/2025,CONUS - Balance,-83185.4422,Conus
+07/08/2025,CONUS - Balance,-84366.7745,Conus
+07/09/2025,CONUS - Balance,-83125.9855,Conus
+07/10/2025,CONUS - Balance,-82172.2396,Conus
+07/11/2025,CONUS - Balance,-82226.0286,Conus
+07/12/2025,CONUS - Balance,-74517.18059999999,Conus
+07/13/2025,CONUS - Balance,-74774.7757,Conus
+07/14/2025,CONUS - Balance,-82935.1647,Conus
+07/15/2025,CONUS - Balance,-83985.042,Conus
+07/16/2025,CONUS - Balance,-84956.56920000001,Conus
+07/17/2025,CONUS - Balance,-85332.3235,Conus
+07/18/2025,CONUS - Balance,-85379.1746,Conus
+07/19/2025,CONUS - Balance,-77592.03160000002,Conus
+07/20/2025,CONUS - Balance,-77660.16889999999,Conus
 07/21/2025,CONUS - Balance,-7852.991,Conus
 07/22/2025,CONUS - Balance,-7852.4039999999995,Conus
 07/23/2025,CONUS - Balance,-7851.815200000001,Conus
@@ -183,26 +178,21 @@ Date,item,value,region
 12/29/2025,CONUS - Balance,-7807.584,Conus
 12/30/2025,CONUS - Balance,-7806.7029,Conus
 12/31/2025,CONUS - Balance,-7805.8204000000005,Conus
-07/01/2025,CONUS - Ind,22663.223,Lower 48
-07/02/2025,CONUS - Ind,22646.158,Lower 48
-07/03/2025,CONUS - Ind,22662.27,Lower 48
-07/04/2025,CONUS - Ind,19262.54,Lower 48
-07/05/2025,CONUS - Ind,20403.486,Lower 48
-07/06/2025,CONUS - Ind,20383.152,Lower 48
-07/07/2025,CONUS - Ind,22621.89,Lower 48
-07/08/2025,CONUS - Ind,22618.604,Lower 48
-07/09/2025,CONUS - Ind,22635.588,Lower 48
-07/10/2025,CONUS - Ind,22692.674,Lower 48
-07/11/2025,CONUS - Ind,22722.297,Lower 48
-07/12/2025,CONUS - Ind,20436.535,Lower 48
-07/13/2025,CONUS - Ind,20421.707,Lower 48
-07/14/2025,CONUS - Ind,22682.541,Lower 48
-07/15/2025,CONUS - Ind,22674.793,Lower 48
-07/02/2025,CONUS - L&P,5617.2583,United States
-07/03/2025,CONUS - L&P,5616.8384,United States
-07/04/2025,CONUS - L&P,5616.4185,United States
-07/05/2025,CONUS - L&P,5615.9985,United States
-07/06/2025,CONUS - L&P,5615.5786,United States
+07/06/2025,CONUS - Ind,20399.904,Lower 48
+07/07/2025,CONUS - Ind,22693.338,Lower 48
+07/08/2025,CONUS - Ind,22671.24,Lower 48
+07/09/2025,CONUS - Ind,22710.107,Lower 48
+07/10/2025,CONUS - Ind,22758.176,Lower 48
+07/11/2025,CONUS - Ind,22784.36,Lower 48
+07/12/2025,CONUS - Ind,20435.828,Lower 48
+07/13/2025,CONUS - Ind,20380.953,Lower 48
+07/14/2025,CONUS - Ind,22643.996,Lower 48
+07/15/2025,CONUS - Ind,22651.736,Lower 48
+07/16/2025,CONUS - Ind,22664.564,Lower 48
+07/17/2025,CONUS - Ind,22662.207,Lower 48
+07/18/2025,CONUS - Ind,22663.914,Lower 48
+07/19/2025,CONUS - Ind,20402.16,Lower 48
+07/20/2025,CONUS - Ind,20409.268,Lower 48
 07/07/2025,CONUS - L&P,5615.1587,United States
 07/08/2025,CONUS - L&P,5614.739,United States
 07/09/2025,CONUS - L&P,5614.319,United States
@@ -381,11 +371,6 @@ Date,item,value,region
 12/29/2025,CONUS - L&P,5576.8457,United States
 12/30/2025,CONUS - L&P,5576.2163,United States
 12/31/2025,CONUS - L&P,5575.586,United States
-07/02/2025,CONUS - P'loss,2246.9033,United States
-07/03/2025,CONUS - P'loss,2246.7354,United States
-07/04/2025,CONUS - P'loss,2246.5674,United States
-07/05/2025,CONUS - P'loss,2246.3994,United States
-07/06/2025,CONUS - P'loss,2246.2314,United States
 07/07/2025,CONUS - P'loss,2246.0635,United States
 07/08/2025,CONUS - P'loss,2245.8955,United States
 07/09/2025,CONUS - P'loss,2245.7275,United States
@@ -564,56 +549,51 @@ Date,item,value,region
 12/29/2025,CONUS - P'loss,2230.7383,United States
 12/30/2025,CONUS - P'loss,2230.4866,United States
 12/31/2025,CONUS - P'loss,2230.2344,United States
-07/01/2025,CONUS - Power,43069.31,Lower 48
-07/02/2025,CONUS - Power,42570.586,Lower 48
-07/03/2025,CONUS - Power,42855.836,Lower 48
-07/04/2025,CONUS - Power,36584.62,Lower 48
-07/05/2025,CONUS - Power,39805.484,Lower 48
-07/06/2025,CONUS - Power,40915.17,Lower 48
-07/07/2025,CONUS - Power,46543.855,Lower 48
-07/08/2025,CONUS - Power,46576.805,Lower 48
-07/09/2025,CONUS - Power,45935.805,Lower 48
-07/10/2025,CONUS - Power,45220.16,Lower 48
-07/11/2025,CONUS - Power,44878.906,Lower 48
-07/12/2025,CONUS - Power,39920.63,Lower 48
-07/13/2025,CONUS - Power,39731.184,Lower 48
-07/14/2025,CONUS - Power,44523.344,Lower 48
-07/15/2025,CONUS - Power,44980.934,Lower 48
-07/01/2025,CONUS - ResCom,8481.942,Lower 48
-07/02/2025,CONUS - ResCom,8512.557,Lower 48
-07/03/2025,CONUS - ResCom,8539.808,Lower 48
-07/04/2025,CONUS - ResCom,7263.532,Lower 48
-07/05/2025,CONUS - ResCom,7656.123,Lower 48
-07/06/2025,CONUS - ResCom,7676.0674,Lower 48
-07/07/2025,CONUS - ResCom,8849.913,Lower 48
-07/08/2025,CONUS - ResCom,8832.646,Lower 48
-07/09/2025,CONUS - ResCom,8595.583,Lower 48
-07/10/2025,CONUS - ResCom,8377.993,Lower 48
-07/11/2025,CONUS - ResCom,8352.951,Lower 48
-07/12/2025,CONUS - ResCom,7513.5396,Lower 48
-07/13/2025,CONUS - ResCom,7521.9155,Lower 48
-07/14/2025,CONUS - ResCom,8366.903,Lower 48
-07/15/2025,CONUS - ResCom,8380.16,Lower 48
-07/01/2025,Midwest - Balance,-11597.7461,Midwest
-07/02/2025,Midwest - Balance,-11719.3989,Midwest
-07/03/2025,Midwest - Balance,-11882.731899999999,Midwest
-07/04/2025,Midwest - Balance,-10432.644100000001,Midwest
-07/05/2025,Midwest - Balance,-11417.7251,Midwest
-07/06/2025,Midwest - Balance,-11122.9877,Midwest
-07/07/2025,Midwest - Balance,-11812.0532,Midwest
-07/08/2025,Midwest - Balance,-11732.318800000001,Midwest
-07/09/2025,Midwest - Balance,-11569.9229,Midwest
-07/10/2025,Midwest - Balance,-11444.312,Midwest
-07/11/2025,Midwest - Balance,-11429.4779,Midwest
-07/12/2025,Midwest - Balance,-10332.6544,Midwest
-07/13/2025,Midwest - Balance,-10465.7003,Midwest
-07/14/2025,Midwest - Balance,-11777.0952,Midwest
-07/15/2025,Midwest - Balance,-11779.999,Midwest
-07/16/2025,Midwest - Balance,0.0,Midwest
-07/17/2025,Midwest - Balance,0.0,Midwest
-07/18/2025,Midwest - Balance,0.0,Midwest
-07/19/2025,Midwest - Balance,0.0,Midwest
-07/20/2025,Midwest - Balance,0.0,Midwest
+07/06/2025,CONUS - Power,39355.73,Lower 48
+07/07/2025,CONUS - Power,44011.78,Lower 48
+07/08/2025,CONUS - Power,45171.875,Lower 48
+07/09/2025,CONUS - Power,44065.15,Lower 48
+07/10/2025,CONUS - Power,43159.16,Lower 48
+07/11/2025,CONUS - Power,43217.258,Lower 48
+07/12/2025,CONUS - Power,38689.83,Lower 48
+07/13/2025,CONUS - Power,38934.06,Lower 48
+07/14/2025,CONUS - Power,43983.215,Lower 48
+07/15/2025,CONUS - Power,45037.977,Lower 48
+07/16/2025,CONUS - Power,45964.367,Lower 48
+07/17/2025,CONUS - Power,46296.285,Lower 48
+07/18/2025,CONUS - Power,46359.25,Lower 48
+07/19/2025,CONUS - Power,41721.277,Lower 48
+07/20/2025,CONUS - Power,41802.625,Lower 48
+07/06/2025,CONUS - ResCom,7741.6167,Lower 48
+07/07/2025,CONUS - ResCom,8619.102,Lower 48
+07/08/2025,CONUS - ResCom,8663.025,Lower 48
+07/09/2025,CONUS - ResCom,8490.682,Lower 48
+07/10/2025,CONUS - ResCom,8395.445,Lower 48
+07/11/2025,CONUS - ResCom,8365.54,Lower 48
+07/12/2025,CONUS - ResCom,7533.24,Lower 48
+07/13/2025,CONUS - ResCom,7602.068,Lower 48
+07/14/2025,CONUS - ResCom,8450.847,Lower 48
+07/15/2025,CONUS - ResCom,8438.81,Lower 48
+07/16/2025,CONUS - ResCom,8471.707,Lower 48
+07/17/2025,CONUS - ResCom,8518.489,Lower 48
+07/18/2025,CONUS - ResCom,8501.256,Lower 48
+07/19/2025,CONUS - ResCom,7614.428,Lower 48
+07/20/2025,CONUS - ResCom,7594.6973,Lower 48
+07/06/2025,Midwest - Balance,-10507.6528,Midwest
+07/07/2025,Midwest - Balance,-11285.2725,Midwest
+07/08/2025,Midwest - Balance,-11466.7382,Midwest
+07/09/2025,Midwest - Balance,-11715.1005,Midwest
+07/10/2025,Midwest - Balance,-11629.960500000001,Midwest
+07/11/2025,Midwest - Balance,-11736.6335,Midwest
+07/12/2025,Midwest - Balance,-10506.3759,Midwest
+07/13/2025,Midwest - Balance,-10487.258300000001,Midwest
+07/14/2025,Midwest - Balance,-11848.7385,Midwest
+07/15/2025,Midwest - Balance,-12158.414499999999,Midwest
+07/16/2025,Midwest - Balance,-12355.6392,Midwest
+07/17/2025,Midwest - Balance,-12245.0535,Midwest
+07/18/2025,Midwest - Balance,-12199.204099999999,Midwest
+07/19/2025,Midwest - Balance,-10983.538,Midwest
+07/20/2025,Midwest - Balance,-11002.0093,Midwest
 07/21/2025,Midwest - Balance,0.0,Midwest
 07/22/2025,Midwest - Balance,0.0,Midwest
 07/23/2025,Midwest - Balance,0.0,Midwest
@@ -778,41 +758,36 @@ Date,item,value,region
 12/29/2025,Midwest - Balance,0.0,Midwest
 12/30/2025,Midwest - Balance,0.0,Midwest
 12/31/2025,Midwest - Balance,0.0,Midwest
-07/01/2025,Midwest - Ind,4013.048,Midwest
-07/02/2025,Midwest - Ind,4013.048,Midwest
-07/03/2025,Midwest - Ind,4013.048,Midwest
-07/04/2025,Midwest - Ind,3411.0908,Midwest
-07/05/2025,Midwest - Ind,3611.7432,Midwest
 07/06/2025,Midwest - Ind,3611.7432,Midwest
-07/07/2025,Midwest - Ind,4013.048,Midwest
-07/08/2025,Midwest - Ind,4013.048,Midwest
+07/07/2025,Midwest - Ind,4071.456,Midwest
+07/08/2025,Midwest - Ind,4022.088,Midwest
 07/09/2025,Midwest - Ind,4013.048,Midwest
-07/10/2025,Midwest - Ind,4027.924,Midwest
-07/11/2025,Midwest - Ind,4031.8228,Midwest
-07/12/2025,Midwest - Ind,3616.6343,Midwest
+07/10/2025,Midwest - Ind,4013.048,Midwest
+07/11/2025,Midwest - Ind,4013.048,Midwest
+07/12/2025,Midwest - Ind,3611.7432,Midwest
 07/13/2025,Midwest - Ind,3611.7432,Midwest
 07/14/2025,Midwest - Ind,4013.048,Midwest
 07/15/2025,Midwest - Ind,4013.048,Midwest
-07/01/2025,Midwest - Power,5702.1836,Midwest
-07/02/2025,Midwest - Power,5823.8364,Midwest
-07/03/2025,Midwest - Power,5987.1694,Midwest
-07/04/2025,Midwest - Power,5421.416,Midwest
-07/05/2025,Midwest - Power,6111.7188,Midwest
-07/06/2025,Midwest - Power,5816.9814,Midwest
-07/07/2025,Midwest - Power,5916.4907,Midwest
-07/08/2025,Midwest - Power,5836.7563,Midwest
-07/09/2025,Midwest - Power,5674.3604,Midwest
-07/10/2025,Midwest - Power,5533.8735,Midwest
-07/11/2025,Midwest - Power,5515.1406,Midwest
-07/12/2025,Midwest - Power,5021.757,Midwest
-07/13/2025,Midwest - Power,5159.694,Midwest
-07/14/2025,Midwest - Power,5881.5327,Midwest
-07/15/2025,Midwest - Power,5884.4365,Midwest
-07/01/2025,Midwest - ResCom,1882.5145,Midwest
-07/02/2025,Midwest - ResCom,1882.5145,Midwest
-07/03/2025,Midwest - ResCom,1882.5145,Midwest
-07/04/2025,Midwest - ResCom,1600.1373,Midwest
-07/05/2025,Midwest - ResCom,1694.2631,Midwest
+07/16/2025,Midwest - Ind,4013.048,Midwest
+07/17/2025,Midwest - Ind,4013.048,Midwest
+07/18/2025,Midwest - Ind,4013.048,Midwest
+07/19/2025,Midwest - Ind,3611.7432,Midwest
+07/20/2025,Midwest - Ind,3611.7432,Midwest
+07/06/2025,Midwest - Power,5201.6465,Midwest
+07/07/2025,Midwest - Power,5331.302,Midwest
+07/08/2025,Midwest - Power,5562.1357,Midwest
+07/09/2025,Midwest - Power,5819.538,Midwest
+07/10/2025,Midwest - Power,5734.398,Midwest
+07/11/2025,Midwest - Power,5841.071,Midwest
+07/12/2025,Midwest - Power,5200.3696,Midwest
+07/13/2025,Midwest - Power,5181.252,Midwest
+07/14/2025,Midwest - Power,5953.176,Midwest
+07/15/2025,Midwest - Power,6262.852,Midwest
+07/16/2025,Midwest - Power,6460.0767,Midwest
+07/17/2025,Midwest - Power,6349.491,Midwest
+07/18/2025,Midwest - Power,6303.6416,Midwest
+07/19/2025,Midwest - Power,5677.5317,Midwest
+07/20/2025,Midwest - Power,5696.003,Midwest
 07/06/2025,Midwest - ResCom,1694.2631,Midwest
 07/07/2025,Midwest - ResCom,1882.5145,Midwest
 07/08/2025,Midwest - ResCom,1882.5145,Midwest
@@ -823,26 +798,26 @@ Date,item,value,region
 07/13/2025,Midwest - ResCom,1694.2631,Midwest
 07/14/2025,Midwest - ResCom,1882.5145,Midwest
 07/15/2025,Midwest - ResCom,1882.5145,Midwest
-07/01/2025,Northeast - Balance,-17436.7993,Northeast
-07/02/2025,Northeast - Balance,-16466.5786,Northeast
-07/03/2025,Northeast - Balance,-16650.6221,Northeast
-07/04/2025,Northeast - Balance,-13533.5773,Northeast
-07/05/2025,Northeast - Balance,-14370.5057,Northeast
-07/06/2025,Northeast - Balance,-15677.907,Northeast
-07/07/2025,Northeast - Balance,-19189.248399999997,Northeast
-07/08/2025,Northeast - Balance,-18942.5338,Northeast
-07/09/2025,Northeast - Balance,-17911.0569,Northeast
-07/10/2025,Northeast - Balance,-17037.586600000002,Northeast
-07/11/2025,Northeast - Balance,-16671.3116,Northeast
-07/12/2025,Northeast - Balance,-14829.030200000001,Northeast
-07/13/2025,Northeast - Balance,-14890.0422,Northeast
-07/14/2025,Northeast - Balance,-16824.5096,Northeast
-07/15/2025,Northeast - Balance,-17113.300600000002,Northeast
-07/16/2025,Northeast - Balance,0.0,Northeast
-07/17/2025,Northeast - Balance,0.0,Northeast
-07/18/2025,Northeast - Balance,0.0,Northeast
-07/19/2025,Northeast - Balance,0.0,Northeast
-07/20/2025,Northeast - Balance,0.0,Northeast
+07/16/2025,Midwest - ResCom,1882.5145,Midwest
+07/17/2025,Midwest - ResCom,1882.5145,Midwest
+07/18/2025,Midwest - ResCom,1882.5145,Midwest
+07/19/2025,Midwest - ResCom,1694.2631,Midwest
+07/20/2025,Midwest - ResCom,1694.2631,Midwest
+07/06/2025,Northeast - Balance,-15950.2647,Northeast
+07/07/2025,Northeast - Balance,-17475.0016,Northeast
+07/08/2025,Northeast - Balance,-18232.1534,Northeast
+07/09/2025,Northeast - Balance,-17184.2058,Northeast
+07/10/2025,Northeast - Balance,-16230.526600000001,Northeast
+07/11/2025,Northeast - Balance,-16152.259600000001,Northeast
+07/12/2025,Northeast - Balance,-14699.485200000001,Northeast
+07/13/2025,Northeast - Balance,-14822.9552,Northeast
+07/14/2025,Northeast - Balance,-16723.247600000002,Northeast
+07/15/2025,Northeast - Balance,-17098.8356,Northeast
+07/16/2025,Northeast - Balance,-17634.5705,Northeast
+07/17/2025,Northeast - Balance,-18021.1408,Northeast
+07/18/2025,Northeast - Balance,-17938.4168,Northeast
+07/19/2025,Northeast - Balance,-15966.2222,Northeast
+07/20/2025,Northeast - Balance,-15875.0461,Northeast
 07/21/2025,Northeast - Balance,0.0,Northeast
 07/22/2025,Northeast - Balance,0.0,Northeast
 07/23/2025,Northeast - Balance,0.0,Northeast
@@ -1007,11 +982,6 @@ Date,item,value,region
 12/29/2025,Northeast - Balance,0.0,Northeast
 12/30/2025,Northeast - Balance,0.0,Northeast
 12/31/2025,Northeast - Balance,0.0,Northeast
-07/01/2025,Northeast - Ind,2669.0288,Northeast
-07/02/2025,Northeast - Ind,2669.0288,Northeast
-07/03/2025,Northeast - Ind,2669.0288,Northeast
-07/04/2025,Northeast - Ind,2271.1633,Northeast
-07/05/2025,Northeast - Ind,2402.9702,Northeast
 07/06/2025,Northeast - Ind,2402.1257,Northeast
 07/07/2025,Northeast - Ind,2669.0288,Northeast
 07/08/2025,Northeast - Ind,2669.0288,Northeast
@@ -1022,56 +992,56 @@ Date,item,value,region
 07/13/2025,Northeast - Ind,2402.1257,Northeast
 07/14/2025,Northeast - Ind,2669.0288,Northeast
 07/15/2025,Northeast - Ind,2669.0288,Northeast
-07/01/2025,Northeast - Power,12115.853,Northeast
-07/02/2025,Northeast - Power,11179.019,Northeast
-07/03/2025,Northeast - Power,11363.0625,Northeast
-07/04/2025,Northeast - Power,9036.663,Northeast
-07/05/2025,Northeast - Power,9610.858,Northeast
-07/06/2025,Northeast - Power,10890.866,Northeast
-07/07/2025,Northeast - Power,13573.005,Northeast
-07/08/2025,Northeast - Power,13376.34,Northeast
-07/09/2025,Northeast - Power,12525.961,Northeast
-07/10/2025,Northeast - Power,11750.027,Northeast
-07/11/2025,Northeast - Power,11383.752,Northeast
-07/12/2025,Northeast - Power,10070.227,Northeast
-07/13/2025,Northeast - Power,10131.239,Northeast
-07/14/2025,Northeast - Power,11536.95,Northeast
-07/15/2025,Northeast - Power,11825.741,Northeast
-07/01/2025,Northeast - ResCom,2651.9175,Northeast
-07/02/2025,Northeast - ResCom,2618.5308,Northeast
-07/03/2025,Northeast - ResCom,2618.5308,Northeast
-07/04/2025,Northeast - ResCom,2225.751,Northeast
-07/05/2025,Northeast - ResCom,2356.6775,Northeast
-07/06/2025,Northeast - ResCom,2384.9153,Northeast
-07/07/2025,Northeast - ResCom,2947.2146,Northeast
-07/08/2025,Northeast - ResCom,2897.165,Northeast
-07/09/2025,Northeast - ResCom,2716.0671,Northeast
+07/16/2025,Northeast - Ind,2669.0288,Northeast
+07/17/2025,Northeast - Ind,2669.0288,Northeast
+07/18/2025,Northeast - Ind,2669.0288,Northeast
+07/19/2025,Northeast - Ind,2402.1257,Northeast
+07/20/2025,Northeast - Ind,2402.1257,Northeast
+07/06/2025,Northeast - Power,11128.16,Northeast
+07/07/2025,Northeast - Power,12149.434,Northeast
+07/08/2025,Northeast - Power,12796.14,Northeast
+07/09/2025,Northeast - Power,11891.108,Northeast
+07/10/2025,Northeast - Power,10942.967,Northeast
+07/11/2025,Northeast - Power,10864.7,Northeast
+07/12/2025,Northeast - Power,9940.682,Northeast
+07/13/2025,Northeast - Power,10064.152,Northeast
+07/14/2025,Northeast - Power,11435.688,Northeast
+07/15/2025,Northeast - Power,11811.276,Northeast
+07/16/2025,Northeast - Power,12288.621,Northeast
+07/17/2025,Northeast - Power,12619.213,Northeast
+07/18/2025,Northeast - Power,12549.201,Northeast
+07/19/2025,Northeast - Power,11141.897,Northeast
+07/20/2025,Northeast - Power,11063.168,Northeast
+07/06/2025,Northeast - ResCom,2419.979,Northeast
+07/07/2025,Northeast - ResCom,2656.5388,Northeast
+07/08/2025,Northeast - ResCom,2766.9846,Northeast
+07/09/2025,Northeast - ResCom,2624.069,Northeast
 07/10/2025,Northeast - ResCom,2618.5308,Northeast
 07/11/2025,Northeast - ResCom,2618.5308,Northeast
 07/12/2025,Northeast - ResCom,2356.6775,Northeast
 07/13/2025,Northeast - ResCom,2356.6775,Northeast
 07/14/2025,Northeast - ResCom,2618.5308,Northeast
 07/15/2025,Northeast - ResCom,2618.5308,Northeast
-07/01/2025,Rockies - Balance,-5194.73113,Rockies
-07/02/2025,Rockies - Balance,-5157.2762999999995,Rockies
-07/03/2025,Rockies - Balance,-4928.5049500000005,Rockies
-07/04/2025,Rockies - Balance,-4179.1156,Rockies
-07/05/2025,Rockies - Balance,-4441.7232,Rockies
-07/06/2025,Rockies - Balance,-4498.849,Rockies
-07/07/2025,Rockies - Balance,-5036.95867,Rockies
-07/08/2025,Rockies - Balance,-5101.9659,Rockies
-07/09/2025,Rockies - Balance,-5211.778700000001,Rockies
-07/10/2025,Rockies - Balance,-5211.7812,Rockies
-07/11/2025,Rockies - Balance,-5148.5017,Rockies
-07/12/2025,Rockies - Balance,-4644.2472,Rockies
-07/13/2025,Rockies - Balance,-4634.8817,Rockies
-07/14/2025,Rockies - Balance,-5129.682,Rockies
-07/15/2025,Rockies - Balance,-5129.682,Rockies
-07/16/2025,Rockies - Balance,0.0,Rockies
-07/17/2025,Rockies - Balance,0.0,Rockies
-07/18/2025,Rockies - Balance,0.0,Rockies
-07/19/2025,Rockies - Balance,0.0,Rockies
-07/20/2025,Rockies - Balance,0.0,Rockies
+07/16/2025,Northeast - ResCom,2676.9207,Northeast
+07/17/2025,Northeast - ResCom,2732.899,Northeast
+07/18/2025,Northeast - ResCom,2720.187,Northeast
+07/19/2025,Northeast - ResCom,2422.1995,Northeast
+07/20/2025,Northeast - ResCom,2409.7524,Northeast
+07/06/2025,Rockies - Balance,-4467.6656,Rockies
+07/07/2025,Rockies - Balance,-5068.87455,Rockies
+07/08/2025,Rockies - Balance,-5188.5484,Rockies
+07/09/2025,Rockies - Balance,-5451.0996,Rockies
+07/10/2025,Rockies - Balance,-5306.558,Rockies
+07/11/2025,Rockies - Balance,-5062.29645,Rockies
+07/12/2025,Rockies - Balance,-4553.23184,Rockies
+07/13/2025,Rockies - Balance,-4602.0611,Rockies
+07/14/2025,Rockies - Balance,-5214.6559,Rockies
+07/15/2025,Rockies - Balance,-5240.2622,Rockies
+07/16/2025,Rockies - Balance,-5179.5146,Rockies
+07/17/2025,Rockies - Balance,-5154.88134,Rockies
+07/18/2025,Rockies - Balance,-5149.7353,Rockies
+07/19/2025,Rockies - Balance,-4638.8167,Rockies
+07/20/2025,Rockies - Balance,-4638.8167,Rockies
 07/21/2025,Rockies - Balance,0.0,Rockies
 07/22/2025,Rockies - Balance,0.0,Rockies
 07/23/2025,Rockies - Balance,0.0,Rockies
@@ -1236,131 +1206,126 @@ Date,item,value,region
 12/29/2025,Rockies - Balance,0.0,Rockies
 12/30/2025,Rockies - Balance,0.0,Rockies
 12/31/2025,Rockies - Balance,0.0,Rockies
-07/01/2025,Rockies - Ind,1173.821,Rockies
-07/02/2025,Rockies - Ind,1169.4323,Rockies
-07/03/2025,Rockies - Ind,1172.876,Rockies
-07/04/2025,Rockies - Ind,1003.8788,Rockies
-07/05/2025,Rockies - Ind,1061.95,Rockies
-07/06/2025,Rockies - Ind,1063.4999,Rockies
-07/07/2025,Rockies - Ind,1183.3638,Rockies
-07/08/2025,Rockies - Ind,1173.3704,Rockies
-07/09/2025,Rockies - Ind,1169.8538,Rockies
-07/10/2025,Rockies - Ind,1170.4265,Rockies
-07/11/2025,Rockies - Ind,1176.5463,Rockies
-07/12/2025,Rockies - Ind,1057.4156,Rockies
-07/13/2025,Rockies - Ind,1057.6166,Rockies
-07/14/2025,Rockies - Ind,1173.1453,Rockies
-07/15/2025,Rockies - Ind,1173.1453,Rockies
-07/01/2025,Rockies - Power,3358.46,Rockies
-07/02/2025,Rockies - Power,3325.2607,Rockies
-07/03/2025,Rockies - Power,3077.7075,Rockies
-07/04/2025,Rockies - Power,2603.09,Rockies
-07/05/2025,Rockies - Power,2775.3557,Rockies
-07/06/2025,Rockies - Power,2836.4072,Rockies
-07/07/2025,Rockies - Power,3190.2065,Rockies
-07/08/2025,Rockies - Power,3265.473,Rockies
-07/09/2025,Rockies - Power,3379.621,Rockies
-07/10/2025,Rockies - Power,3378.965,Rockies
-07/11/2025,Rockies - Power,3309.6763,Rockies
-07/12/2025,Rockies - Power,2990.779,Rockies
-07/13/2025,Rockies - Power,2981.208,Rockies
-07/14/2025,Rockies - Power,3293.971,Rockies
-07/15/2025,Rockies - Power,3293.971,Rockies
-07/01/2025,Rockies - ResCom,662.45013,Rockies
-07/02/2025,Rockies - ResCom,662.5833,Rockies
-07/03/2025,Rockies - ResCom,677.92145,Rockies
-07/04/2025,Rockies - ResCom,572.1468,Rockies
-07/05/2025,Rockies - ResCom,604.4175,Rockies
-07/06/2025,Rockies - ResCom,598.9419,Rockies
-07/07/2025,Rockies - ResCom,663.38837,Rockies
-07/08/2025,Rockies - ResCom,663.1225,Rockies
-07/09/2025,Rockies - ResCom,662.3039,Rockies
-07/10/2025,Rockies - ResCom,662.3897,Rockies
-07/11/2025,Rockies - ResCom,662.2791,Rockies
-07/12/2025,Rockies - ResCom,596.0526,Rockies
-07/13/2025,Rockies - ResCom,596.0571,Rockies
-07/14/2025,Rockies - ResCom,662.5657,Rockies
-07/15/2025,Rockies - ResCom,662.5657,Rockies
-07/01/2025,Rockies[SW] - Ind,90.06791,Rockies
-07/02/2025,Rockies[SW] - Ind,88.97431,Rockies
-07/03/2025,Rockies[SW] - Ind,86.73859,Rockies
-07/04/2025,Rockies[SW] - Ind,73.929955,Rockies
-07/05/2025,Rockies[SW] - Ind,78.37865,Rockies
-07/06/2025,Rockies[SW] - Ind,79.08045,Rockies
-07/07/2025,Rockies[SW] - Ind,88.486275,Rockies
-07/08/2025,Rockies[SW] - Ind,88.61208,Rockies
-07/09/2025,Rockies[SW] - Ind,89.39578,Rockies
-07/10/2025,Rockies[SW] - Ind,89.968475,Rockies
-07/11/2025,Rockies[SW] - Ind,89.59119,Rockies
-07/12/2025,Rockies[SW] - Ind,80.66007,Rockies
-07/13/2025,Rockies[SW] - Ind,80.532425,Rockies
-07/14/2025,Rockies[SW] - Ind,88.99097,Rockies
-07/15/2025,Rockies[SW] - Ind,88.99653,Rockies
-07/01/2025,Rockies[SW] - Power,2113.0107,Rockies
-07/02/2025,Rockies[SW] - Power,2050.3845,Rockies
-07/03/2025,Rockies[SW] - Power,1849.1881,Rockies
-07/04/2025,Rockies[SW] - Power,1603.1124,Rockies
-07/05/2025,Rockies[SW] - Power,1709.7993,Rockies
-07/06/2025,Rockies[SW] - Power,1776.165,Rockies
-07/07/2025,Rockies[SW] - Power,2018.8154,Rockies
-07/08/2025,Rockies[SW] - Power,2027.2366,Rockies
-07/09/2025,Rockies[SW] - Power,2075.6284,Rockies
-07/10/2025,Rockies[SW] - Power,2107.6687,Rockies
-07/11/2025,Rockies[SW] - Power,2086.823,Rockies
-07/12/2025,Rockies[SW] - Power,1879.7214,Rockies
-07/13/2025,Rockies[SW] - Power,1872.4648,Rockies
-07/14/2025,Rockies[SW] - Power,2051.4138,Rockies
-07/15/2025,Rockies[SW] - Power,2051.757,Rockies
-07/01/2025,Rockies[SW] - ResCom,199.97594,Rockies
-07/02/2025,Rockies[SW] - ResCom,200.1091,Rockies
-07/03/2025,Rockies[SW] - ResCom,215.44728,Rockies
-07/04/2025,Rockies[SW] - ResCom,179.04373,Rockies
-07/05/2025,Rockies[SW] - ResCom,188.19067,Rockies
-07/06/2025,Rockies[SW] - ResCom,182.71512,Rockies
-07/07/2025,Rockies[SW] - ResCom,200.91417,Rockies
-07/08/2025,Rockies[SW] - ResCom,200.6483,Rockies
-07/09/2025,Rockies[SW] - ResCom,199.82968,Rockies
-07/10/2025,Rockies[SW] - ResCom,199.91553,Rockies
-07/11/2025,Rockies[SW] - ResCom,199.80495,Rockies
-07/12/2025,Rockies[SW] - ResCom,179.82582,Rockies
-07/13/2025,Rockies[SW] - ResCom,179.83038,Rockies
-07/14/2025,Rockies[SW] - ResCom,200.0915,Rockies
-07/15/2025,Rockies[SW] - ResCom,200.08575,Rockies
-07/01/2025,Rockies[Up] - Ind,1083.7532,Rockies
-07/02/2025,Rockies[Up] - Ind,1080.458,Rockies
-07/03/2025,Rockies[Up] - Ind,1086.1373,Rockies
-07/04/2025,Rockies[Up] - Ind,929.9488,Rockies
-07/05/2025,Rockies[Up] - Ind,983.5712,Rockies
-07/06/2025,Rockies[Up] - Ind,984.41943,Rockies
-07/07/2025,Rockies[Up] - Ind,1094.8774,Rockies
-07/08/2025,Rockies[Up] - Ind,1084.7583,Rockies
+07/06/2025,Rockies - Ind,1069.2693,Rockies
+07/07/2025,Rockies - Ind,1180.244,Rockies
+07/08/2025,Rockies - Ind,1172.7323,Rockies
+07/09/2025,Rockies - Ind,1172.6606,Rockies
+07/10/2025,Rockies - Ind,1171.4926,Rockies
+07/11/2025,Rockies - Ind,1191.985,Rockies
+07/12/2025,Rockies - Ind,1067.2845,Rockies
+07/13/2025,Rockies - Ind,1059.0089,Rockies
+07/14/2025,Rockies - Ind,1169.7822,Rockies
+07/15/2025,Rockies - Ind,1169.8179,Rockies
+07/16/2025,Rockies - Ind,1169.5842,Rockies
+07/17/2025,Rockies - Ind,1169.3937,Rockies
+07/18/2025,Rockies - Ind,1169.1318,Rockies
+07/19/2025,Rockies - Ind,1051.988,Rockies
+07/20/2025,Rockies - Ind,1051.988,Rockies
+07/06/2025,Rockies - Power,2799.2957,Rockies
+07/07/2025,Rockies - Power,3225.677,Rockies
+07/08/2025,Rockies - Power,3353.479,Rockies
+07/09/2025,Rockies - Power,3612.4167,Rockies
+07/10/2025,Rockies - Power,3471.4702,Rockies
+07/11/2025,Rockies - Power,3208.0266,Rockies
+07/12/2025,Rockies - Power,2889.6382,Rockies
+07/13/2025,Rockies - Power,2946.8062,Rockies
+07/14/2025,Rockies - Power,3382.5452,Rockies
+07/15/2025,Rockies - Power,3408.1292,Rockies
+07/16/2025,Rockies - Power,3347.4866,Rockies
+07/17/2025,Rockies - Power,3322.8613,Rockies
+07/18/2025,Rockies - Power,3317.5957,Rockies
+07/19/2025,Rockies - Power,2989.6309,Rockies
+07/20/2025,Rockies - Power,2989.6309,Rockies
+07/06/2025,Rockies - ResCom,599.1006,Rockies
+07/07/2025,Rockies - ResCom,662.95355,Rockies
+07/08/2025,Rockies - ResCom,662.3371,Rockies
+07/09/2025,Rockies - ResCom,666.0223,Rockies
+07/10/2025,Rockies - ResCom,663.5952,Rockies
+07/11/2025,Rockies - ResCom,662.28485,Rockies
+07/12/2025,Rockies - ResCom,596.30914,Rockies
+07/13/2025,Rockies - ResCom,596.246,Rockies
+07/14/2025,Rockies - ResCom,662.3285,Rockies
+07/15/2025,Rockies - ResCom,662.3151,Rockies
+07/16/2025,Rockies - ResCom,662.4438,Rockies
+07/17/2025,Rockies - ResCom,662.62634,Rockies
+07/18/2025,Rockies - ResCom,663.0078,Rockies
+07/19/2025,Rockies - ResCom,597.1978,Rockies
+07/20/2025,Rockies - ResCom,597.1978,Rockies
+07/06/2025,Rockies[SW] - Ind,79.0476,Rockies
+07/07/2025,Rockies[SW] - Ind,88.70512,Rockies
+07/08/2025,Rockies[SW] - Ind,89.8575,Rockies
+07/09/2025,Rockies[SW] - Ind,92.202675,Rockies
+07/10/2025,Rockies[SW] - Ind,91.03453,Rockies
+07/11/2025,Rockies[SW] - Ind,89.48657,Rockies
+07/12/2025,Rockies[SW] - Ind,80.09187,Rockies
+07/13/2025,Rockies[SW] - Ind,80.15742,Rockies
+07/14/2025,Rockies[SW] - Ind,89.32419,Rockies
+07/15/2025,Rockies[SW] - Ind,89.35987,Rockies
+07/16/2025,Rockies[SW] - Ind,89.12627,Rockies
+07/17/2025,Rockies[SW] - Ind,88.93567,Rockies
+07/18/2025,Rockies[SW] - Ind,88.673874,Rockies
+07/19/2025,Rockies[SW] - Ind,79.5758,Rockies
+07/20/2025,Rockies[SW] - Ind,79.259544,Rockies
+07/06/2025,Rockies[SW] - Power,1773.5322,Rockies
+07/07/2025,Rockies[SW] - Power,2033.3296,Rockies
+07/08/2025,Rockies[SW] - Power,2101.6348,Rockies
+07/09/2025,Rockies[SW] - Power,2216.6516,Rockies
+07/10/2025,Rockies[SW] - Power,2162.2332,Rockies
+07/11/2025,Rockies[SW] - Power,2080.8662,Rockies
+07/12/2025,Rockies[SW] - Power,1846.2725,Rockies
+07/13/2025,Rockies[SW] - Power,1850.2942,Rockies
+07/14/2025,Rockies[SW] - Power,2071.451,Rockies
+07/15/2025,Rockies[SW] - Power,2073.5383,Rockies
+07/16/2025,Rockies[SW] - Power,2059.6738,Rockies
+07/17/2025,Rockies[SW] - Power,2047.9854,Rockies
+07/18/2025,Rockies[SW] - Power,2031.2957,Rockies
+07/19/2025,Rockies[SW] - Power,1812.7084,Rockies
+07/20/2025,Rockies[SW] - Power,1790.0056,Rockies
+07/06/2025,Rockies[SW] - ResCom,182.87383,Rockies
+07/07/2025,Rockies[SW] - ResCom,200.47939,Rockies
+07/08/2025,Rockies[SW] - ResCom,199.8629,Rockies
+07/09/2025,Rockies[SW] - ResCom,203.54807,Rockies
+07/10/2025,Rockies[SW] - ResCom,201.12102,Rockies
+07/11/2025,Rockies[SW] - ResCom,199.81067,Rockies
+07/12/2025,Rockies[SW] - ResCom,180.08235,Rockies
+07/13/2025,Rockies[SW] - ResCom,180.0192,Rockies
+07/14/2025,Rockies[SW] - ResCom,199.85432,Rockies
+07/15/2025,Rockies[SW] - ResCom,199.84096,Rockies
+07/16/2025,Rockies[SW] - ResCom,199.96962,Rockies
+07/17/2025,Rockies[SW] - ResCom,200.15218,Rockies
+07/18/2025,Rockies[SW] - ResCom,200.5336,Rockies
+07/19/2025,Rockies[SW] - ResCom,180.97104,Rockies
+07/20/2025,Rockies[SW] - ResCom,181.95515,Rockies
+07/06/2025,Rockies[Up] - Ind,990.2217,Rockies
+07/07/2025,Rockies[Up] - Ind,1091.5388,Rockies
+07/08/2025,Rockies[Up] - Ind,1082.8748,Rockies
 07/09/2025,Rockies[Up] - Ind,1080.458,Rockies
 07/10/2025,Rockies[Up] - Ind,1080.458,Rockies
-07/11/2025,Rockies[Up] - Ind,1086.9551,Rockies
-07/12/2025,Rockies[Up] - Ind,976.75555,Rockies
-07/13/2025,Rockies[Up] - Ind,977.0841,Rockies
-07/14/2025,Rockies[Up] - Ind,1084.1543,Rockies
-07/15/2025,Rockies[Up] - Ind,1080.6262,Rockies
-07/01/2025,Rockies[Up] - Power,1245.4492,Rockies
-07/02/2025,Rockies[Up] - Power,1274.8761,Rockies
-07/03/2025,Rockies[Up] - Power,1228.5193,Rockies
-07/04/2025,Rockies[Up] - Power,999.9777,Rockies
-07/05/2025,Rockies[Up] - Power,1065.5564,Rockies
-07/06/2025,Rockies[Up] - Power,1060.2423,Rockies
-07/07/2025,Rockies[Up] - Power,1171.3912,Rockies
-07/08/2025,Rockies[Up] - Power,1238.2363,Rockies
-07/09/2025,Rockies[Up] - Power,1303.9926,Rockies
-07/10/2025,Rockies[Up] - Power,1271.2964,Rockies
-07/11/2025,Rockies[Up] - Power,1222.8531,Rockies
-07/12/2025,Rockies[Up] - Power,1111.0576,Rockies
-07/13/2025,Rockies[Up] - Power,1108.7432,Rockies
-07/14/2025,Rockies[Up] - Power,1242.5571,Rockies
-07/15/2025,Rockies[Up] - Power,1268.6201,Rockies
-07/01/2025,Rockies[Up] - ResCom,462.47418,Rockies
-07/02/2025,Rockies[Up] - ResCom,462.47418,Rockies
-07/03/2025,Rockies[Up] - ResCom,462.47418,Rockies
-07/04/2025,Rockies[Up] - ResCom,393.10306,Rockies
-07/05/2025,Rockies[Up] - ResCom,416.22678,Rockies
+07/11/2025,Rockies[Up] - Ind,1102.4984,Rockies
+07/12/2025,Rockies[Up] - Ind,987.1926,Rockies
+07/13/2025,Rockies[Up] - Ind,978.8515,Rockies
+07/14/2025,Rockies[Up] - Ind,1080.458,Rockies
+07/15/2025,Rockies[Up] - Ind,1080.458,Rockies
+07/16/2025,Rockies[Up] - Ind,1080.458,Rockies
+07/17/2025,Rockies[Up] - Ind,1080.458,Rockies
+07/18/2025,Rockies[Up] - Ind,1080.458,Rockies
+07/19/2025,Rockies[Up] - Ind,972.4122,Rockies
+07/20/2025,Rockies[Up] - Ind,972.4122,Rockies
+07/06/2025,Rockies[Up] - Power,1025.7635,Rockies
+07/07/2025,Rockies[Up] - Power,1192.3473,Rockies
+07/08/2025,Rockies[Up] - Power,1251.8441,Rockies
+07/09/2025,Rockies[Up] - Power,1395.7651,Rockies
+07/10/2025,Rockies[Up] - Power,1309.2369,Rockies
+07/11/2025,Rockies[Up] - Power,1127.1603,Rockies
+07/12/2025,Rockies[Up] - Power,1043.3657,Rockies
+07/13/2025,Rockies[Up] - Power,1096.512,Rockies
+07/14/2025,Rockies[Up] - Power,1311.0942,Rockies
+07/15/2025,Rockies[Up] - Power,1334.5907,Rockies
+07/16/2025,Rockies[Up] - Power,1287.8129,Rockies
+07/17/2025,Rockies[Up] - Power,1274.8761,Rockies
+07/18/2025,Rockies[Up] - Power,1286.2999,Rockies
+07/19/2025,Rockies[Up] - Power,1176.9225,Rockies
+07/20/2025,Rockies[Up] - Power,1175.5339,Rockies
 07/06/2025,Rockies[Up] - ResCom,416.22678,Rockies
 07/07/2025,Rockies[Up] - ResCom,462.47418,Rockies
 07/08/2025,Rockies[Up] - ResCom,462.47418,Rockies
@@ -1371,26 +1336,26 @@ Date,item,value,region
 07/13/2025,Rockies[Up] - ResCom,416.22678,Rockies
 07/14/2025,Rockies[Up] - ResCom,462.47418,Rockies
 07/15/2025,Rockies[Up] - ResCom,462.47418,Rockies
-07/01/2025,SouthCentral - Balance,-22311.099000000002,SouthCentral
-07/02/2025,SouthCentral - Balance,-22626.52,SouthCentral
-07/03/2025,SouthCentral - Balance,-22739.616,SouthCentral
-07/04/2025,SouthCentral - Balance,-19569.03674,SouthCentral
-07/05/2025,SouthCentral - Balance,-21224.0255,SouthCentral
-07/06/2025,SouthCentral - Balance,-21237.1685,SouthCentral
-07/07/2025,SouthCentral - Balance,-23295.532,SouthCentral
-07/08/2025,SouthCentral - Balance,-23128.391,SouthCentral
-07/09/2025,SouthCentral - Balance,-23330.815000000002,SouthCentral
-07/10/2025,SouthCentral - Balance,-23733.146,SouthCentral
-07/11/2025,SouthCentral - Balance,-23867.846,SouthCentral
-07/12/2025,SouthCentral - Balance,-21233.8825,SouthCentral
-07/13/2025,SouthCentral - Balance,-21004.0995,SouthCentral
-07/14/2025,SouthCentral - Balance,-23225.444,SouthCentral
-07/15/2025,SouthCentral - Balance,-23316.683,SouthCentral
-07/16/2025,SouthCentral - Balance,0.0,SouthCentral
-07/17/2025,SouthCentral - Balance,0.0,SouthCentral
-07/18/2025,SouthCentral - Balance,0.0,SouthCentral
-07/19/2025,SouthCentral - Balance,0.0,SouthCentral
-07/20/2025,SouthCentral - Balance,0.0,SouthCentral
+07/16/2025,Rockies[Up] - ResCom,462.47418,Rockies
+07/17/2025,Rockies[Up] - ResCom,462.47418,Rockies
+07/18/2025,Rockies[Up] - ResCom,462.47418,Rockies
+07/19/2025,Rockies[Up] - ResCom,416.22678,Rockies
+07/20/2025,Rockies[Up] - ResCom,416.22678,Rockies
+07/06/2025,SouthCentral - Balance,-19941.4019,SouthCentral
+07/07/2025,SouthCentral - Balance,-22366.123,SouthCentral
+07/08/2025,SouthCentral - Balance,-22283.778,SouthCentral
+07/09/2025,SouthCentral - Balance,-22111.1084,SouthCentral
+07/10/2025,SouthCentral - Balance,-22512.231,SouthCentral
+07/11/2025,SouthCentral - Balance,-22834.802,SouthCentral
+07/12/2025,SouthCentral - Balance,-20343.7215,SouthCentral
+07/13/2025,SouthCentral - Balance,-20439.3125,SouthCentral
+07/14/2025,SouthCentral - Balance,-22848.034,SouthCentral
+07/15/2025,SouthCentral - Balance,-23166.371,SouthCentral
+07/16/2025,SouthCentral - Balance,-23394.726000000002,SouthCentral
+07/17/2025,SouthCentral - Balance,-23513.234,SouthCentral
+07/18/2025,SouthCentral - Balance,-23640.819,SouthCentral
+07/19/2025,SouthCentral - Balance,-21346.4755,SouthCentral
+07/20/2025,SouthCentral - Balance,-21447.2005,SouthCentral
 07/21/2025,SouthCentral - Balance,0.0,SouthCentral
 07/22/2025,SouthCentral - Balance,0.0,SouthCentral
 07/23/2025,SouthCentral - Balance,0.0,SouthCentral
@@ -1555,71 +1520,66 @@ Date,item,value,region
 12/29/2025,SouthCentral - Balance,0.0,SouthCentral
 12/30/2025,SouthCentral - Balance,0.0,SouthCentral
 12/31/2025,SouthCentral - Balance,0.0,SouthCentral
-07/01/2025,SouthCentral - Ind,10655.219,South Central
-07/02/2025,SouthCentral - Ind,10648.503,South Central
-07/03/2025,SouthCentral - Ind,10646.397,South Central
-07/04/2025,SouthCentral - Ind,9045.498,South Central
-07/05/2025,SouthCentral - Ind,9571.414,South Central
-07/06/2025,SouthCentral - Ind,9571.286,South Central
-07/07/2025,SouthCentral - Ind,10638.06,South Central
-07/08/2025,SouthCentral - Ind,10640.24,South Central
-07/09/2025,SouthCentral - Ind,10637.633,South Central
-07/10/2025,SouthCentral - Ind,10633.519,South Central
-07/11/2025,SouthCentral - Ind,10632.432,South Central
-07/12/2025,SouthCentral - Ind,9571.317,South Central
-07/13/2025,SouthCentral - Ind,9573.793,South Central
-07/14/2025,SouthCentral - Ind,10638.942,South Central
-07/15/2025,SouthCentral - Ind,10637.803,South Central
-07/01/2025,SouthCentral - Power,10524.645,South Central
-07/02/2025,SouthCentral - Power,10846.782,South Central
-07/03/2025,SouthCentral - Power,10961.984,South Central
-07/04/2025,SouthCentral - Power,9561.989,South Central
-07/05/2025,SouthCentral - Power,10634.5,South Central
-07/06/2025,SouthCentral - Power,10647.771,South Central
-07/07/2025,SouthCentral - Power,11526.237,South Central
-07/08/2025,SouthCentral - Power,11356.916,South Central
-07/09/2025,SouthCentral - Power,11561.947,South Central
-07/10/2025,SouthCentral - Power,11968.392,South Central
-07/11/2025,SouthCentral - Power,12104.179,South Central
-07/12/2025,SouthCentral - Power,10644.454,South Central
-07/13/2025,SouthCentral - Power,10412.195,South Central
-07/14/2025,SouthCentral - Power,11455.267,South Central
-07/15/2025,SouthCentral - Power,11547.645,South Central
-07/01/2025,SouthCentral - ResCom,1131.235,South Central
-07/02/2025,SouthCentral - ResCom,1131.235,South Central
-07/03/2025,SouthCentral - ResCom,1131.235,South Central
-07/04/2025,SouthCentral - ResCom,961.54974,South Central
-07/05/2025,SouthCentral - ResCom,1018.1115,South Central
-07/06/2025,SouthCentral - ResCom,1018.1115,South Central
+07/06/2025,SouthCentral - Ind,9593.28,South Central
+07/07/2025,SouthCentral - Ind,10653.952,South Central
+07/08/2025,SouthCentral - Ind,10655.863,South Central
+07/09/2025,SouthCentral - Ind,10660.51,South Central
+07/10/2025,SouthCentral - Ind,10650.787,South Central
+07/11/2025,SouthCentral - Ind,10644.74,South Central
+07/12/2025,SouthCentral - Ind,9584.044,South Central
+07/13/2025,SouthCentral - Ind,9582.235,South Central
+07/14/2025,SouthCentral - Ind,10644.518,South Central
+07/15/2025,SouthCentral - Ind,10639.722,South Central
+07/16/2025,SouthCentral - Ind,10636.888,South Central
+07/17/2025,SouthCentral - Ind,10635.6,South Central
+07/18/2025,SouthCentral - Ind,10634.345,South Central
+07/19/2025,SouthCentral - Ind,9570.282,South Central
+07/20/2025,SouthCentral - Ind,9569.449,South Central
+07/06/2025,SouthCentral - Power,9322.815,South Central
+07/07/2025,SouthCentral - Power,10580.936,South Central
+07/08/2025,SouthCentral - Power,10496.68,South Central
+07/09/2025,SouthCentral - Power,10307.343,South Central
+07/10/2025,SouthCentral - Power,10730.209,South Central
+07/11/2025,SouthCentral - Power,11058.827,South Central
+07/12/2025,SouthCentral - Power,9741.566,South Central
+07/13/2025,SouthCentral - Power,9838.966,South Central
+07/14/2025,SouthCentral - Power,11072.281,South Central
+07/15/2025,SouthCentral - Power,11395.414,South Central
+07/16/2025,SouthCentral - Power,11626.603,South Central
+07/17/2025,SouthCentral - Power,11746.399,South Central
+07/18/2025,SouthCentral - Power,11875.239,South Central
+07/19/2025,SouthCentral - Power,10758.082,South Central
+07/20/2025,SouthCentral - Power,10859.64,South Central
+07/06/2025,SouthCentral - ResCom,1025.3069,South Central
 07/07/2025,SouthCentral - ResCom,1131.235,South Central
 07/08/2025,SouthCentral - ResCom,1131.235,South Central
-07/09/2025,SouthCentral - ResCom,1131.235,South Central
+07/09/2025,SouthCentral - ResCom,1143.2554,South Central
 07/10/2025,SouthCentral - ResCom,1131.235,South Central
 07/11/2025,SouthCentral - ResCom,1131.235,South Central
 07/12/2025,SouthCentral - ResCom,1018.1115,South Central
 07/13/2025,SouthCentral - ResCom,1018.1115,South Central
 07/14/2025,SouthCentral - ResCom,1131.235,South Central
 07/15/2025,SouthCentral - ResCom,1131.235,South Central
-07/01/2025,SouthEast - Balance,-11338.6822,SouthEast
-07/02/2025,SouthEast - Balance,-11549.92667,SouthEast
-07/03/2025,SouthEast - Balance,-11622.9414,SouthEast
-07/04/2025,SouthEast - Balance,-10088.71585,SouthEast
-07/05/2025,SouthEast - Balance,-10659.465,SouthEast
-07/06/2025,SouthEast - Balance,-10731.538900000001,SouthEast
-07/07/2025,SouthEast - Balance,-12355.9979,SouthEast
-07/08/2025,SouthEast - Balance,-12711.55414,SouthEast
-07/09/2025,SouthEast - Balance,-12643.8269,SouthEast
-07/10/2025,SouthEast - Balance,-12115.962200000002,SouthEast
-07/11/2025,SouthEast - Balance,-11974.7058,SouthEast
-07/12/2025,SouthEast - Balance,-10720.24843,SouthEast
-07/13/2025,SouthEast - Balance,-10700.449799999999,SouthEast
-07/14/2025,SouthEast - Balance,-11984.9441,SouthEast
-07/15/2025,SouthEast - Balance,-11984.9441,SouthEast
-07/16/2025,SouthEast - Balance,0.0,SouthEast
-07/17/2025,SouthEast - Balance,0.0,SouthEast
-07/18/2025,SouthEast - Balance,0.0,SouthEast
-07/19/2025,SouthEast - Balance,0.0,SouthEast
-07/20/2025,SouthEast - Balance,0.0,SouthEast
+07/16/2025,SouthCentral - ResCom,1131.235,South Central
+07/17/2025,SouthCentral - ResCom,1131.235,South Central
+07/18/2025,SouthCentral - ResCom,1131.235,South Central
+07/19/2025,SouthCentral - ResCom,1018.1115,South Central
+07/20/2025,SouthCentral - ResCom,1018.1115,South Central
+07/06/2025,SouthEast - Balance,-10979.909800000001,SouthEast
+07/07/2025,SouthEast - Balance,-12803.671400000001,SouthEast
+07/08/2025,SouthEast - Balance,-12767.6697,SouthEast
+07/09/2025,SouthEast - Balance,-12192.9015,SouthEast
+07/10/2025,SouthEast - Balance,-11686.06644,SouthEast
+07/11/2025,SouthEast - Balance,-11502.5968,SouthEast
+07/12/2025,SouthEast - Balance,-10594.1355,SouthEast
+07/13/2025,SouthEast - Balance,-10824.240150000001,SouthEast
+07/14/2025,SouthEast - Balance,-12058.3612,SouthEast
+07/15/2025,SouthEast - Balance,-12033.1643,SouthEast
+07/16/2025,SouthEast - Balance,-12025.2286,SouthEast
+07/17/2025,SouthEast - Balance,-12029.538050000001,SouthEast
+07/18/2025,SouthEast - Balance,-12049.476999999999,SouthEast
+07/19/2025,SouthEast - Balance,-10865.2265,SouthEast
+07/20/2025,SouthEast - Balance,-10865.2265,SouthEast
 07/21/2025,SouthEast - Balance,0.0,SouthEast
 07/22/2025,SouthEast - Balance,0.0,SouthEast
 07/23/2025,SouthEast - Balance,0.0,SouthEast
@@ -1784,11 +1744,6 @@ Date,item,value,region
 12/29/2025,SouthEast - Balance,0.0,SouthEast
 12/30/2025,SouthEast - Balance,0.0,SouthEast
 12/31/2025,SouthEast - Balance,0.0,SouthEast
-07/01/2025,SouthEast - Ind,1936.6035,Southeast
-07/02/2025,SouthEast - Ind,1929.009,Southeast
-07/03/2025,SouthEast - Ind,1931.6783,Southeast
-07/04/2025,SouthEast - Ind,1643.7178,Southeast
-07/05/2025,SouthEast - Ind,1740.1486,Southeast
 07/06/2025,SouthEast - Ind,1744.2715,Southeast
 07/07/2025,SouthEast - Ind,1932.2894,Southeast
 07/08/2025,SouthEast - Ind,1927.6222,Southeast
@@ -1798,42 +1753,42 @@ Date,item,value,region
 07/12/2025,SouthEast - Ind,1738.5933,Southeast
 07/13/2025,SouthEast - Ind,1736.2921,Southeast
 07/14/2025,SouthEast - Ind,1927.5938,Southeast
-07/15/2025,SouthEast - Ind,1927.5938,Southeast
-07/01/2025,SouthEast - Power,8741.131,Southeast
-07/02/2025,SouthEast - Power,8966.547,Southeast
-07/03/2025,SouthEast - Power,9031.574,Southeast
-07/04/2025,SouthEast - Power,7863.8125,Southeast
-07/05/2025,SouthEast - Power,8281.08,Southeast
-07/06/2025,SouthEast - Power,8334.959,Southeast
-07/07/2025,SouthEast - Power,9686.281,Southeast
-07/08/2025,SouthEast - Power,10002.195,Southeast
-07/09/2025,SouthEast - Power,9948.889,Southeast
-07/10/2025,SouthEast - Power,9513.647,Southeast
-07/11/2025,SouthEast - Power,9393.443,Southeast
-07/12/2025,SouthEast - Power,8400.856,Southeast
-07/13/2025,SouthEast - Power,8383.175,Southeast
-07/14/2025,SouthEast - Power,9403.447,Southeast
-07/15/2025,SouthEast - Power,9403.447,Southeast
-07/01/2025,SouthEast - ResCom,660.9477,Southeast
-07/02/2025,SouthEast - ResCom,654.37067,Southeast
-07/03/2025,SouthEast - ResCom,659.6891,Southeast
-07/04/2025,SouthEast - ResCom,581.18555,Southeast
-07/05/2025,SouthEast - ResCom,638.2364,Southeast
-07/06/2025,SouthEast - ResCom,652.3084,Southeast
-07/07/2025,SouthEast - ResCom,737.4275,Southeast
-07/08/2025,SouthEast - ResCom,781.73694,Southeast
-07/09/2025,SouthEast - ResCom,767.4419,Southeast
-07/10/2025,SouthEast - ResCom,674.0239,Southeast
-07/11/2025,SouthEast - ResCom,651.8076,Southeast
-07/12/2025,SouthEast - ResCom,580.79913,Southeast
-07/13/2025,SouthEast - ResCom,580.9827,Southeast
-07/14/2025,SouthEast - ResCom,653.9033,Southeast
-07/15/2025,SouthEast - ResCom,653.9033,Southeast
-07/01/2025,SouthEast[Fl] - Ind,359.0129,Southeast
-07/02/2025,SouthEast[Fl] - Ind,358.39246,Southeast
-07/03/2025,SouthEast[Fl] - Ind,358.60608,Southeast
-07/04/2025,SouthEast[Fl] - Ind,304.96143,Southeast
-07/05/2025,SouthEast[Fl] - Ind,322.87906,Southeast
+07/15/2025,SouthEast - Ind,1929.6102,Southeast
+07/16/2025,SouthEast - Ind,1932.6809,Southeast
+07/17/2025,SouthEast - Ind,1930.3241,Southeast
+07/18/2025,SouthEast - Ind,1928.3096,Southeast
+07/19/2025,SouthEast - Ind,1734.9889,Southeast
+07/20/2025,SouthEast - Ind,1734.9889,Southeast
+07/06/2025,SouthEast - Power,8579.769,Southeast
+07/07/2025,SouthEast - Power,10072.058,Southeast
+07/08/2025,SouthEast - Power,10049.3125,Southeast
+07/09/2025,SouthEast - Power,9546.657,Southeast
+07/10/2025,SouthEast - Power,9099.859,Southeast
+07/11/2025,SouthEast - Power,8920.937,Southeast
+07/12/2025,SouthEast - Power,8264.568,Southeast
+07/13/2025,SouthEast - Power,8475.708,Southeast
+07/14/2025,SouthEast - Power,9434.125,Southeast
+07/15/2025,SouthEast - Power,9408.302,Southeast
+07/16/2025,SouthEast - Power,9409.324,Southeast
+07/17/2025,SouthEast - Power,9423.743,Southeast
+07/18/2025,SouthEast - Power,9445.57,Southeast
+07/19/2025,SouthEast - Power,8527.356,Southeast
+07/20/2025,SouthEast - Power,8527.356,Southeast
+07/06/2025,SouthEast - ResCom,655.8693,Southeast
+07/07/2025,SouthEast - ResCom,799.324,Southeast
+07/08/2025,SouthEast - ResCom,790.735,Southeast
+07/09/2025,SouthEast - ResCom,718.7485,Southeast
+07/10/2025,SouthEast - ResCom,657.91614,Southeast
+07/11/2025,SouthEast - ResCom,652.2046,Southeast
+07/12/2025,SouthEast - ResCom,590.9742,Southeast
+07/13/2025,SouthEast - ResCom,612.24005,Southeast
+07/14/2025,SouthEast - ResCom,696.6424,Southeast
+07/15/2025,SouthEast - ResCom,695.2521,Southeast
+07/16/2025,SouthEast - ResCom,683.2237,Southeast
+07/17/2025,SouthEast - ResCom,675.47095,Southeast
+07/18/2025,SouthEast - ResCom,675.5974,Southeast
+07/19/2025,SouthEast - ResCom,602.8816,Southeast
+07/20/2025,SouthEast - ResCom,602.8816,Southeast
 07/06/2025,SouthEast[Fl] - Ind,323.2242,Southeast
 07/07/2025,SouthEast[Fl] - Ind,358.65567,Southeast
 07/08/2025,SouthEast[Fl] - Ind,358.13828,Southeast
@@ -1844,41 +1799,41 @@ Date,item,value,region
 07/13/2025,SouthEast[Fl] - Ind,322.56778,Southeast
 07/14/2025,SouthEast[Fl] - Ind,358.10986,Southeast
 07/15/2025,SouthEast[Fl] - Ind,358.44016,Southeast
-07/01/2025,SouthEast[Fl] - Power,4030.3132,Southeast
-07/02/2025,SouthEast[Fl] - Power,4237.73,Southeast
-07/03/2025,SouthEast[Fl] - Power,4229.4434,Southeast
-07/04/2025,SouthEast[Fl] - Power,3620.5037,Southeast
-07/05/2025,SouthEast[Fl] - Power,3680.9565,Southeast
-07/06/2025,SouthEast[Fl] - Power,3664.2703,Southeast
-07/07/2025,SouthEast[Fl] - Power,4391.9355,Southeast
-07/08/2025,SouthEast[Fl] - Power,4509.2354,Southeast
-07/09/2025,SouthEast[Fl] - Power,4512.9243,Southeast
-07/10/2025,SouthEast[Fl] - Power,4538.872,Southeast
-07/11/2025,SouthEast[Fl] - Power,4582.0015,Southeast
-07/12/2025,SouthEast[Fl] - Power,4140.853,Southeast
-07/13/2025,SouthEast[Fl] - Power,4132.3145,Southeast
-07/14/2025,SouthEast[Fl] - Power,4574.456,Southeast
-07/15/2025,SouthEast[Fl] - Power,4574.456,Southeast
-07/01/2025,SouthEast[Fl] - ResCom,203.6219,Southeast
-07/02/2025,SouthEast[Fl] - ResCom,197.04486,Southeast
-07/03/2025,SouthEast[Fl] - ResCom,197.28477,Southeast
-07/04/2025,SouthEast[Fl] - ResCom,166.96136,Southeast
-07/05/2025,SouthEast[Fl] - ResCom,181.44058,Southeast
-07/06/2025,SouthEast[Fl] - ResCom,181.99516,Southeast
-07/07/2025,SouthEast[Fl] - ResCom,192.87663,Southeast
-07/08/2025,SouthEast[Fl] - ResCom,190.04372,Southeast
-07/09/2025,SouthEast[Fl] - ResCom,189.9589,Southeast
-07/10/2025,SouthEast[Fl] - ResCom,189.3692,Southeast
-07/11/2025,SouthEast[Fl] - ResCom,188.41542,Southeast
-07/12/2025,SouthEast[Fl] - ResCom,169.20589,Southeast
-07/13/2025,SouthEast[Fl] - ResCom,169.38948,Southeast
-07/14/2025,SouthEast[Fl] - ResCom,188.57997,Southeast
-07/15/2025,SouthEast[Fl] - ResCom,188.57997,Southeast
-07/01/2025,SouthEast[Oth] - Ind,1577.5906,Southeast
-07/02/2025,SouthEast[Oth] - Ind,1570.6166,Southeast
-07/03/2025,SouthEast[Oth] - Ind,1573.0723,Southeast
-07/04/2025,SouthEast[Oth] - Ind,1338.7563,Southeast
-07/05/2025,SouthEast[Oth] - Ind,1417.2695,Southeast
+07/16/2025,SouthEast[Fl] - Ind,358.68756,Southeast
+07/17/2025,SouthEast[Fl] - Ind,358.4971,Southeast
+07/18/2025,SouthEast[Fl] - Ind,358.33728,Southeast
+07/19/2025,SouthEast[Fl] - Ind,322.45346,Southeast
+07/20/2025,SouthEast[Fl] - Ind,322.47772,Southeast
+07/06/2025,SouthEast[Fl] - Power,3862.3208,Southeast
+07/07/2025,SouthEast[Fl] - Power,4511.079,Southeast
+07/08/2025,SouthEast[Fl] - Power,4520.313,Southeast
+07/09/2025,SouthEast[Fl] - Power,4346.409,Southeast
+07/10/2025,SouthEast[Fl] - Power,4296.567,Southeast
+07/11/2025,SouthEast[Fl] - Power,4315.356,Southeast
+07/12/2025,SouthEast[Fl] - Power,3935.319,Southeast
+07/13/2025,SouthEast[Fl] - Power,3978.3137,Southeast
+07/14/2025,SouthEast[Fl] - Power,4349.8823,Southeast
+07/15/2025,SouthEast[Fl] - Power,4334.2876,Southeast
+07/16/2025,SouthEast[Fl] - Power,4397.2397,Southeast
+07/17/2025,SouthEast[Fl] - Power,4452.673,Southeast
+07/18/2025,SouthEast[Fl] - Power,4470.795,Southeast
+07/19/2025,SouthEast[Fl] - Power,4076.62,Southeast
+07/20/2025,SouthEast[Fl] - Power,4086.6602,Southeast
+07/06/2025,SouthEast[Fl] - ResCom,175.9771,Southeast
+07/07/2025,SouthEast[Fl] - ResCom,190.00128,Southeast
+07/08/2025,SouthEast[Fl] - ResCom,189.78973,Southeast
+07/09/2025,SouthEast[Fl] - ResCom,194.05145,Southeast
+07/10/2025,SouthEast[Fl] - ResCom,195.38995,Southeast
+07/11/2025,SouthEast[Fl] - ResCom,194.87875,Southeast
+07/12/2025,SouthEast[Fl] - ResCom,174.0337,Southeast
+07/13/2025,SouthEast[Fl] - ResCom,172.94893,Southeast
+07/14/2025,SouthEast[Fl] - ResCom,193.96025,Southeast
+07/15/2025,SouthEast[Fl] - ResCom,194.37183,Southeast
+07/16/2025,SouthEast[Fl] - ResCom,192.74261,Southeast
+07/17/2025,SouthEast[Fl] - ResCom,191.37622,Southeast
+07/18/2025,SouthEast[Fl] - ResCom,190.94269,Southeast
+07/19/2025,SouthEast[Fl] - ResCom,170.62112,Southeast
+07/20/2025,SouthEast[Fl] - ResCom,170.39462,Southeast
 07/06/2025,SouthEast[Oth] - Ind,1421.0472,Southeast
 07/07/2025,SouthEast[Oth] - Ind,1573.6338,Southeast
 07/08/2025,SouthEast[Oth] - Ind,1569.4839,Southeast
@@ -1889,56 +1844,56 @@ Date,item,value,region
 07/13/2025,SouthEast[Oth] - Ind,1413.7244,Southeast
 07/14/2025,SouthEast[Oth] - Ind,1569.4839,Southeast
 07/15/2025,SouthEast[Oth] - Ind,1571.17,Southeast
-07/01/2025,SouthEast[Oth] - Power,4710.818,Southeast
-07/02/2025,SouthEast[Oth] - Power,4728.817,Southeast
-07/03/2025,SouthEast[Oth] - Power,4802.131,Southeast
-07/04/2025,SouthEast[Oth] - Power,4243.309,Southeast
-07/05/2025,SouthEast[Oth] - Power,4600.123,Southeast
-07/06/2025,SouthEast[Oth] - Power,4670.6885,Southeast
-07/07/2025,SouthEast[Oth] - Power,5294.345,Southeast
-07/08/2025,SouthEast[Oth] - Power,5492.96,Southeast
-07/09/2025,SouthEast[Oth] - Power,5435.965,Southeast
-07/10/2025,SouthEast[Oth] - Power,4974.7754,Southeast
-07/11/2025,SouthEast[Oth] - Power,4811.4424,Southeast
-07/12/2025,SouthEast[Oth] - Power,4260.0034,Southeast
-07/13/2025,SouthEast[Oth] - Power,4250.8604,Southeast
-07/14/2025,SouthEast[Oth] - Power,4828.991,Southeast
-07/15/2025,SouthEast[Oth] - Power,4908.7856,Southeast
-07/01/2025,SouthEast[Oth] - ResCom,457.3258,Southeast
-07/02/2025,SouthEast[Oth] - ResCom,457.3258,Southeast
-07/03/2025,SouthEast[Oth] - ResCom,462.40433,Southeast
-07/04/2025,SouthEast[Oth] - ResCom,414.22418,Southeast
-07/05/2025,SouthEast[Oth] - ResCom,456.7958,Southeast
-07/06/2025,SouthEast[Oth] - ResCom,470.31326,Southeast
-07/07/2025,SouthEast[Oth] - ResCom,544.55084,Southeast
-07/08/2025,SouthEast[Oth] - ResCom,591.69324,Southeast
-07/09/2025,SouthEast[Oth] - ResCom,577.483,Southeast
-07/10/2025,SouthEast[Oth] - ResCom,484.65475,Southeast
-07/11/2025,SouthEast[Oth] - ResCom,463.3922,Southeast
-07/12/2025,SouthEast[Oth] - ResCom,411.59323,Southeast
-07/13/2025,SouthEast[Oth] - ResCom,411.59323,Southeast
-07/14/2025,SouthEast[Oth] - ResCom,465.32333,Southeast
-07/15/2025,SouthEast[Oth] - ResCom,475.20218,Southeast
-07/01/2025,West - Balance,-6307.81562,West
-07/02/2025,West - Balance,-6176.78361,West
-07/03/2025,West - Balance,-6208.36447,West
-07/04/2025,West - Balance,-5298.846890000001,West
-07/05/2025,West - Balance,-5748.11863,West
-07/06/2025,West - Balance,-5710.79679,West
-07/07/2025,West - Balance,-6329.19255,West
-07/08/2025,West - Balance,-6410.44118,West
-07/09/2025,West - Balance,-6498.61615,West
-07/10/2025,West - Balance,-6732.34286,West
-07/11/2025,West - Balance,-6837.12265,West
-07/12/2025,West - Balance,-6085.28253,West
-07/13/2025,West - Balance,-5951.30004,West
-07/14/2025,West - Balance,-6605.22411,West
-07/15/2025,West - Balance,-6578.16401,West
-07/16/2025,West - Balance,0.0,West
-07/17/2025,West - Balance,0.0,West
-07/18/2025,West - Balance,0.0,West
-07/19/2025,West - Balance,0.0,West
-07/20/2025,West - Balance,0.0,West
+07/16/2025,SouthEast[Oth] - Ind,1573.9933,Southeast
+07/17/2025,SouthEast[Oth] - Ind,1571.827,Southeast
+07/18/2025,SouthEast[Oth] - Ind,1569.9724,Southeast
+07/19/2025,SouthEast[Oth] - Ind,1412.5355,Southeast
+07/20/2025,SouthEast[Oth] - Ind,1412.6722,Southeast
+07/06/2025,SouthEast[Oth] - Power,4717.448,Southeast
+07/07/2025,SouthEast[Oth] - Power,5560.9785,Southeast
+07/08/2025,SouthEast[Oth] - Power,5528.9995,Southeast
+07/09/2025,SouthEast[Oth] - Power,5200.248,Southeast
+07/10/2025,SouthEast[Oth] - Power,4803.2925,Southeast
+07/11/2025,SouthEast[Oth] - Power,4605.5806,Southeast
+07/12/2025,SouthEast[Oth] - Power,4329.2495,Southeast
+07/13/2025,SouthEast[Oth] - Power,4497.3945,Southeast
+07/14/2025,SouthEast[Oth] - Power,5084.2427,Southeast
+07/15/2025,SouthEast[Oth] - Power,5074.014,Southeast
+07/16/2025,SouthEast[Oth] - Power,5012.084,Southeast
+07/17/2025,SouthEast[Oth] - Power,4971.0703,Southeast
+07/18/2025,SouthEast[Oth] - Power,4974.7754,Southeast
+07/19/2025,SouthEast[Oth] - Power,4450.736,Southeast
+07/20/2025,SouthEast[Oth] - Power,4438.6504,Southeast
+07/06/2025,SouthEast[Oth] - ResCom,479.89224,Southeast
+07/07/2025,SouthEast[Oth] - ResCom,609.3227,Southeast
+07/08/2025,SouthEast[Oth] - ResCom,600.94525,Southeast
+07/09/2025,SouthEast[Oth] - ResCom,524.697,Southeast
+07/10/2025,SouthEast[Oth] - ResCom,462.52615,Southeast
+07/11/2025,SouthEast[Oth] - ResCom,457.3258,Southeast
+07/12/2025,SouthEast[Oth] - ResCom,416.9405,Southeast
+07/13/2025,SouthEast[Oth] - ResCom,439.2911,Southeast
+07/14/2025,SouthEast[Oth] - ResCom,502.68213,Southeast
+07/15/2025,SouthEast[Oth] - ResCom,500.88025,Southeast
+07/16/2025,SouthEast[Oth] - ResCom,490.48105,Southeast
+07/17/2025,SouthEast[Oth] - ResCom,484.09473,Southeast
+07/18/2025,SouthEast[Oth] - ResCom,484.65475,Southeast
+07/19/2025,SouthEast[Oth] - ResCom,432.26047,Southeast
+07/20/2025,SouthEast[Oth] - ResCom,430.5388,Southeast
+07/06/2025,West - Balance,-5658.1474,West
+07/07/2025,West - Balance,-6329.102269999999,West
+07/08/2025,West - Balance,-6566.44488,West
+07/09/2025,West - Balance,-6608.380340000001,West
+07/10/2025,West - Balance,-6919.32274,West
+07/11/2025,West - Balance,-7037.77317,West
+07/12/2025,West - Balance,-5940.51282,West
+07/13/2025,West - Balance,-5728.81561,West
+07/14/2025,West - Balance,-6374.81132,West
+07/15/2025,West - Balance,-6422.5682,West
+07/16/2025,West - Balance,-6501.47401,West
+07/17/2025,West - Balance,-6498.88281,West
+07/18/2025,West - Balance,-6530.817419999999,West
+07/19/2025,West - Balance,-5921.226500000001,West
+07/20/2025,West - Balance,-5988.59879,West
 07/21/2025,West - Balance,0.0,West
 07/22/2025,West - Balance,0.0,West
 07/23/2025,West - Balance,0.0,West
@@ -2103,26 +2058,21 @@ Date,item,value,region
 12/29/2025,West - Balance,0.0,West
 12/30/2025,West - Balance,0.0,West
 12/31/2025,West - Balance,0.0,West
-07/01/2025,West - Ind,2187.90188,West
-07/02/2025,West - Ind,2184.31947,West
-07/03/2025,West - Ind,2204.10863,West
-07/04/2025,West - Ind,1878.43542,West
-07/05/2025,West - Ind,2011.73102,West
-07/06/2025,West - Ind,1995.0842,West
-07/07/2025,West - Ind,2189.42628,West
-07/08/2025,West - Ind,2194.44268,West
-07/09/2025,West - Ind,2217.56728,West
-07/10/2025,West - Ind,2247.78998,West
-07/11/2025,West - Ind,2257.82328,West
-07/12/2025,West - Ind,2025.08985,West
-07/13/2025,West - Ind,2011.80385,West
-07/14/2025,West - Ind,2234.89298,West
-07/15/2025,West - Ind,2237.1324,West
-07/16/2025,West - Ind,0.0,West
-07/17/2025,West - Ind,0.0,West
-07/18/2025,West - Ind,0.0,West
-07/19/2025,West - Ind,0.0,West
-07/20/2025,West - Ind,0.0,West
+07/06/2025,West - Ind,1987.0063,West
+07/07/2025,West - Ind,2190.19168,West
+07/08/2025,West - Ind,2223.0987800000003,West
+07/09/2025,West - Ind,2264.22193,West
+07/10/2025,West - Ind,2297.4125,West
+07/11/2025,West - Ind,2295.30713,West
+07/12/2025,West - Ind,2010.60465,West
+07/13/2025,West - Ind,1977.11125,West
+07/14/2025,West - Ind,2209.81538,West
+07/15/2025,West - Ind,2221.6014,West
+07/16/2025,West - Ind,2233.84568,West
+07/17/2025,West - Ind,2230.5618,West
+07/18/2025,West - Ind,2234.10026,West
+07/19/2025,West - Ind,2014.67402,West
+07/20/2025,West - Ind,2022.18055,West
 07/21/2025,West - Ind,0.0,West
 07/22/2025,West - Ind,0.0,West
 07/23/2025,West - Ind,0.0,West
@@ -2287,26 +2237,21 @@ Date,item,value,region
 12/29/2025,West - Ind,0.0,West
 12/30/2025,West - Ind,0.0,West
 12/31/2025,West - Ind,0.0,West
-07/01/2025,West - Power,2627.0361000000003,West
-07/02/2025,West - Power,2429.1416,West
-07/03/2025,West - Power,2434.3388999999997,West
-07/04/2025,West - Power,2097.6498,West
-07/05/2025,West - Power,2391.9708,West
-07/06/2025,West - Power,2388.18514,West
-07/07/2025,West - Power,2651.63305,West
-07/08/2025,West - Power,2739.1259,West
-07/09/2025,West - Power,2845.0283,West
-07/10/2025,West - Power,3075.25375,West
-07/11/2025,West - Power,3172.715,West
-07/12/2025,West - Power,2792.55676,West
-07/13/2025,West - Power,2663.67274,West
-07/14/2025,West - Power,2952.17715,West
-07/15/2025,West - Power,2919.4935600000003,West
-07/16/2025,West - Power,0.0,West
-07/17/2025,West - Power,0.0,West
-07/18/2025,West - Power,0.0,West
-07/19/2025,West - Power,0.0,West
-07/20/2025,West - Power,0.0,West
+07/06/2025,West - Power,2324.0432,West
+07/07/2025,West - Power,2652.375,West
+07/08/2025,West - Power,2914.127,West
+07/09/2025,West - Power,2888.0869000000002,West
+07/10/2025,West - Power,3180.2562,West
+07/11/2025,West - Power,3323.6953,West
+07/12/2025,West - Power,2653.0035000000003,West
+07/13/2025,West - Power,2427.1744,West
+07/14/2025,West - Power,2705.4004999999997,West
+07/15/2025,West - Power,2752.0047999999997,West
+07/16/2025,West - Power,2832.2586,West
+07/17/2025,West - Power,2834.57773,West
+07/18/2025,West - Power,2868.0033,West
+07/19/2025,West - Power,2626.77756,West
+07/20/2025,West - Power,2692.9633,West
 07/21/2025,West - Power,0.0,West
 07/22/2025,West - Power,0.0,West
 07/23/2025,West - Power,0.0,West
@@ -2471,26 +2416,21 @@ Date,item,value,region
 12/29/2025,West - Power,0.0,West
 12/30/2025,West - Power,0.0,West
 12/31/2025,West - Power,0.0,West
-07/01/2025,West - ResCom,1492.8776400000002,West
-07/02/2025,West - ResCom,1563.3225400000001,West
-07/03/2025,West - ResCom,1569.91694,West
-07/04/2025,West - ResCom,1322.76167,West
-07/05/2025,West - ResCom,1344.41681,West
-07/06/2025,West - ResCom,1327.52745,West
-07/07/2025,West - ResCom,1488.1332200000002,West
-07/08/2025,West - ResCom,1476.8726000000001,West
-07/09/2025,West - ResCom,1436.02057,West
-07/10/2025,West - ResCom,1409.29913,West
-07/11/2025,West - ResCom,1406.58437,West
-07/12/2025,West - ResCom,1267.63592,West
-07/13/2025,West - ResCom,1275.8234499999999,West
-07/14/2025,West - ResCom,1418.15398,West
-07/15/2025,West - ResCom,1421.53805,West
-07/16/2025,West - ResCom,0.0,West
-07/17/2025,West - ResCom,0.0,West
-07/18/2025,West - ResCom,0.0,West
-07/19/2025,West - ResCom,0.0,West
-07/20/2025,West - ResCom,0.0,West
+07/06/2025,West - ResCom,1347.0979,West
+07/07/2025,West - ResCom,1486.53559,West
+07/08/2025,West - ResCom,1429.2190999999998,West
+07/09/2025,West - ResCom,1456.07151,West
+07/10/2025,West - ResCom,1441.65404,West
+07/11/2025,West - ResCom,1418.7707400000002,West
+07/12/2025,West - ResCom,1276.90467,West
+07/13/2025,West - ResCom,1324.52996,West
+07/14/2025,West - ResCom,1459.59544,West
+07/15/2025,West - ResCom,1448.962,West
+07/16/2025,West - ResCom,1435.3697300000001,West
+07/17/2025,West - ResCom,1433.74328,West
+07/18/2025,West - ResCom,1428.71386,West
+07/19/2025,West - ResCom,1279.77492,West
+07/20/2025,West - ResCom,1273.45494,West
 07/21/2025,West - ResCom,0.0,West
 07/22/2025,West - ResCom,0.0,West
 07/23/2025,West - ResCom,0.0,West
@@ -2655,93 +2595,93 @@ Date,item,value,region
 12/29/2025,West - ResCom,0.0,West
 12/30/2025,West - ResCom,0.0,West
 12/31/2025,West - ResCom,0.0,West
-07/01/2025,West[CA] - Ind,1865.5935,California
-07/02/2025,West[CA] - Ind,1850.1349,California
-07/03/2025,West[CA] - Ind,1860.3297,California
-07/04/2025,West[CA] - Ind,1586.0776,California
-07/05/2025,West[CA] - Ind,1704.2186,California
-07/06/2025,West[CA] - Ind,1696.0345,California
-07/07/2025,West[CA] - Ind,1867.1179,California
-07/08/2025,West[CA] - Ind,1872.1343,California
-07/09/2025,West[CA] - Ind,1895.2589,California
-07/10/2025,West[CA] - Ind,1925.4816,California
-07/11/2025,West[CA] - Ind,1935.5149,California
-07/12/2025,West[CA] - Ind,1735.0123,California
-07/13/2025,West[CA] - Ind,1721.7263,California
-07/14/2025,West[CA] - Ind,1912.5846,California
-07/15/2025,West[CA] - Ind,1913.9204,California
-07/01/2025,West[CA] - Power,1744.015,California
-07/02/2025,West[CA] - Power,1652.0919,California
-07/03/2025,West[CA] - Power,1712.0082,California
-07/04/2025,West[CA] - Power,1484.4001,California
-07/05/2025,West[CA] - Power,1732.0878,California
-07/06/2025,West[CA] - Power,1677.712,California
-07/07/2025,West[CA] - Power,1753.411,California
-07/08/2025,West[CA] - Power,1784.7168,California
-07/09/2025,West[CA] - Power,1935.8884,California
-07/10/2025,West[CA] - Power,2147.5198,California
-07/11/2025,West[CA] - Power,2220.6875,California
-07/12/2025,West[CA] - Power,1947.823,California
-07/13/2025,West[CA] - Power,1852.7657,California
-07/14/2025,West[CA] - Power,2055.496,California
-07/15/2025,West[CA] - Power,2064.9158,California
-07/01/2025,West[CA] - ResCom,1303.3539,California
-07/02/2025,West[CA] - ResCom,1347.13,California
-07/03/2025,West[CA] - ResCom,1316.9526,California
-07/04/2025,West[CA] - ResCom,1107.0576,California
-07/05/2025,West[CA] - ResCom,1125.2312,California
-07/06/2025,West[CA] - ResCom,1137.8423,California
-07/07/2025,West[CA] - ResCom,1299.6509,California
-07/08/2025,West[CA] - ResCom,1288.1764,California
-07/09/2025,West[CA] - ResCom,1247.9729,California
-07/10/2025,West[CA] - ResCom,1221.438,California
-07/11/2025,West[CA] - ResCom,1218.0118,California
-07/12/2025,West[CA] - ResCom,1098.389,California
-07/13/2025,West[CA] - ResCom,1106.3108,California
-07/14/2025,West[CA] - ResCom,1229.5898,California
-07/15/2025,West[CA] - ResCom,1228.538,California
-07/01/2025,West[PNW] - Ind,322.30838,West
-07/02/2025,West[PNW] - Ind,334.18457,West
-07/03/2025,West[PNW] - Ind,343.77893,West
-07/04/2025,West[PNW] - Ind,292.35782,West
-07/05/2025,West[PNW] - Ind,307.51242,West
-07/06/2025,West[PNW] - Ind,299.0497,West
+07/06/2025,West[CA] - Ind,1687.0337,California
+07/07/2025,West[CA] - Ind,1867.8833,California
+07/08/2025,West[CA] - Ind,1900.7904,California
+07/09/2025,West[CA] - Ind,1924.7913,California
+07/10/2025,West[CA] - Ind,1961.3657,California
+07/11/2025,West[CA] - Ind,1970.2504,California
+07/12/2025,West[CA] - Ind,1720.5271,California
+07/13/2025,West[CA] - Ind,1687.0337,California
+07/14/2025,West[CA] - Ind,1884.6865,California
+07/15/2025,West[CA] - Ind,1894.2062,California
+07/16/2025,West[CA] - Ind,1906.1995,California
+07/17/2025,West[CA] - Ind,1904.676,California
+07/18/2025,West[CA] - Ind,1908.8271,California
+07/19/2025,West[CA] - Ind,1723.1312,California
+07/20/2025,West[CA] - Ind,1731.4856,California
+07/06/2025,West[CA] - Power,1619.6072,California
+07/07/2025,West[CA] - Power,1758.1499,California
+07/08/2025,West[CA] - Power,1973.5378,California
+07/09/2025,West[CA] - Power,2142.5354,California
+07/10/2025,West[CA] - Power,2414.8145,California
+07/11/2025,West[CA] - Power,2483.2124,California
+07/12/2025,West[CA] - Power,1844.3257,California
+07/13/2025,West[CA] - Power,1619.6072,California
+07/14/2025,West[CA] - Power,1865.4604,California
+07/15/2025,West[CA] - Power,1928.7839,California
+07/16/2025,West[CA] - Power,2010.8497,California
+07/17/2025,West[CA] - Power,2000.2927,California
+07/18/2025,West[CA] - Power,2029.1467,California
+07/19/2025,West[CA] - Power,1862.6843,California
+07/20/2025,West[CA] - Power,1922.3224,California
+07/06/2025,West[CA] - ResCom,1154.8522,California
+07/07/2025,West[CA] - ResCom,1297.8301,California
+07/08/2025,West[CA] - ResCom,1241.1091,California
+07/09/2025,West[CA] - ResCom,1221.7644,California
+07/10/2025,West[CA] - ResCom,1219.5697,California
+07/11/2025,West[CA] - ResCom,1223.2097,California
+07/12/2025,West[CA] - ResCom,1107.2848,California
+07/13/2025,West[CA] - ResCom,1154.8522,California
+07/14/2025,West[CA] - ResCom,1263.9235,California
+07/15/2025,West[CA] - ResCom,1249.3909,California
+07/16/2025,West[CA] - ResCom,1235.3169,California
+07/17/2025,West[CA] - ResCom,1236.8589,California
+07/18/2025,West[CA] - ResCom,1232.8177,California
+07/19/2025,West[CA] - ResCom,1105.2262,California
+07/20/2025,West[CA] - ResCom,1099.9956,California
+07/06/2025,West[PNW] - Ind,299.9726,West
 07/07/2025,West[PNW] - Ind,322.30838,West
 07/08/2025,West[PNW] - Ind,322.30838,West
-07/09/2025,West[PNW] - Ind,322.30838,West
-07/10/2025,West[PNW] - Ind,322.30838,West
-07/11/2025,West[PNW] - Ind,322.30838,West
+07/09/2025,West[PNW] - Ind,339.43063,West
+07/10/2025,West[PNW] - Ind,336.0468,West
+07/11/2025,West[PNW] - Ind,325.05673,West
 07/12/2025,West[PNW] - Ind,290.07755,West
 07/13/2025,West[PNW] - Ind,290.07755,West
-07/14/2025,West[PNW] - Ind,322.30838,West
-07/15/2025,West[PNW] - Ind,323.212,West
-07/01/2025,West[PNW] - Power,883.0211,West
-07/02/2025,West[PNW] - Power,777.0497,West
-07/03/2025,West[PNW] - Power,722.3307,West
-07/04/2025,West[PNW] - Power,613.2497,West
-07/05/2025,West[PNW] - Power,659.883,West
-07/06/2025,West[PNW] - Power,710.47314,West
-07/07/2025,West[PNW] - Power,898.22205,West
-07/08/2025,West[PNW] - Power,954.4091,West
-07/09/2025,West[PNW] - Power,909.1399,West
-07/10/2025,West[PNW] - Power,927.73395,West
-07/11/2025,West[PNW] - Power,952.0275,West
-07/12/2025,West[PNW] - Power,844.73376,West
-07/13/2025,West[PNW] - Power,810.90704,West
-07/14/2025,West[PNW] - Power,896.68115,West
-07/15/2025,West[PNW] - Power,854.57776,West
-07/01/2025,West[PNW] - ResCom,189.52374,West
-07/02/2025,West[PNW] - ResCom,216.19254,West
-07/03/2025,West[PNW] - ResCom,252.96434,West
-07/04/2025,West[PNW] - ResCom,215.70407,West
-07/05/2025,West[PNW] - ResCom,219.18561,West
-07/06/2025,West[PNW] - ResCom,189.68515,West
-07/07/2025,West[PNW] - ResCom,188.48232,West
-07/08/2025,West[PNW] - ResCom,188.6962,West
-07/09/2025,West[PNW] - ResCom,188.04767,West
-07/10/2025,West[PNW] - ResCom,187.86113,West
-07/11/2025,West[PNW] - ResCom,188.57257,West
-07/12/2025,West[PNW] - ResCom,169.24692,West
-07/13/2025,West[PNW] - ResCom,169.51265,West
-07/14/2025,West[PNW] - ResCom,188.56418,West
-07/15/2025,West[PNW] - ResCom,193.00005,West
+07/14/2025,West[PNW] - Ind,325.12888,West
+07/15/2025,West[PNW] - Ind,327.3952,West
+07/16/2025,West[PNW] - Ind,327.64618,West
+07/17/2025,West[PNW] - Ind,325.8858,West
+07/18/2025,West[PNW] - Ind,325.27316,West
+07/19/2025,West[PNW] - Ind,291.54282,West
+07/20/2025,West[PNW] - Ind,290.69495,West
+07/06/2025,West[PNW] - Power,704.436,West
+07/07/2025,West[PNW] - Power,894.2251,West
+07/08/2025,West[PNW] - Power,940.5892,West
+07/09/2025,West[PNW] - Power,745.5515,West
+07/10/2025,West[PNW] - Power,765.4417,West
+07/11/2025,West[PNW] - Power,840.4829,West
+07/12/2025,West[PNW] - Power,808.6778,West
+07/13/2025,West[PNW] - Power,807.5672,West
+07/14/2025,West[PNW] - Power,839.9401,West
+07/15/2025,West[PNW] - Power,823.2209,West
+07/16/2025,West[PNW] - Power,821.4089,West
+07/17/2025,West[PNW] - Power,834.28503,West
+07/18/2025,West[PNW] - Power,838.8566,West
+07/19/2025,West[PNW] - Power,764.09326,West
+07/20/2025,West[PNW] - Power,770.6409,West
+07/06/2025,West[PNW] - ResCom,192.2457,West
+07/07/2025,West[PNW] - ResCom,188.70549,West
+07/08/2025,West[PNW] - ResCom,188.11,West
+07/09/2025,West[PNW] - ResCom,234.30711,West
+07/10/2025,West[PNW] - ResCom,222.08434,West
+07/11/2025,West[PNW] - ResCom,195.56104,West
+07/12/2025,West[PNW] - ResCom,169.61987,West
+07/13/2025,West[PNW] - ResCom,169.67776,West
+07/14/2025,West[PNW] - ResCom,195.67194,West
+07/15/2025,West[PNW] - ResCom,199.5711,West
+07/16/2025,West[PNW] - ResCom,200.05283,West
+07/17/2025,West[PNW] - ResCom,196.88438,West
+07/18/2025,West[PNW] - ResCom,195.89616,West
+07/19/2025,West[PNW] - ResCom,174.54872,West
+07/20/2025,West[PNW] - ResCom,173.45934,West
