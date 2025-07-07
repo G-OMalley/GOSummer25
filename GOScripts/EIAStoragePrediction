@@ -1,0 +1,224 @@
+import pandas as pd
+import numpy as np
+from pathlib import Path
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error
+
+# === File Paths ===
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent
+data_folder = project_root / "INFO"
+eia_path = data_folder / "EIAchanges.csv"
+fundy_path = data_folder / "Fundy.csv"
+criterion_extra_path = data_folder / "CriterionExtra.csv"
+platts_conus_path = data_folder / "PlattsCONUSFundamentalsHIST.csv"
+platts_power_path = data_folder / "PlattsPowerFundy.csv"
+
+# === Load Data ===
+eia = pd.read_csv(eia_path)
+fundy = pd.read_csv(fundy_path)
+criterion = pd.read_csv(criterion_extra_path)
+platts_conus = pd.read_csv(platts_conus_path)
+platts_power = pd.read_csv(platts_power_path)
+
+# === Preprocess Dates ===
+eia['Period'] = pd.to_datetime(eia['Period'])
+fundy['Date'] = pd.to_datetime(fundy['Date'], format='%m/%d/%Y')
+criterion['Date'] = pd.to_datetime(criterion['Date'], format='%m/%d/%Y')
+platts_conus['GasDate'] = pd.to_datetime(platts_conus['GasDate'])
+platts_power['Date'] = pd.to_datetime(platts_power['Date'])
+
+# === Resample Platts CONUS to weekly ===
+platts_conus.set_index('GasDate', inplace=True)
+platts_weekly = platts_conus.resample('W-FRI').mean()
+platts_weekly.reset_index(inplace=True)
+
+# === Map for region correlation ===
+region_map = {
+    'Lower 48 States': 'Conus',
+    'East Region': 'East',
+    'Midwest Region': 'Midwest',
+    'South Central Region': 'South Central',
+    'Mountain Region': 'Mountain',
+    'Pacific Region': 'Pacific'
+}
+
+# === Merge Fundy & CriterionExtra ===
+def merge_regional_series(df, tag):
+    df['item'] = df['item'].str.strip()
+    df['region'] = df['region'].str.strip()
+    features = {}
+    for eia_region, data_region in region_map.items():
+        sub = df[df['region'] == data_region]
+        pivot = sub.pivot_table(index='Date', columns='item', values='value', aggfunc='mean')
+        pivot.columns = [f"{eia_region}_{tag}_{col.strip().replace(' ', '_')}" for col in pivot.columns]
+        pivot = pivot.resample('W-FRI').mean()
+        features[eia_region] = pivot
+    return features
+
+fundy_features = merge_regional_series(fundy, "Fundy")
+criterion_features = merge_regional_series(criterion, "Criterion")
+
+# === Process PlattsPowerFundy ===
+platts_power_features = {}
+
+# Filter PlattsPowerFundy for desired 'Item' types
+power_keywords = ['PeakLoad', 'TotalGen', 'Total Gen', 'Total Generation', 'Load']
+
+filtered_platts_power = platts_power[
+    platts_power['Item'].str.contains('|'.join(power_keywords), case=False, na=False)
+].copy()
+
+for eia_region in region_map.keys():
+    region_power = filtered_platts_power[
+        filtered_platts_power['Item'].str.contains(eia_region.split()[0], case=False, na=False)
+    ]
+    if region_power.empty:
+        continue
+
+    pivot = region_power.pivot_table(index='Date', columns='Item', values='Value', aggfunc='mean')
+    pivot.columns = [f"{eia_region}_Power_{col.strip().replace(' ', '_')}" for col in pivot.columns]
+    pivot = pivot.resample('W-FRI').mean()
+    platts_power_features[eia_region] = pivot
+
+
+# === Modeling Setup ===
+LAG_DAYS = 5
+results = {}
+
+for region in region_map.keys():
+    storage_col = f"{region} Storage Change (Bcf)"
+    if storage_col not in eia.columns:
+        continue
+
+    df = eia[['Period', storage_col]].copy()
+    df.rename(columns={storage_col: 'target'}, inplace=True)
+    df = df.set_index('Period')
+
+    for lag in range(1, LAG_DAYS + 1):
+        df[f'lag_{lag}'] = df['target'].shift(lag)
+
+    if region in fundy_features:
+        df = df.merge(fundy_features[region], how='left', left_index=True, right_index=True)
+    if region in criterion_features:
+        df = df.merge(criterion_features[region], how='left', left_index=True, right_index=True)
+    if region in platts_power_features:
+        df = df.merge(platts_power_features[region], how='left', left_index=True, right_index=True)
+
+    df = df.merge(platts_weekly.set_index('GasDate'), how='left', left_index=True, right_index=True)
+
+    df = df.ffill()
+
+    required_cols_for_target_lags = ['target'] + [f'lag_{i}' for i in range(1, LAG_DAYS + 1)]
+    initial_rows_before_target_lag_drop = df.shape[0]
+    df.dropna(subset=required_cols_for_target_lags, inplace=True)
+    rows_dropped_target_lags = initial_rows_before_target_lag_drop - df.shape[0]
+
+    if rows_dropped_target_lags > 0:
+        print(f"INFO: Dropped {rows_dropped_target_lags} rows in region: {region} (missing target or lags only)")
+
+    X_cols = [col for col in df.columns if col != 'target']
+
+    initial_X_rows = df.shape[0]
+    df = df.dropna(subset=X_cols)
+    rows_dropped_X_cols = initial_X_rows - df.shape[0]
+    if rows_dropped_X_cols > 0:
+        print(f"INFO: Dropped {rows_dropped_X_cols} additional rows due to NaNs in active feature columns in region: {region}")
+
+    if df.shape[0] < 6:
+        print(f"Skipping region {region}: Not enough data after dropping NaNs ({df.shape[0]} rows remaining).")
+        continue
+
+    X = df[X_cols]
+    y = df['target']
+
+    X_train = X.iloc[:-2]
+    y_train = y.iloc[:-2]
+    X_backtest = X.iloc[[-2]]
+    y_backtest_actual = y.iloc[-2]
+    X_forecast = X.iloc[[-1]]
+
+    # === STEP 1: Add Date Tracking ===
+    backtest_date = df.index[-2]
+    forecast_date = df.index[-1]
+    # === End of Date Tracking ===
+
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    backtest_pred = model.predict(X_backtest)[0]
+    forecast_pred = model.predict(X_forecast)[0]
+
+    recent_X = X.iloc[-6:-2]
+    recent_y = y.iloc[-6:-2]
+
+    if recent_X.shape[0] < 4:
+        print(f"⚠️ Warning: Only {recent_X.shape[0]} weeks used for MAE in region: {region}")
+        mae_str = "Not enough data"
+    else:
+        mae_4wk = mean_absolute_error(recent_y, model.predict(recent_X))
+        mae_str = f"{mae_4wk:.2f} Bcf"
+
+    # === Update results dictionary with dates ===
+    results[region.replace(" Region", "")] = {
+        'backtest_date': backtest_date.strftime('%Y-%m-%d'),
+        'forecast_date': forecast_date.strftime('%Y-%m-%d'),
+        'last_actual': y_backtest_actual,
+        'backtest_pred': backtest_pred,
+        'forecast_pred': forecast_pred,
+        'mae_4wk_str': mae_str
+    }
+    # === End of results dictionary update ===
+
+# === STEP 1: Transpose output with MAE included ===
+if results: # Ensure results dictionary is not empty before processing
+    regions = []
+    forecast_dates = []
+    backtest_preds = []
+    backtest_actuals = []
+    mae_vals = []
+
+    for region, stats in results.items():
+        regions.append(region)
+        forecast_dates.append(stats['forecast_date'])
+        backtest_preds.append(round(stats['backtest_pred'], 2))
+        backtest_actuals.append(round(stats['last_actual'], 2))
+
+        try:
+            mae_val = float(stats['mae_4wk_str'].split()[0])  # Extract number from '2.91 Bcf'
+        except:
+            mae_val = np.nan
+        mae_vals.append(mae_val)
+
+    # Build transposed DataFrame
+    transposed_data = pd.DataFrame({
+        'Forecast Date': forecast_dates,
+        'Backtest Predicted': backtest_preds,
+        'Backtest Actual': backtest_actuals,
+        '4-Week MAE (Bcf)': mae_vals
+    }, index=regions).T  # Transpose so metrics become rows
+
+    # === STEP 2: Save to GOScripts/GOutput ===
+    output_dir = project_root / "GOScripts" / "GOutput"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Changed output filename to EIAStoragePred.csv
+    output_path = output_dir / "EIAStoragePred.csv"
+    transposed_data.to_csv(output_path)
+    print(f"\n✅ Transposed forecast with MAE saved to: {output_path}")
+else:
+    print("\n⚠️ No forecast data to save in transposed format. The 'results' dictionary is empty.")
+
+# === Updated Summary Print (Using the 'results' dictionary directly) ===
+print("\n=== FULL EIA Storage Forecast (All Sources Integrated) ===\n")
+if results:
+    for region_name, row_data in results.items():
+        print(f"Region: {region_name}")
+        print("-" * 34)
+        print(f"Backtest Week (Actual): {row_data['backtest_date']}    →   {row_data['last_actual']:+.0f} Bcf")
+        print(f"Backtest Predicted: {row_data['backtest_pred']:+.2f} Bcf")
+        print(f"Forecast Week: {row_data['forecast_date']}    →   Predicted: {row_data['forecast_pred']:+.2f} Bcf")
+        print(f"4-Week MAE: {row_data['mae_4wk_str']}\n")
+else:
+    print("No results to display in the summary.")
+# === End of Updated Summary Print ===

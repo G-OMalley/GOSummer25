@@ -38,3 +38,7 @@ Thumbs.db
 INFO/ComprehensiveFlow_DataCache.csv
 
 GOutputs/
+C_Disagg06_16.txt
+c_year.txt
+GOScripts\GOutput\correlation_log.txt
+GOScripts\test
