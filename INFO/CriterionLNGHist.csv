@@ -3833,7 +3833,12 @@ Date,Item,Value,state_name
 06/28/2025,Calcasieu Pass LNG Feed Gas,1279.845,Louisiana
 06/29/2025,Calcasieu Pass LNG Feed Gas,1468.821,Louisiana
 06/30/2025,Calcasieu Pass LNG Feed Gas,1517.656,Louisiana
-07/01/2025,Calcasieu Pass LNG Feed Gas,1600.839,Louisiana
+07/01/2025,Calcasieu Pass LNG Feed Gas,1585.307,Louisiana
+07/02/2025,Calcasieu Pass LNG Feed Gas,1581.178,Louisiana
+07/03/2025,Calcasieu Pass LNG Feed Gas,1625.271,Louisiana
+07/04/2025,Calcasieu Pass LNG Feed Gas,1678.443,Louisiana
+07/05/2025,Calcasieu Pass LNG Feed Gas,1705.182,Louisiana
+07/06/2025,Calcasieu Pass LNG Feed Gas,1632.316,Louisiana
 01/01/2015,Cameron LNG Feed Gas,0.0,Louisiana
 01/02/2015,Cameron LNG Feed Gas,0.0,Louisiana
 01/03/2015,Cameron LNG Feed Gas,0.0,Louisiana
@@ -7668,7 +7673,12 @@ Date,Item,Value,state_name
 06/28/2025,Cameron LNG Feed Gas,2004.614,Louisiana
 06/29/2025,Cameron LNG Feed Gas,2004.614,Louisiana
 06/30/2025,Cameron LNG Feed Gas,2025.614,Louisiana
-07/01/2025,Cameron LNG Feed Gas,1982.635,Louisiana
+07/01/2025,Cameron LNG Feed Gas,1802.635,Louisiana
+07/02/2025,Cameron LNG Feed Gas,2012.635,Louisiana
+07/03/2025,Cameron LNG Feed Gas,2000.635,Louisiana
+07/04/2025,Cameron LNG Feed Gas,1446.647,Louisiana
+07/05/2025,Cameron LNG Feed Gas,1416.635,Louisiana
+07/06/2025,Cameron LNG Feed Gas,1986.635,Louisiana
 01/01/2015,Corpus Christi LNG Feed Gas,0.0,Texas
 01/02/2015,Corpus Christi LNG Feed Gas,0.0,Texas
 01/03/2015,Corpus Christi LNG Feed Gas,0.0,Texas
@@ -11503,7 +11513,12 @@ Date,Item,Value,state_name
 06/28/2025,Corpus Christi LNG Feed Gas,2243.961,Texas
 06/29/2025,Corpus Christi LNG Feed Gas,1899.502,Texas
 06/30/2025,Corpus Christi LNG Feed Gas,1896.765,Texas
-07/01/2025,Corpus Christi LNG Feed Gas,2743.493,Texas
+07/01/2025,Corpus Christi LNG Feed Gas,2659.649,Texas
+07/02/2025,Corpus Christi LNG Feed Gas,2677.748,Texas
+07/03/2025,Corpus Christi LNG Feed Gas,2033.341,Texas
+07/04/2025,Corpus Christi LNG Feed Gas,2391.29,Texas
+07/05/2025,Corpus Christi LNG Feed Gas,2418.29,Texas
+07/06/2025,Corpus Christi LNG Feed Gas,2358.5,Texas
 01/01/2015,Cove Point LNG Feed Gas,0.0,Maryland
 01/02/2015,Cove Point LNG Feed Gas,0.0,Maryland
 01/03/2015,Cove Point LNG Feed Gas,0.0,Maryland
@@ -15338,7 +15353,12 @@ Date,Item,Value,state_name
 06/28/2025,Cove Point LNG Feed Gas,848.8,Maryland
 06/29/2025,Cove Point LNG Feed Gas,848.8,Maryland
 06/30/2025,Cove Point LNG Feed Gas,843.948,Maryland
-07/01/2025,Cove Point LNG Feed Gas,816.479,Maryland
+07/01/2025,Cove Point LNG Feed Gas,818.6,Maryland
+07/02/2025,Cove Point LNG Feed Gas,818.6,Maryland
+07/03/2025,Cove Point LNG Feed Gas,818.6,Maryland
+07/04/2025,Cove Point LNG Feed Gas,818.6,Maryland
+07/05/2025,Cove Point LNG Feed Gas,818.6,Maryland
+07/06/2025,Cove Point LNG Feed Gas,818.6,Maryland
 01/01/2015,Elba Island LNG Feed Gas,0.0,Georgia
 01/02/2015,Elba Island LNG Feed Gas,0.0,Georgia
 01/03/2015,Elba Island LNG Feed Gas,0.0,Georgia
@@ -19173,7 +19193,12 @@ Date,Item,Value,state_name
 06/28/2025,Elba Island LNG Feed Gas,394.991,Georgia
 06/29/2025,Elba Island LNG Feed Gas,391.769,Georgia
 06/30/2025,Elba Island LNG Feed Gas,393.76,Georgia
-07/01/2025,Elba Island LNG Feed Gas,380.133,Georgia
+07/01/2025,Elba Island LNG Feed Gas,375.126,Georgia
+07/02/2025,Elba Island LNG Feed Gas,381.448,Georgia
+07/03/2025,Elba Island LNG Feed Gas,379.323,Georgia
+07/04/2025,Elba Island LNG Feed Gas,381.741,Georgia
+07/05/2025,Elba Island LNG Feed Gas,381.2,Georgia
+07/06/2025,Elba Island LNG Feed Gas,375.696,Georgia
 01/01/2015,Freeport LNG Feed Gas,0.0,Texas
 01/02/2015,Freeport LNG Feed Gas,0.0,Texas
 01/03/2015,Freeport LNG Feed Gas,0.0,Texas
@@ -23008,7 +23033,12 @@ Date,Item,Value,state_name
 06/28/2025,Freeport LNG Feed Gas,2037.989,Texas
 06/29/2025,Freeport LNG Feed Gas,2040.456,Texas
 06/30/2025,Freeport LNG Feed Gas,2037.989,Texas
-07/01/2025,Freeport LNG Feed Gas,1994.126,Texas
+07/01/2025,Freeport LNG Feed Gas,1529.949,Texas
+07/02/2025,Freeport LNG Feed Gas,842.958,Texas
+07/03/2025,Freeport LNG Feed Gas,1826.581,Texas
+07/04/2025,Freeport LNG Feed Gas,1910.476,Texas
+07/05/2025,Freeport LNG Feed Gas,1911.264,Texas
+07/06/2025,Freeport LNG Feed Gas,1948.162,Texas
 01/01/2015,Sabine Pass LNG Feed Gas,0.0,Louisiana
 01/02/2015,Sabine Pass LNG Feed Gas,0.0,Louisiana
 01/03/2015,Sabine Pass LNG Feed Gas,0.0,Louisiana
@@ -26843,7 +26873,12 @@ Date,Item,Value,state_name
 06/28/2025,Sabine Pass LNG Feed Gas,4029.852,Louisiana
 06/29/2025,Sabine Pass LNG Feed Gas,4377.208,Louisiana
 06/30/2025,Sabine Pass LNG Feed Gas,4390.534,Louisiana
-07/01/2025,Sabine Pass LNG Feed Gas,4249.093,Louisiana
+07/01/2025,Sabine Pass LNG Feed Gas,4379.262,Louisiana
+07/02/2025,Sabine Pass LNG Feed Gas,4461.999,Louisiana
+07/03/2025,Sabine Pass LNG Feed Gas,4426.997,Louisiana
+07/04/2025,Sabine Pass LNG Feed Gas,4429.505,Louisiana
+07/05/2025,Sabine Pass LNG Feed Gas,4522.3,Louisiana
+07/06/2025,Sabine Pass LNG Feed Gas,4434.124,Louisiana
 01/01/2015,US LNG Exports - Plaquemines LNG,0.0,
 01/02/2015,US LNG Exports - Plaquemines LNG,0.0,
 01/03/2015,US LNG Exports - Plaquemines LNG,0.0,
@@ -30678,4 +30713,9 @@ Date,Item,Value,state_name
 06/28/2025,US LNG Exports - Plaquemines LNG,2636.979,
 06/29/2025,US LNG Exports - Plaquemines LNG,2689.242,
 06/30/2025,US LNG Exports - Plaquemines LNG,2353.323,
-07/01/2025,US LNG Exports - Plaquemines LNG,2584.357,
+07/01/2025,US LNG Exports - Plaquemines LNG,2611.746,
+07/02/2025,US LNG Exports - Plaquemines LNG,2663.545,
+07/03/2025,US LNG Exports - Plaquemines LNG,2628.209,
+07/04/2025,US LNG Exports - Plaquemines LNG,2681.103,
+07/05/2025,US LNG Exports - Plaquemines LNG,2687.878,
+07/06/2025,US LNG Exports - Plaquemines LNG,2586.915,

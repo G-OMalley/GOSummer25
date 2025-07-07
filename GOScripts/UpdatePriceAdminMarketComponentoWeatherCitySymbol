@@ -5,10 +5,16 @@ import os
 import logging
 import sys
 
+<<<<<<< HEAD
+# --- Configure Logging ---
+log_folder = '.' # Log file in the same directory as the script
+log_file_path = os.path.join(log_folder, 'correlation_log.txt')
+=======
 script_dir = os.path.dirname(os.path.abspath(__file__))  # Make sure this is defined first
 log_folder = os.path.join(script_dir, 'GOutput')         # Log file will go into GOutput folder
 os.makedirs(log_folder, exist_ok=True)                   # Create GOutput if it doesn't exist
 log_file_path = os.path.join(log_folder, 'correlation_log.txt')  # Full path to log file
+>>>>>>> 18f2828ee4811a1eff5bc43af71b16bd0d82b898
 
 # Create a logger
 logger = logging.getLogger('CorrelationAnalysis')

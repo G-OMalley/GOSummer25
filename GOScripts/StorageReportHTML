@@ -30,11 +30,15 @@ data_folder = project_root / "INFO"
 goscripts_folder = project_root / "GOScripts"
 
 # Define the output path for the generated HTML report relative to the project root
+<<<<<<< HEAD
+output_path = project_root / "EIA_Dashboard.html" # Renamed for clarity
+=======
 # Save HTML to GOutput inside GOScripts
 goutput_folder = goscripts_folder / "GOutput"
 goutput_folder.mkdir(parents=True, exist_ok=True)  # Ensure the folder exists
 output_path = goutput_folder / "EIA_Dashboard.html"
  # Renamed for clarity
+>>>>>>> 18f2828ee4811a1eff5bc43af71b16bd0d82b898
 # --- END MODIFIED BLOCK ---
 
 
