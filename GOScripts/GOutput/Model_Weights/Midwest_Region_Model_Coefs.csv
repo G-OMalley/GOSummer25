@@ -1,0 +1,55 @@
+Feature,Coefficient
+normalized_target,1.054205041703272
+Industrial,-0.847497759989635
+PipeLoss,-0.7360869116893909
+ImpliedStorageChange,0.675563002078198
+USDemand,-0.6692123300220213
+Midwest Region_Max_LMP,-0.6640673682605318
+Midwest Region_Criterion_Total_Demand_-_Midwest,-0.663351606039398
+Midwest Region_Fundy_Midwest_-_Balance,0.6379140226080074
+Total Demand,-0.595039312260556
+lag_5,0.582997944753941
+Midwest Region_Fundy_Midwest_-_ResCom,-0.5663507733982235
+DryGasProduction,0.526102843775624
+Midwest Region_Fundy_Midwest_-_Balance_Smoothed_2wk,0.5129934664752023
+Midwest Region_Max_LMP_Smoothed_2wk,-0.4951987033310101
+lag_4,0.4945365940214983
+Midwest Region Storage (Bcf)_lag_5,-0.482416511687224
+Midwest Region_Fundy_Midwest_-_ResCom_Smoothed_2wk,-0.4763310768513277
+ResComm,-0.47514867881009815
+lag_3,-0.44491471377603636
+LNG Feedgas,0.43888723928012574
+Midwest Region_Max_LMP_WoW,-0.43471425236862427
+Midwest Region_Fundy_Midwest_-_Ind_Smoothed_2wk,-0.4275465855748947
+lag_1,0.42403333004663263
+Midwest Region_Fundy_Midwest_-_Ind,-0.403365365764982
+Midwest Region_Power_MISO_-_Total_Generation_Smoothed_2wk,0.38985114615791827
+Balance,0.34096557750915846
+Midwest Region_Fundy_Midwest_-_Balance_WoW,0.3208313839630452
+Midwest Region_Power_MISO_-_Total_Generation,0.31850607435318856
+Midwest Region_Fundy_Midwest_-_Prod,-0.28413776229198606
+Midwest Region_Fundy_Midwest_-_Power_WoW,-0.27540873342288896
+index,0.2643246965161759
+WeekOfYear,0.2643246965161759
+Midwest Region_Fundy_Midwest_-_ResCom_WoW,-0.2609666613361399
+Midwest Region_Fundy_Midwest_-_Prod_Smoothed_2wk,-0.2157590636132488
+Net Imports from Canada,-0.19320129974990113
+NetImportExport,-0.1773506576069239
+TotalSupply,0.17606576065578067
+Midwest Region_Fundy_Midwest_-_Prod_WoW,-0.16387585200011792
+Midwest Region_Fundy_Midwest_-_Power_Smoothed_2wk,0.13998459872237248
+Midwest Region Storage (Bcf)_lag_3,-0.125651835260581
+Midwest Region_Power_MISO_-_Total_Generation_WoW,0.12226045089106352
+Midwest Region_Power_MISO_-_PeakLoad_WoW,-0.110876715182359
+Midwest Region Storage (Bcf)_lag_4,0.10465773571113479
+Midwest Region_Fundy_Midwest_-_Power,-0.09187279081624486
+Midwest Region Storage (Bcf)_lag_2,-0.08923025072610691
+Month,0.08049858349558528
+NetExports to Mexico,0.06512570094400938
+Midwest Region_Power_MISO_-_PeakLoad_Smoothed_2wk,0.06376214050786938
+PowerBurn,-0.059011513094934215
+Midwest Region_Fundy_Midwest_-_Ind_WoW,0.053679515738131844
+Midwest Region Storage (Bcf)_lag_1,0.03613107858054382
+Midwest Region_Power_MISO_-_PeakLoad,-0.030471792169417367
+lag_2,0.016405051651172647
+LNG Sendout,0.012883500247833746

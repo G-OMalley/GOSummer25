@@ -1,0 +1,73 @@
+Feature,Coefficient
+lag_3,0.8977363246729448
+normalized_target,0.7944239761140115
+Net Imports from Canada,-0.6302929357074072
+LNG Feedgas,-0.6232022613027244
+South Central Region_Max_LMP_Smoothed_2wk,-0.6163065233956512
+South Central Region_Fundy_SouthCentral_-_Prod_WoW,0.5517386364030916
+SouthCentral_Fundy_Prod_WoW,0.5517386364030916
+NetImportExport,-0.5162140589895156
+lag_2,-0.5046871939153322
+TotalSupply,-0.4744840003526687
+Total Demand,-0.47081120853250774
+ImpliedStorageChange,0.45019308907475053
+USDemand,-0.42221930124201806
+LNG Sendout,-0.4202497377943565
+South Central Region_Power_ERCOT_-_Total_Generation_Smoothed_2wk,-0.4022132435425232
+South Central Region_Power_ERCOT_-_PeakLoad_WoW,0.3749675890407379
+PipeLoss,-0.3674042424247256
+South Central Region_Fundy_SouthCentral_-_Ind_WoW,-0.3535462607726412
+SouthCentral_Fundy_Ind_WoW,-0.3535462607726412
+South Central Region_Fundy_SouthCentral_-_Balance,0.34997920846837094
+SouthCentral_Fundy_Balance,0.34997920846837094
+SouthCentral_Fundy_NetBalance,0.34997920846836944
+SouthCentral_Fundy_ResCom_WoW,-0.34676272735249963
+South Central Region_Fundy_SouthCentral_-_ResCom_WoW,-0.34676272735249963
+ResComm,-0.3341064243826264
+South Central Region_Max_LMP,-0.32440717015636644
+SouthCentral_Fundy_Power_Smoothed_2wk,-0.3184862728440777
+South Central Region_Fundy_SouthCentral_-_Power_Smoothed_2wk,-0.3184862728440777
+SouthCentral_Fundy_Power_WoW,0.3045095785607884
+South Central Region_Fundy_SouthCentral_-_Power_WoW,0.3045095785607884
+SouthCentral_Fundy_Balance_WoW,0.3029812764496539
+South Central Region_Fundy_SouthCentral_-_Balance_WoW,0.3029812764496539
+SouthCentral_Fundy_NetBalance_WoW,0.30298127644965234
+South Central Region_Power_ERCOT_-_PeakLoad_Smoothed_2wk,-0.29852912955604655
+Balance,0.28282385660500003
+lag_5,-0.2681135782862857
+South Central Region_Fundy_SouthCentral_-_Prod,0.2649692084073254
+SouthCentral_Fundy_Prod,0.2649692084073254
+SouthCentral_Fundy_ResCom_Smoothed_2wk,0.2572522831620125
+South Central Region_Fundy_SouthCentral_-_ResCom_Smoothed_2wk,0.2572522831620125
+South Central Region_Criterion_Total_Demand_-_South_Central,-0.23330950350487029
+South Central Region_Power_ERCOT_-_Total_Generation,-0.22812827189410645
+SouthCentral_Fundy_Ind,-0.22519397736875327
+South Central Region_Fundy_SouthCentral_-_Ind,-0.22519397736875327
+South Central Region Storage (Bcf)_lag_3,0.1921877989845563
+SouthCentral_Fundy_Balance_Smoothed_2wk,0.19071679811764813
+South Central Region_Fundy_SouthCentral_-_Balance_Smoothed_2wk,0.19071679811764813
+SouthCentral_Fundy_NetBalance_Smoothed_2wk,0.1907167981176443
+lag_1,-0.18004104329499498
+South Central Region_Max_LMP_WoW,0.16209056788267323
+WeekOfYear,0.13822796346049498
+index,0.13822796346049493
+DryGasProduction,0.13412951888806318
+Industrial,-0.13149625093751816
+South Central Region Storage (Bcf)_lag_2,0.13070493015710644
+South Central Region_Fundy_SouthCentral_-_Ind_Smoothed_2wk,0.1287799180249069
+SouthCentral_Fundy_Ind_Smoothed_2wk,0.1287799180249069
+South Central Region_Power_ERCOT_-_Total_Generation_WoW,0.1232252495560126
+South Central Region Storage (Bcf)_lag_1,0.10515086751785337
+South Central Region Storage (Bcf)_lag_5,0.10303981370211547
+SouthCentral_Fundy_Prod_Smoothed_2wk,-0.099187749078552
+South Central Region_Fundy_SouthCentral_-_Prod_Smoothed_2wk,-0.099187749078552
+South Central Region Storage (Bcf)_lag_4,0.0916345133991571
+SouthCentral_Fundy_ResCom,-0.08974026615061542
+South Central Region_Fundy_SouthCentral_-_ResCom,-0.08974026615061542
+SouthCentral_Fundy_Power,-0.08579935506919667
+South Central Region_Fundy_SouthCentral_-_Power,-0.08579935506919667
+PowerBurn,-0.08501686055425497
+Month,0.06381346513071418
+NetExports to Mexico,0.05969340263367853
+South Central Region_Power_ERCOT_-_PeakLoad,-0.05036943257737614
+lag_4,-0.01301554864056298

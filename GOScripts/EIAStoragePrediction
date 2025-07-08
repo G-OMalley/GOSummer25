@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge # Import Ridge for regularization
 from sklearn.metrics import mean_absolute_error
+from sklearn.preprocessing import StandardScaler # Added for feature scaling
+from sklearn.linear_model import RidgeCV # Added for automatic alpha tuning
 
 # === File Paths ===
 script_dir = Path(__file__).resolve().parent
@@ -11,31 +13,32 @@ data_folder = project_root / "INFO"
 eia_path = data_folder / "EIAchanges.csv"
 fundy_path = data_folder / "Fundy.csv"
 criterion_extra_path = data_folder / "CriterionExtra.csv"
-platts_conus_path = data_folder / "PlattsCONUSFundamentalsHIST.csv"
+platts_conus_path = data_folder / "PlattsCONUSFundamentalsHIST.csv" 
 platts_power_path = data_folder / "PlattsPowerFundy.csv"
+fundy_forecast_path = data_folder / "FundyForecast.csv"
+weather_path = data_folder / "WEATHER.csv" # Path to the new WEATHER.csv file
 
-# === Load Data ===
-eia = pd.read_csv(eia_path)
-fundy = pd.read_csv(fundy_path)
-criterion = pd.read_csv(criterion_extra_path)
-platts_conus = pd.read_csv(platts_conus_path)
-platts_power = pd.read_csv(platts_power_path)
+# === Define Global Region Renaming Map (STEP 1) ===
+REGION_RENAME_MAP = {
+    'Northeast': 'East',
+    'Southeast': 'East',
+    'SouthEast': 'East',
+    'SouthCentral': 'South Central',
+    'South Central': 'South Central', # Explicitly keep this if it's already sometimes present
+    'Rockies': 'Mountain',
+    'West': 'Pacific',
+    'California': 'Pacific',
+    'West[CA]': 'Pacific',   # future proof / precaution
+    'Conus': 'Lower 48 States',
+    'Lower 48': 'Lower 48 States',
+    'United States': 'Lower 48 States',
+    'Midwest': 'Midwest'   # explicitly keep
+}
 
-# === Preprocess Dates ===
-eia['Period'] = pd.to_datetime(eia['Period'])
-fundy['Date'] = pd.to_datetime(fundy['Date'], format='%m/%d/%Y')
-criterion['Date'] = pd.to_datetime(criterion['Date'], format='%m/%d/%Y')
-platts_conus['GasDate'] = pd.to_datetime(platts_conus['GasDate'])
-platts_power['Date'] = pd.to_datetime(platts_power['Date'])
-
-# === Resample Platts CONUS to weekly ===
-platts_conus.set_index('GasDate', inplace=True)
-platts_weekly = platts_conus.resample('W-FRI').mean()
-platts_weekly.reset_index(inplace=True)
-
-# === Map for region correlation ===
+# === Define Map for EIA Target Regions (STEP 4 - MOVED HERE) ===
+# This map links EIA's official region names (keys) to the standardized names (values) used in data processing.
 region_map = {
-    'Lower 48 States': 'Conus',
+    'Lower 48 States': 'Lower 48 States', # Now directly using standardized name
     'East Region': 'East',
     'Midwest Region': 'Midwest',
     'South Central Region': 'South Central',
@@ -43,48 +46,356 @@ region_map = {
     'Pacific Region': 'Pacific'
 }
 
-# === Merge Fundy & CriterionExtra ===
+
+# === Load Data ===
+try:
+    eia = pd.read_csv(eia_path)
+    fundy = pd.read_csv(fundy_path)
+    criterion = pd.read_csv(criterion_extra_path)
+    platts_conus = pd.read_csv(platts_conus_path)
+    platts_power = pd.read_csv(platts_power_path)
+except FileNotFoundError as e:
+    print(f"Error loading file: {e}. Please ensure all necessary CSV files are in the '{data_folder}' directory.")
+    exit() # Exit the script if files are not found
+
+# --- Preprocess Dates (Initial) ---
+eia['Period'] = pd.to_datetime(eia['Period'])
+criterion['Date'] = pd.to_datetime(criterion['Date'], format='%m/%d/%Y', errors='coerce')
+platts_conus['GasDate'] = pd.to_datetime(platts_conus['GasDate'])
+platts_power['Date'] = pd.to_datetime(platts_power['Date'])
+
+# --- Load and Preprocess FundyForecast.csv ---
+try:
+    fundy_forecast = pd.read_csv(fundy_forecast_path)
+    
+    # 1. Inspect & Clean FundyForecast Columns
+    print("\n--- FundyForecast.csv Columns ---")
+    print("Original FundyForecast Columns:", fundy_forecast.columns.tolist())
+    fundy_forecast.columns = fundy_forecast.columns.str.strip() # Strip whitespace from column names
+    print("Cleaned FundyForecast Columns:", fundy_forecast.columns.tolist())
+    print("FundyForecast.head():\n", fundy_forecast.head())
+
+    # Convert Date to Timestamp (if it isn't already)
+    fundy_forecast['Date'] = pd.to_datetime(fundy_forecast['Date'], format='%m/%d/%Y', errors='coerce')
+    
+    # Clean region and item strings
+    fundy_forecast['region'] = fundy_forecast['region'].astype(str).str.strip()
+    fundy_forecast['item'] = fundy_forecast['item'].astype(str).str.strip()
+
+    # Apply global region renaming to fundy_forecast (STEP 2)
+    fundy_forecast['region'] = fundy_forecast['region'].replace(REGION_RENAME_MAP)
+    print("✅ FundyForecast.csv regions renamed using REGION_RENAME_MAP.")
+    
+    print(f"✅ Loaded FundyForecast.csv. Latest date: {fundy_forecast['Date'].max().strftime('%Y-%m-%d')}")
+except FileNotFoundError:
+    print("❌ Could not find FundyForecast.csv. Forecast will default to forward-filled values for Fundy data.")
+    fundy_forecast = pd.DataFrame() # Create an empty DataFrame if not found
+# --- End Load and Preprocess FundyForecast.csv ---
+
+# --- Preprocess Fundy.csv specifically for date and string cleaning ---
+fundy['Date'] = pd.to_datetime(fundy['Date'], format='%m/%d/%Y', errors='coerce') # Ensure Timestamp
+fundy['region'] = fundy['region'].astype(str).str.strip()
+fundy['item'] = fundy['item'].astype(str).str.strip()
+
+# Apply global region renaming to fundy (STEP 2)
+fundy['region'] = fundy['region'].replace(REGION_RENAME_MAP)
+print("✅ Fundy.csv 'Date', 'region', 'item' columns cleaned and regions renamed.")
+
+# --- Validate Region Availability (STEP 3 - Optional Sanity Check) ---
+print("\n--- Region Availability Validation ---")
+print("Fundy regions:", sorted(fundy['region'].unique()))
+print("FundyForecast regions:", sorted(fundy_forecast['region'].unique()))
+print("------------------------------------")
+# --- End Region Availability Validation ---
+
+
+# === New Global Weather Data Processing ===
+# === Define CITY_SYMBOL_TO_REGION Mapping ===
+CITY_SYMBOL_TO_REGION = {
+    "KJFK": "East", "KBOS": "East", "KDCA": "East", "KBUF": "East", "KPIT": "East", "KRDU": "East", "KTPA": "East",
+    "KDTW": "Midwest", "KORD": "Midwest", "KLIT": "Midwest",
+    "KIAH": "South Central", "KATL": "South Central", "KMSY": "South Central", "KOKC": "South Central",
+    "KDEN": "Mountain",
+    "KLAX": "Pacific", "KSEA": "Pacific", "KSFO": "Pacific"
+}
+
+# === Load and Preprocess WEATHER.csv ===
+weather_path = data_folder / "WEATHER.csv"
+weather_df = pd.DataFrame() # Initialize
+region_weather_pivot = pd.DataFrame() # Initialize
+
+try:
+    weather_df = pd.read_csv(weather_path)
+    weather_df['Date'] = pd.to_datetime(weather_df['Date'])   # Ensure datetime
+    weather_df['Region'] = weather_df['City Symbol'].map(CITY_SYMBOL_TO_REGION)
+
+    # Filter out rows that aren't mapped to a region
+    initial_rows = weather_df.shape[0]
+    weather_df = weather_df.dropna(subset=['Region'])
+    if weather_df.shape[0] < initial_rows:
+        print(f"INFO: Dropped {initial_rows - weather_df.shape[0]} rows from WEATHER.csv due to unmapped city symbols.")
+
+    # Keep only needed columns
+    weather_df = weather_df[['Date', 'Region', 'Avg Temp']] # Use 'Avg Temp' as per user's correction
+
+    # === Aggregate Weekly Regional Weather (by Region) ===
+    # Group by Region and weekly Date
+    region_weather = (
+        weather_df
+        .groupby(['Region', pd.Grouper(key='Date', freq='W-FRI')])['Avg Temp'] # Use 'Avg Temp'
+        .mean()
+        .reset_index()
+    )
+
+    # Pivot to wide format
+    region_weather_pivot = region_weather.pivot(index='Date', columns='Region', values='Avg Temp') # Use 'Avg Temp'
+    region_weather_pivot.columns = [f"{col}_Weather_Avg Temp" for col in region_weather_pivot.columns]
+
+    # === Add Lower 48 Composite (Average of All Regions) ===
+    if not region_weather_pivot.empty:
+        cols_to_average = [col for col in region_weather_pivot.columns if '_Weather_Avg Temp' in col and 'Lower 48 States' not in col]
+        if cols_to_average:
+            region_weather_pivot['Lower 48 States_Weather_Avg Temp'] = region_weather_pivot[cols_to_average].mean(axis=1)
+            print("✅ Created 'Lower 48 States_Weather_Avg Temp' composite feature.")
+        else:
+            print("⚠️ Not enough regional weather data to create 'Lower 48 States_Weather_Avg Temp' composite.")
+    else:
+        print("⚠️ region_weather_pivot is empty, cannot create Lower 48 composite.")
+
+    print("✅ Successfully processed global weather data into 'region_weather_pivot'.")
+
+except FileNotFoundError:
+    print(f"❌ Could not find {weather_path}. Skipping all weather features.")
+except KeyError as e:
+    print(f"❌ Missing expected column in {weather_path}: {e}. Skipping all weather features.")
+# === End New Global Weather Data Processing ===
+
+
+# --- Latest Dates in Raw Dataframes (before any extensions) ---
+print("\n--- Latest Dates in Raw Dataframes (before any extensions) ---")
+print(f"Latest EIA date: {eia['Period'].max().strftime('%Y-%m-%d')}")
+print(f"Latest Fundy date: {fundy['Date'].max().strftime('%Y-%m-%d')}") # This is now Timestamp
+print(f"Latest Criterion date: {criterion['Date'].max().strftime('%Y-%m-%d')}")
+# For platts_conus, need to reload or ensure it's not indexed before getting max
+platts_conus_temp = pd.read_csv(platts_conus_path)
+platts_conus_temp['GasDate'] = pd.to_datetime(platts_conus_temp['GasDate'])
+print(f"Latest Platts CONUS date: {platts_conus_temp['GasDate'].max().strftime('%Y-%m-%d')}")
+print(f"Latest Platts Power date: {platts_power['Date'].max().strftime('%Y-%m-%d')}")
+print("------------------------------------------------------------")
+# --- End Latest Dates in Raw Dataframes ---
+
+
+# === Forward-fill logic for all datasets ===
+def extend_dataframe(df, date_col, weeks_to_add=1, freq=None):
+    if df.empty:
+        return df
+
+    df_copy = df.copy()
+    df_copy = df_copy.sort_values(by=date_col)
+    
+    last_date = df_copy[date_col].max()
+
+    new_dates = []
+    current_date = last_date
+    for _ in range(weeks_to_add):
+        if freq == 'D':
+            current_date += pd.Timedelta(days=7)
+        elif freq == 'W-FRI':
+            # This logic works correctly for Timestamp objects and includes the fix for "next Friday"
+            days_to_add = (4 - current_date.weekday() + 7) % 7
+            if days_to_add == 0: # If current day is Friday, add 7 days to get next Friday
+                days_to_add = 7
+            current_date += pd.Timedelta(days=days_to_add)
+        else: # Default to weekly if freq is not 'D' or 'W-FRI'
+            current_date += pd.Timedelta(days=7)
+        new_dates.append(current_date)
+
+    extended_rows = []
+    for date in new_dates:
+        new_row = df_copy.iloc[-1:].copy()
+        new_row[date_col] = date
+        extended_rows.append(new_row)
+    
+    if extended_rows:
+        return pd.concat([df_copy] + extended_rows, ignore_index=True)
+    return df_copy
+
+
+# Apply extend_dataframe with weeks_to_add=1 for next week's forecast
+eia = extend_dataframe(eia, 'Period', weeks_to_add=1, freq='W-FRI')
+fundy = extend_dataframe(fundy, 'Date', weeks_to_add=1, freq='W-FRI')
+criterion = extend_dataframe(criterion, 'Date', weeks_to_add=1, freq='W-FRI')
+platts_conus = extend_dataframe(platts_conus.reset_index(), 'GasDate', weeks_to_add=1, freq='D')
+platts_power = extend_dataframe(platts_power, 'Date', weeks_to_add=1, freq='D')
+
+# --- Integrate FundyForecast.csv for the forecast week (with confirmation) ---
+# Determine the forecast week date from the extended fundy DataFrame
+forecast_date_fundy = fundy['Date'].max()
+
+print(f"🧪 Forecast date extracted from Fundy (max date): {forecast_date_fundy}")
+print("\n--- Fundy.tail(5) after extension ---")
+print(fundy.tail(5)) # Shows the last 5 rows of fundy after extension
+print("------------------------------------")
+
+if not fundy_forecast.empty:
+    print(f"\n🔍 Forecast date in Fundy (date-only for comparison): {forecast_date_fundy.date()}")
+    print("📅 Dates in FundyForecast.csv (date-only unique values):")
+    if not fundy_forecast['Date'].empty:
+        print(fundy_forecast['Date'].dt.date.unique())
+    else:
+        print("FundyForecast['Date'] is empty.")
+
+    if forecast_date_fundy.date() in fundy_forecast['Date'].dt.date.values:
+        print("✅ Found exact match for forecast date in FundyForecast.csv (date-only comparison)")
+    else:
+        print("❌ No exact match found for forecast date in FundyForecast.csv (date-only comparison)")
+        fuzzy_matches = fundy_forecast[
+            (fundy_forecast['Date'] >= forecast_date_fundy - pd.Timedelta(days=2)) &
+            (fundy_forecast['Date'] <= forecast_date_fundy + pd.Timedelta(days=2))
+        ]
+        if not fuzzy_matches.empty:
+            print(f"🔁 Closest available dates within ±2 days:\n{[d.strftime('%Y-%m-%d') for d in fuzzy_matches['Date'].dt.date.tolist()]}")
+        else:
+            print("⚠️ No nearby dates found within ±2 days either.")
+
+    forecast_rows_from_file = fundy_forecast[
+        fundy_forecast['Date'].dt.date == forecast_date_fundy.date()
+    ]
+
+    if not forecast_rows_from_file.empty:
+        required_regions_for_check = list(region_map.values())
+        forecast_regions_in_file = forecast_rows_from_file['region'].unique()
+        
+        missing_regions = [r for r in required_regions_for_check if r not in forecast_regions_in_file]
+        
+        if missing_regions:
+            print(f"⚠️ Missing regions in FundyForecast for {forecast_date_fundy.strftime('%Y-%m-%d')}: {missing_regions}")
+            print("   (Proceeding with available data, but awareness is key for data quality.)")
+        else:
+            print(f"✅ All expected regions are present in FundyForecast for {forecast_date_fundy.strftime('%Y-%m-%d')}.")
+
+    if not forecast_rows_from_file.empty:
+        print(f"✅ Found forecast Fundy data for {forecast_date_fundy.strftime('%Y-%m-%d')}. Replacing forward-filled row.")
+        fundy = fundy[fundy['Date'].dt.date != forecast_date_fundy.date()].copy()
+        fundy = pd.concat([fundy, forecast_rows_from_file], ignore_index=True)
+        print("✅ Successfully replaced forward-filled row with FundyForecast data.")
+    else:
+        print(f"⚠️ No matching forecast Fundy data found in FundyForecast.csv for {forecast_date_fundy.strftime('%Y-%m-%d')}. Keeping forward-filled row.")
+else:
+    print("INFO: FundyForecast.csv was not loaded or is empty. Forward-filled Fundy data will be used.")
+
+# Confirm merge worked
+print(f"✅ Final fundy date range after forecast integration: {fundy['Date'].min().strftime('%Y-%m-%d')} to {fundy['Date'].max().strftime('%Y-%m-%d')}")
+print(f"✅ Forecast Date checked: {forecast_date_fundy.strftime('%Y-%m-%d')}")
+print(f"✅ Fundy row count on forecast date: {fundy[fundy['Date'].dt.date == forecast_date_fundy.date()].shape[0]} (Should be >0 if forecast data was integrated)")
+# --- End Integrate FundyForecast.csv ---
+
+
+# === Resample Platts CONUS to weekly ===
+platts_conus.set_index('GasDate', inplace=True)
+platts_weekly = platts_conus.resample('W-FRI', label='right').mean()
+platts_weekly.reset_index(inplace=True)
+
+# === Map for region correlation ===
+# This definition has been moved to the top of the script for proper scoping.
+
+
+# === Merge Fundy & CriterionExtra (UPDATED for South Central aliases) ===
+# This function is now streamlined as regions are pre-cleaned and pre-renamed globally (STEP 5)
 def merge_regional_series(df, tag):
     df['item'] = df['item'].str.strip()
-    df['region'] = df['region'].str.strip()
     features = {}
-    for eia_region, data_region in region_map.items():
-        sub = df[df['region'] == data_region]
+    for eia_region, data_region in region_map.items(): # data_region is the standardized name like 'East', 'Lower 48 States'
+        sub = df[df['region'] == data_region].copy()
+
+        if sub.empty:
+            print(f"⚠️ No data found for {eia_region} from region: {data_region}") # Updated print for clarity
+            continue
+
+        # --- FIX for ValueError: Index contains duplicate entries, cannot reshape ---
+        # Ensure pivot_table aggregates duplicate (Date, item) pairs
         pivot = sub.pivot_table(index='Date', columns='item', values='value', aggfunc='mean')
+        # --- END FIX ---
+        
         pivot.columns = [f"{eia_region}_{tag}_{col.strip().replace(' ', '_')}" for col in pivot.columns]
-        pivot = pivot.resample('W-FRI').mean()
+        pivot = pivot.resample('W-FRI').mean() # This will now work as 'Date' column is Timestamp
         features[eia_region] = pivot
     return features
 
 fundy_features = merge_regional_series(fundy, "Fundy")
 criterion_features = merge_regional_series(criterion, "Criterion")
 
-# === Process PlattsPowerFundy ===
+# === Process PlattsPowerFundy (UPDATED with explicit mapping and Lower 48 aggregation) ===
 platts_power_features = {}
 
-# Filter PlattsPowerFundy for desired 'Item' types
-power_keywords = ['PeakLoad', 'TotalGen', 'Total Gen', 'Total Generation', 'Load']
-
-filtered_platts_power = platts_power[
-    platts_power['Item'].str.contains('|'.join(power_keywords), case=False, na=False)
-].copy()
-
-for eia_region in region_map.keys():
-    region_power = filtered_platts_power[
-        filtered_platts_power['Item'].str.contains(eia_region.split()[0], case=False, na=False)
+# === STEP: Hardcoded power metrics to use for each region ===
+power_metric_map = {
+    "Pacific Region": [
+        "CAISO - PeakLoad", "CAISO - Total Generation", "CAISO - Load"
+    ],
+    "Mountain Region": [],
+    "South Central Region": [
+        "ERCOT - PeakLoad", "ERCOT - Total Generation", "ERCOT - Load"
+    ],
+    "Midwest Region": [
+        "MISO - PeakLoad", "MISO - Total Generation", "MISO - Load"
+    ],
+    "East Region": [
+        "PJM - PeakLoad", "PJM - Total Generation", "PJM - Load",
+        "NYISO - PeakLoad", "NYISO - Total Generation", "NYISO - Load",
+        "ISONE - PeakLoad", "ISONE - Total Generation", "ISONE - Load"
     ]
-    if region_power.empty:
+}
+
+platts_power['Item'] = platts_power['Item'].str.strip()
+
+for region, item_list in power_metric_map.items():
+    if not item_list:
+        print(f"⚠️ No specific Platts Power metrics configured for region: {region}. Skipping power features for this region.")
         continue
 
-    pivot = region_power.pivot_table(index='Date', columns='Item', values='Value', aggfunc='mean')
-    pivot.columns = [f"{eia_region}_Power_{col.strip().replace(' ', '_')}" for col in pivot.columns]
+    regional_df = platts_power[platts_power['Item'].isin(item_list)].copy()
+    
+    if regional_df.empty:
+        print(f"⚠️ No Platts Power data found in the file for specified items ({item_list}) for region: {region}. Skipping power features for this region.")
+        continue
+
+    pivot = regional_df.pivot_table(index='Date', columns='Item', values='Value', aggfunc='mean')
+    
+    pivot.columns = [f"{region}_Power_{col.replace(' ', '_')}" for col in pivot.columns]
     pivot = pivot.resample('W-FRI').mean()
-    platts_power_features[eia_region] = pivot
+    platts_power_features[region] = pivot
+
+# --- Aggregation for Lower 48 States Power Features ---
+regions_to_sum_for_lower48 = ["Pacific Region", "South Central Region", "Midwest Region", "East Region"]
+valid_region_dfs = []
+
+for r in regions_to_sum_for_lower48:
+    if r in platts_power_features and not platts_power_features[r].empty:
+        valid_region_dfs.append(platts_power_features[r])
+    else:
+        print(f"INFO: Missing or empty power data for '{r}', cannot include in Lower 48 States aggregation. (Could be due to no items configured or no data found).")
+
+if valid_region_dfs:
+    # --- FIX for FutureWarning: DataFrame.groupby with axis=1 is deprecated ---
+    lower48_combined_df = pd.concat(valid_region_dfs, axis=1).fillna(0)
+    lower48_df_grouped = lower48_combined_df.T.groupby(
+        lambda col: col.split("_Power_", 1)[-1] if "_Power_" in col else col
+    ).sum().T
+    # --- END FIX ---
+
+    lower48_df_grouped.columns = [f"Lower 48 States_Power_{col}" for col in lower48_df_grouped.columns]
+    platts_power_features["Lower 48 States"] = lower48_df_grouped
+    print("✅ Lower 48 States power features created by summing relevant EIA regions.")
+else:
+    print("⚠️ Could not build Lower 48 States power features — no valid regional data available for aggregation.")
+# === End of Process PlattsPowerFundy (UPDATED) ===
 
 
 # === Modeling Setup ===
 LAG_DAYS = 5
 results = {}
+all_region_feature_tables = {} # Initialize dictionary to store processed dataframes
 
 for region in region_map.keys():
     storage_col = f"{region} Storage Change (Bcf)"
@@ -100,14 +411,164 @@ for region in region_map.keys():
 
     if region in fundy_features:
         df = df.merge(fundy_features[region], how='left', left_index=True, right_index=True)
+
+        # === Add Specific Fundy Features for South Central (from user's analysis) ===
+        # Corrected item names based on how merge_regional_series creates them (SouthCentral, not South_Central)
+        if region == "South Central Region":
+            sc_fundy_items = {
+                "SouthCentral_-_Balance": "SouthCentral_Fundy_Balance",
+                "SouthCentral_-_Ind": "SouthCentral_Fundy_Ind",
+                "SouthCentral_-_Power": "SouthCentral_Fundy_Power",
+                "SouthCentral_-_ResCom": "SouthCentral_Fundy_ResCom",
+                "SouthCentral_-_Prod": "SouthCentral_Fundy_Prod"
+            }
+            
+            for original_item_suffix, new_col_alias in sc_fundy_items.items():
+                full_original_col_name = f"{region}_Fundy_{original_item_suffix}"
+                if full_original_col_name in df.columns:
+                    df[new_col_alias] = df[full_original_col_name]
+                    print(f"INFO: Added South Central Fundy feature: {new_col_alias}")
+                else:
+                    print(f"INFO: South Central Fundy feature '{full_original_col_name}' not found.")
+            
+            required_prod = "SouthCentral_Fundy_Prod" # Use the alias if created
+            required_demand_components = ["SouthCentral_Fundy_Ind", "SouthCentral_Fundy_Power", "SouthCentral_Fundy_ResCom"]
+            
+            # Check for the aliases we just tried to create, or fallback to the original full names if aliases weren't created
+            prod_col_exists = required_prod in df.columns or f"{region}_Fundy_SouthCentral_-_Prod" in df.columns
+            demand_cols_exist = all(
+                (comp in df.columns or f"{region}_Fundy_{comp.replace('SouthCentral_Fundy_', 'SouthCentral-')}" in df.columns)
+                for comp in required_demand_components
+            )
+
+            if prod_col_exists and demand_cols_exist:
+                # Ensure we use the actual column names present in df for sum
+                actual_prod_col = required_prod if required_prod in df.columns else f"{region}_Fundy_SouthCentral_-_Prod"
+                actual_demand_cols = [
+                    comp if comp in df.columns else f"{region}_Fundy_{comp.replace('SouthCentral_Fundy_', 'SouthCentral-')}"
+                    for comp in required_demand_components if (comp in df.columns or f"{region}_Fundy_{comp.replace('SouthCentral_Fundy_', 'SouthCentral-')}" in df.columns)
+                ]
+
+                if actual_prod_col and all(c in df.columns for c in actual_demand_cols):
+                    df['SouthCentral_Fundy_NetBalance'] = (
+                        df[actual_prod_col] - df[actual_demand_cols].sum(axis=1)
+                    )
+                    print("INFO: Created SouthCentral_Fundy_NetBalance feature.")
+                else:
+                     print("INFO: Could not create SouthCentral_Fundy_NetBalance due to missing components (after checking aliases and original names).")
+            else:
+                print("INFO: Could not create SouthCentral_Fundy_NetBalance due to missing components.")
+    else:
+        print(f"INFO: No Fundy features available for region: {region}. Skipping merge for Fundy features.")
+
+
     if region in criterion_features:
         df = df.merge(criterion_features[region], how='left', left_index=True, right_index=True)
-    if region in platts_power_features:
+    
+    # Merge Platts Power features
+    if region in platts_power_features: 
         df = df.merge(platts_power_features[region], how='left', left_index=True, right_index=True)
+    else:
+        print(f"INFO: No Platts Power features available for region: {region}. Skipping merge for power features.")
 
     df = df.merge(platts_weekly.set_index('GasDate'), how='left', left_index=True, right_index=True)
 
+    # === Merge Weather Features for This Region ===
+    region_key = region.replace(" Region", "") 
+    weather_col = f"{region_key}_Weather_Avg Temp"
+
+    if weather_col in region_weather_pivot.columns:
+        df = df.merge(region_weather_pivot[[weather_col]], how='left', left_index=True, right_index=True)
+        print(f"✅ Merged weather feature '{weather_col}' into {region}")
+        
+        df[f"{weather_col}_Smoothed_2wk"] = df[weather_col].rolling(window=2, min_periods=1).mean()
+        df[f"{weather_col}_WoW"] = df[weather_col].diff()
+        print(f"✅ Added Smoothed and Δ features for {weather_col}")
+    else:
+        print(f"⚠️ Weather column '{weather_col}' missing for region {region}. Skipping weather merge for this region.")
+    # === End Merge Weather Features for This Region ===
+
+    # --- Add LNG as a Feature (General for all regions if 'LNG' or 'Feedgas' in item) ---
+    if region in fundy_features:
+        lng_cols_in_fundy = [col for col in df.columns if 'LNG' in col.upper() or 'FEEDGAS' in col.upper()]
+        
+        if region == "South Central Region":
+            print("\n🔍 Checking for LNG-related features in df for South Central:")
+            if lng_cols_in_fundy:
+                print(f"Found LNG/Feedgas columns: {lng_cols_in_fundy}")
+                print(df[lng_cols_in_fundy].tail(8))
+            else:
+                print("No LNG or Feedgas related columns found after merging Fundy features for South Central.")
+                print("Manual check of Fundy.csv for 'LNG' or 'Feedgas' items needed if expected.")
+        else:
+            print(f"INFO: No Fundy features available for {region} to check for LNG/Feedgas.")
+
+
+    # --- Feature Engineering: Rolling Averages and WoW for ALL applicable Features (Generalization) ---
+    features_to_engineer = [
+        col for col in df.columns
+        if ('_Fundy_' in col or '_Power_' in col or '_Weather_' in col) and not ('_WoW' in col or '_Smoothed' in col)
+    ]
+
+    for col_name in features_to_engineer:
+        df[f"{col_name}_WoW"] = df[col_name].diff()
+        df[f"{col_name}_Smoothed_2wk"] = df[col_name].rolling(window=2, min_periods=1).mean()
+    print(f"✅ Engineered WoW and Smoothed features for {len(features_to_engineer)} relevant columns in {region}.")
+    # --- End Feature Engineering Generalization ---
+
+
+    # --- Feature Engineering: Net Balance Feature (renamed from previous version) ---
+    if region != "South Central Region":
+        # Check for specific balance item names based on standard region names
+        balance_col_name = None
+        if region == "Lower 48 States":
+            # For Lower 48 States, look for 'Lower 48 States_Fundy_Lower_48_States_-_Balance' or similar after renaming
+            if f"Lower 48 States_Fundy_Lower_48_States_-_Balance" in df.columns:
+                balance_col_name = f"Lower 48 States_Fundy_Lower_48_States_-_Balance"
+            elif f"Lower 48 States_Fundy_Conus_-_Balance" in df.columns:
+                    balance_col_name = f"Lower 48 States_Fundy_Conus_-_Balance"
+            elif f"Lower 48 States_Fundy_United_States_-_Balance" in df.columns:
+                    balance_col_name = f"Lower 48 States_Fundy_United_States_-_Balance"
+            else:
+                print(f"INFO: Specific balance item for 'Lower 48 States' not found, checking generic CONUS.")
+                balance_col_name = f"{region}_Fundy_CONUS_-_Balance" # Fallback to original naming if exists
+
+        elif f"{region}_Fundy_CONUS_-_Balance" in df.columns: # Check for generic CONUS balance if present
+            balance_col_name = f"{region}_Fundy_CONUS_-_Balance"
+        
+        if balance_col_name and balance_col_name in df.columns:
+            df[f"{region}_Net_Balance"] = df[balance_col_name]
+            print(f"INFO: Created net balance feature '{region}_Net_Balance' from '{balance_col_name}'.")
+        else:
+            print(f"INFO: Balance feature could not be created for {region}. Skipping balance feature creation.")
+    # South Central's NetBalance is handled above specifically.
+
+
     df = df.ffill()
+    
+    # --- STEP 1: Validate Weekly Behavior for South Central (Outlier Check) ---
+    if region == "South Central Region":
+        print("\n=== 🔎 South Central - Recent Weekly Behavior (Post-FE, Pre-Model) ===")
+        print("Target and ERCOT power values (including new smoothed/delta features) last 8 weeks:")
+        ercot_cols_to_print = [col for col in df.columns if "ERCOT" in col and ("Power" in col or "WoW" in col or "Smoothed" in col)]
+        sc_new_fundy_cols_to_print = [
+            f"{region}_Fundy_Balance", f"{region}_Fundy_Ind",
+            f"{region}_Fundy_Power", f"{region}_Fundy_ResCom",
+            f"{region}_Fundy_Prod", f"{region}_Fundy_NetBalance"
+        ]
+        sc_cols_to_print_existing = [col for col in sc_new_fundy_cols_to_print if col in df.columns]
+        
+        all_relevant_cols = list(set(ercot_cols_to_print + sc_cols_to_print_existing))
+
+        if all_relevant_cols:
+            print(df[['target'] + all_relevant_cols].tail(8))
+        else:
+            print(f"No relevant features found to display for last 8 weeks in {region}.")
+
+        print("\n🧪 South Central target last 8 weeks:")
+        print(df['target'].tail(8))
+        print("============================================")
+
 
     required_cols_for_target_lags = ['target'] + [f'lag_{i}' for i in range(1, LAG_DAYS + 1)]
     initial_rows_before_target_lag_drop = df.shape[0]
@@ -117,7 +578,7 @@ for region in region_map.keys():
     if rows_dropped_target_lags > 0:
         print(f"INFO: Dropped {rows_dropped_target_lags} rows in region: {region} (missing target or lags only)")
 
-    X_cols = [col for col in df.columns if col != 'target']
+    X_cols = [col for col in df.columns if col not in ['target', 'Period', 'Region_Tag']]
 
     initial_X_rows = df.shape[0]
     df = df.dropna(subset=X_cols)
@@ -125,41 +586,126 @@ for region in region_map.keys():
     if rows_dropped_X_cols > 0:
         print(f"INFO: Dropped {rows_dropped_X_cols} additional rows due to NaNs in active feature columns in region: {region}")
 
-    if df.shape[0] < 6:
-        print(f"Skipping region {region}: Not enough data after dropping NaNs ({df.shape[0]} rows remaining).")
-        continue
-
     X = df[X_cols]
     y = df['target']
 
-    X_train = X.iloc[:-2]
-    y_train = y.iloc[:-2]
+    # --- FIX for Lower 48 - Drop ImpliedStorageChange ---
+    if region == "Lower 48 States":
+        implied_storage_cols = [col for col in X.columns if "ImpliedStorageChange" in col]
+        if implied_storage_cols:
+            X = X.drop(columns=implied_storage_cols, errors='ignore')
+            print(f"✅ Dropped ImpliedStorageChange for {region}.")
+    # --- END FIX ---
+
+    # === Modified Data Split for OOS MAE ===
+    MIN_REQUIRED_ROWS = LAG_DAYS + 4 + 2
+    if df.shape[0] < MIN_REQUIRED_ROWS:
+        print(f"Skipping region {region}: Not enough data for robust OOS MAE calculation ({df.shape[0]} rows remaining). Needs at least {MIN_REQUIRED_ROWS} rows.")
+        continue
+
+    X_train = X.iloc[:-6]
+    y_train = y.iloc[:-6]
+
+    recent_X_oos = X.iloc[-6:-2]
+    recent_y_oos = y.iloc[-6:-2]
+
     X_backtest = X.iloc[[-2]]
     y_backtest_actual = y.iloc[-2]
     X_forecast = X.iloc[[-1]]
 
-    # === STEP 1: Add Date Tracking ===
+    if X_train.empty:
+        print(f"Skipping region {region}: X_train is empty after splitting for OOS MAE. Consider increasing historical data.")
+        continue
+
+    # --- Drop constant features from all splits ---
+    zero_std_cols = X_train.columns[X_train.std() == 0].tolist()
+    
+    if zero_std_cols:
+        print(f"🚫 Dropping constant features for {region}: {zero_std_cols}")
+        X_train = X_train.drop(columns=zero_std_cols)
+        X_backtest = X_backtest.drop(columns=zero_std_cols, errors='ignore')
+        X_forecast = X_forecast.drop(columns=zero_std_cols, errors='ignore')
+        recent_X_oos = recent_X_oos.drop(columns=zero_std_cols, errors='ignore')
+    else:
+        print(f"✅ No constant features found in training data for {region}.")
+
     backtest_date = df.index[-2]
     forecast_date = df.index[-1]
-    # === End of Date Tracking ===
 
-    model = LinearRegression()
-    model.fit(X_train, y_train)
+    # --- 1. Normalize Features Before Training ---
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_backtest_scaled = scaler.transform(X_backtest)
+    X_forecast_scaled = scaler.transform(X_forecast)
+    recent_X_oos_scaled = scaler.transform(recent_X_oos)
 
-    backtest_pred = model.predict(X_backtest)[0]
-    forecast_pred = model.predict(X_forecast)[0]
+    print(f"✅ Features scaled for {region}.")
 
-    recent_X = X.iloc[-6:-2]
-    recent_y = y.iloc[-6:-2]
+    # --- Use RidgeCV for automatic alpha tuning (Broader search) ---
+    # FIX: Removed store_cv_results=True because it's incompatible with cv!=None
+    alphas = np.logspace(-3, 3, 7) # Example: 0.001, 0.01, 0.1, 1, 10, 100, 1000
+    model = RidgeCV(alphas=alphas, cv=5) # Added cv=5 for robust cross-validation
+    model.fit(X_train_scaled, y_train)
+    print(f"✅ RidgeCV model trained for {region} with best alpha: {model.alpha_:.4f}")
+
+    # --- Debug: Model Coefficients ---
+    print(f"\n=== {region} MODEL COEFFICIENTS (on SCALED X_train) ===")
+    if not X_train.empty and len(X_train.columns) > 0:
+        coef_df = pd.Series(model.coef_, index=X_train.columns).sort_values(ascending=False)
+        print("\nTop 10 coefficients:\n", coef_df.head(10))
+        print("\nBottom 10 coefficients:\n", coef_df.tail(10))
+        print("\n📊 Features with absolute coefficient > 0.2:")
+        high_impact_coefs = coef_df[coef_df.abs() > 0.2]
+        if not high_impact_coefs.empty:
+            print(high_impact_coefs)
+        else:
+            print("No features with absolute coefficient > 0.2.")
+    else:
+        print("Warning: X_train is empty or has no columns, skipping coefficient display.")
+
+    backtest_pred = model.predict(X_backtest_scaled)[0]
+    forecast_pred = model.predict(X_forecast_scaled)[0]
+
+    # --- DEBUG MAE CALCULATION ---
+    print(f"\n🔍 Calculating 4-week MAE for region: {region} (Out-of-Sample)")
+    recent_X = recent_X_oos_scaled
+    recent_y = recent_y_oos
+
+    print(f"🧪 recent_X shape: {recent_X.shape}")
+    print(f"🧪 recent_y shape: {recent_y.shape}")
+    print(f"🧪 recent_y values:\n{recent_y.values}")
+    print(f"🧪 recent_y unique values: {recent_y.unique()}")
 
     if recent_X.shape[0] < 4:
-        print(f"⚠️ Warning: Only {recent_X.shape[0]} weeks used for MAE in region: {region}")
+        print(f"⚠️ MAE skipped for {region}: fewer than 4 valid weeks ({recent_X.shape[0]}) for OOS MAE.")
+        mae_str = "Not enough data"
+    elif recent_y.isna().any():
+        print(f"⚠️ MAE skipped for {region}: recent_y contains NaNs for OOS MAE.")
+        mae_str = "Not enough data" # Assign mae_str here
+    elif recent_y.nunique() <= 1:
+        print(f"⚠️ MAE skipped for {region}: recent_y has low variance (unique count = {recent_y.nunique()}) for OOS MAE.")
         mae_str = "Not enough data"
     else:
-        mae_4wk = mean_absolute_error(recent_y, model.predict(recent_X))
-        mae_str = f"{mae_4wk:.2f} Bcf"
+        try:
+            preds = model.predict(recent_X)
+            print(f"🧠 model predictions on recent_X (OOS):\n{preds}")
+            mae_val = mean_absolute_error(recent_y, preds)
+            print(f"📉 Calculated MAE: {mae_val:.4f}")
 
-    # === Update results dictionary with dates ===
+            suspicious = mae_val < 0.01
+            if suspicious:
+                print("🚨 SUSPICIOUS: Perfect or near-perfect MAE. Still investigate for subtle leakage.")
+            
+            mae_str = f"{mae_val:.2f} Bcf"
+        except Exception as e:
+            print(f"❌ Error during MAE calculation for {region}: {e}")
+            mae_str = "Error"
+
+    # --- Log Model Residuals for South Central ---
+    if region == "South Central Region":
+        residual = y_backtest_actual - backtest_pred
+        print(f"\n🧾 Residual (Actual - Predicted) for {region} backtest: {residual:.2f} Bcf")
+
     results[region.replace(" Region", "")] = {
         'backtest_date': backtest_date.strftime('%Y-%m-%d'),
         'forecast_date': forecast_date.strftime('%Y-%m-%d'),
@@ -168,48 +714,78 @@ for region in region_map.keys():
         'forecast_pred': forecast_pred,
         'mae_4wk_str': mae_str
     }
-    # === End of results dictionary update ===
 
-# === STEP 1: Transpose output with MAE included ===
-if results: # Ensure results dictionary is not empty before processing
-    regions = []
-    forecast_dates = []
-    backtest_preds = []
-    backtest_actuals = []
-    mae_vals = []
+    df['Region_Tag'] = region
+    all_region_feature_tables[region] = df.copy()
+
+
+# === Step 1: Add validation checks for all_region_feature_tables ===
+print("\n=== Data Table Validation (Step 1 Completion) ===")
+expected_lags = [f'lag_{i}' for i in range(1, LAG_DAYS + 1)]
+min_external_features = 5
+
+if not all_region_feature_tables:
+    print("⚠️ No feature tables generated for any region. Check earlier data loading/merging steps.")
+else:
+    for region, df_processed in all_region_feature_tables.items():
+        print(f"\nValidating {region} table:")
+        
+        if 'target' not in df_processed.columns:
+            print(f"❌ '{region}' table is missing 'target' column.")
+        else:
+            print(f"✅ '{region}' table has 'target' column.")
+
+        lags_present = [col for col in expected_lags if col in df_processed.columns]
+        if len(lags_present) == len(expected_lags):
+            print(f"✅ '{region}' table has all {len(expected_lags)} lag columns.")
+        else:
+            print(f"❌ '{region}' table is missing some lag columns. Found: {lags_present}")
+
+        non_feature_cols = ['target', 'Region_Tag'] + expected_lags
+        external_features = [col for col in df_processed.columns if col not in non_feature_cols]
+        
+        if len(external_features) >= min_external_features:
+            print(f"✅ '{region}' table has {len(external_features)} external features (>= {min_external_features} required).")
+        else:
+            print(f"⚠️ '{region}' table has only {len(external_features)} external features (< {min_external_features} required). Consider more data sources/features.")
+
+        print(f"📊 {region} table shape: {df_processed.shape}")
+
+print("\n=== End of Data Table Validation ===")
+
+# === CSV Output Block ===
+if results:
+    rows = []
 
     for region, stats in results.items():
-        regions.append(region)
-        forecast_dates.append(stats['forecast_date'])
-        backtest_preds.append(round(stats['backtest_pred'], 2))
-        backtest_actuals.append(round(stats['last_actual'], 2))
-
         try:
-            mae_val = float(stats['mae_4wk_str'].split()[0])  # Extract number from '2.91 Bcf'
-        except:
+            mae_val = float(stats['mae_4wk_str'].split()[0])
+        except (ValueError, IndexError):
             mae_val = np.nan
-        mae_vals.append(mae_val)
 
-    # Build transposed DataFrame
-    transposed_data = pd.DataFrame({
-        'Forecast Date': forecast_dates,
-        'Backtest Predicted': backtest_preds,
-        'Backtest Actual': backtest_actuals,
-        '4-Week MAE (Bcf)': mae_vals
-    }, index=regions).T  # Transpose so metrics become rows
+        rows.append({
+            'Region': region,
+            'Forecast Week': stats['forecast_date'],
+            'Forecast Predicted': round(stats['forecast_pred'], 2),
+            'Backtest Week': stats['backtest_date'],
+            'Backtest Predicted': round(stats['backtest_pred'], 2),
+            'Backtest Actual': round(stats['last_actual'], 2),
+            '4-Week MAE (Bcf)': mae_val
+        })
 
-    # === STEP 2: Save to GOScripts/GOutput ===
+    final_df = pd.DataFrame(rows)
+
     output_dir = project_root / "GOScripts" / "GOutput"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Changed output filename to EIAStoragePred.csv
     output_path = output_dir / "EIAStoragePred.csv"
-    transposed_data.to_csv(output_path)
-    print(f"\n✅ Transposed forecast with MAE saved to: {output_path}")
+    final_df.to_csv(output_path, index=False)
+    print(f"\n✅ Updated EIA forecast with backtest written to: {output_path}")
 else:
-    print("\n⚠️ No forecast data to save in transposed format. The 'results' dictionary is empty.")
+    print("\n⚠️ No forecast data to save. The 'results' dictionary is empty.")
+# === End of CSV Output Block ===
 
-# === Updated Summary Print (Using the 'results' dictionary directly) ===
+# === Updated Summary Print ===
 print("\n=== FULL EIA Storage Forecast (All Sources Integrated) ===\n")
 if results:
     for region_name, row_data in results.items():
@@ -221,4 +797,3 @@ if results:
         print(f"4-Week MAE: {row_data['mae_4wk_str']}\n")
 else:
     print("No results to display in the summary.")
-# === End of Updated Summary Print ===

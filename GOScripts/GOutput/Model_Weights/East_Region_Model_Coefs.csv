@@ -1,0 +1,101 @@
+Feature,Coefficient
+normalized_target,3.5336082247374994
+lag_1,2.046861770936772
+ImpliedStorageChange,1.617428361055625
+East Region_Fundy_Northeast_-_ResCom,-1.534972317896124
+East Region_Fundy_Northeast_-_ResCom_Smoothed_2wk,-1.350273168665008
+lag_3,1.2084418523640816
+HeatingSeason,-1.1915905702908314
+ResComm,-1.1834063904430752
+East Region_Fundy_Northeast_-_Balance,1.1633612472224495
+East Region_Fundy_Northeast_-_Ind,-1.087888672895944
+Total Demand,-1.0371370174004184
+East Region_Fundy_Northeast_-_ResCom_WoW,-0.9895663518940033
+USDemand,-0.9793239351391603
+East Region_Fundy_Northeast_-_Balance_Smoothed_2wk,0.9714300061892202
+East Region_Fundy_Northeast_-_Ind_Smoothed_2wk,-0.9648307793631307
+lag_5,0.9380400937695077
+East Region_Fundy_Northeast_-_Balance_WoW,0.8329822715480472
+LNG Sendout,0.7951376116957319
+East Region_Fundy_Northeast_-_Ind_WoW,-0.7809904183571172
+lag_2,0.7371647833646243
+DryGasProduction,0.7344810030202645
+East Region_Fundy_SouthEast[Oth]_-_ResCom_Smoothed_2wk,-0.7075411936771269
+East Region_Fundy_SouthEast_-_ResCom_Smoothed_2wk,-0.6997522568861302
+East Region_Fundy_SouthEast[Oth]_-_ResCom,-0.690828184034306
+TotalSupply,0.6891726475480539
+East Region_Fundy_SouthEast_-_ResCom,-0.6880057677871073
+East Region_Power_PJM_-_Total_Generation,-0.6755770921761837
+East Region_Power_PJM_-_Total_Generation_Smoothed_2wk,-0.6366328683225827
+index,0.6209220471758795
+East Region_Power_ISONE_-_PeakLoad,-0.5936184450370083
+East Region_Power_ISONE_-_PeakLoad_Smoothed_2wk,-0.5923595087952339
+East Region_Power_NYISO_-_Total_Generation_Smoothed_2wk,-0.5896390612976211
+East Region_Power_NYISO_-_Total_Generation,-0.5847201321233577
+East Region_Fundy_SouthEast[Fl]_-_ResCom,-0.5682246550456203
+East Region_Fundy_Northeast_-_Prod_Smoothed_2wk,-0.5442427776817369
+lag_4,0.5440779381770448
+Industrial,-0.5322217838914367
+PowerBurn,0.5106367997418253
+East Region_Fundy_SouthEast[Fl]_-_ResCom_Smoothed_2wk,-0.5023852643288943
+East Region_Fundy_Northeast_-_Prod,-0.4863879365998387
+East Region_Fundy_Northeast_-_Prod_WoW,0.4776399835088346
+East Region Storage (Bcf)_lag_5,-0.4680848056413729
+Balance,0.4126326043343744
+East Region_Power_ISONE_-_Total_Generation_WoW,-0.39903684578183546
+East Region Storage (Bcf)_lag_4,-0.39514153135688423
+Month,0.3852290754722562
+PipeLoss,-0.3605708969776234
+East Region_Power_NYISO_-_PeakLoad_WoW,-0.35218649359247306
+LNG Feedgas,-0.3474676276469405
+East Region_Fundy_SouthEast_-_Balance_Smoothed_2wk,0.3343246543341673
+East Region_Fundy_SouthEast_-_Balance,0.32483940575288306
+East Region_Fundy_SouthEast[Oth]_-_Ind,-0.3232634082839105
+CoolingSeason,0.3207111125696089
+East Region_Fundy_SouthEast[Fl]_-_ResCom_WoW,-0.31787163540962055
+East Region_Fundy_Northeast_-_Power_Smoothed_2wk,0.31362241155653525
+East Region_Fundy_Northeast_-_Power,0.31185264290825226
+East Region_Fundy_SouthEast[Oth]_-_Ind_Smoothed_2wk,-0.28813650915195105
+Net Imports from Canada,-0.27020831089243397
+East Region_Fundy_SouthEast[Fl]_-_Power_Smoothed_2wk,0.2569865089831073
+East Region_Power_PJM_-_PeakLoad_WoW,-0.2569093926258511
+East Region_Fundy_SouthEast_-_Ind,-0.2500368081019149
+East Region Storage (Bcf)_lag_3,-0.23298411922483614
+East Region_Fundy_SouthEast[Fl]_-_Ind,0.22747407337903752
+East Region_Power_PJM_-_Total_Generation_WoW,-0.22664194098111146
+East Region_Fundy_SouthEast_-_Ind_Smoothed_2wk,-0.22418834628837153
+East Region_Power_NYISO_-_PeakLoad,-0.2201302800213505
+East Region_Fundy_SouthEast[Fl]_-_Power_WoW,-0.21707374778408636
+WeekOfYear,0.21094111699937676
+East Region_Fundy_SouthEast_-_Power_Smoothed_2wk,0.2004613414770592
+East Region_Fundy_SouthEast[Fl]_-_Ind_Smoothed_2wk,0.1978327419418979
+East Region_Fundy_SouthEast_-_Power,0.1952920729766859
+East Region_Fundy_SouthEast[Fl]_-_Power,0.19183158773500714
+East Region_Power_PJM_-_PeakLoad,-0.18469387705112797
+East Region_Fundy_SouthEast[Oth]_-_Ind_WoW,-0.18440832117540923
+East Region_Fundy_SouthEast[Oth]_-_Power_WoW,0.1800970844730388
+East Region_Fundy_SouthEast[Oth]_-_Power,0.17252841232129573
+East Region_Power_ISONE_-_Total_Generation,-0.15126560028735345
+East Region_Fundy_SouthEast_-_Prod_WoW,0.1493955151165155
+East Region Storage (Bcf)_lag_1,0.14078823770718607
+East Region_Fundy_SouthEast_-_Ind_WoW,-0.1359082311072583
+East Region Storage (Bcf)_lag_2,-0.1341160970296832
+East Region_Max_LMP,0.12969638526873978
+East Region_Fundy_SouthEast[Fl]_-_Ind_WoW,0.1262699782386838
+East Region_Power_NYISO_-_PeakLoad_Smoothed_2wk,-0.12294403002644252
+East Region_Fundy_SouthEast[Oth]_-_Power_Smoothed_2wk,0.12196167651976342
+East Region_Power_PJM_-_PeakLoad_Smoothed_2wk,-0.10931124413607367
+East Region_Power_ISONE_-_PeakLoad_WoW,-0.1030829449107514
+East Region_Max_LMP_Smoothed_2wk,0.10060513719625176
+East Region_Max_LMP_WoW,0.09687543305806742
+NetExports to Mexico,-0.0912793188728784
+East Region_Fundy_SouthEast_-_Prod_Smoothed_2wk,-0.07293486131565269
+East Region_Fundy_SouthEast_-_ResCom_WoW,-0.0665591463531747
+NetImportExport,-0.06595714879694947
+East Region_Fundy_SouthEast[Oth]_-_ResCom_WoW,-0.054275453807496474
+East Region_Fundy_SouthEast_-_Prod,-0.04622858405307143
+East Region_Fundy_SouthEast_-_Balance_WoW,0.04349109792972558
+East Region_Fundy_Northeast_-_Power_WoW,0.03600317322603907
+East Region_Power_NYISO_-_Total_Generation_WoW,-0.02746977054026864
+East Region_Power_ISONE_-_Total_Generation_Smoothed_2wk,-0.01884784383204603
+East Region_Fundy_SouthEast_-_Power_WoW,0.005409090719117395

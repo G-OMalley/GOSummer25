@@ -1,0 +1,65 @@
+Feature,Coefficient
+normalized_target,2.330988610205831
+lag_1,1.1408091292837705
+Industrial,-0.6279954754887914
+LNG Feedgas,-0.5284701261303121
+index,0.474362952677593
+ImpliedStorageChange,0.46509316339548534
+PipeLoss,-0.31274413831996534
+Total Demand,-0.2885771868259315
+Mountain Region_Fundy_Rockies[Up]_-_Ind_Smoothed_2wk,0.28636218633859867
+Mountain Region_Fundy_Rockies[SW]_-_ResCom_WoW,-0.2732063954781399
+USDemand,-0.271815114126497
+Mountain Region_Fundy_Rockies[SW]_-_Ind_Smoothed_2wk,-0.25720349337803566
+Mountain Region_Fundy_Rockies_-_Ind_Smoothed_2wk,0.24885876146656835
+NetExports to Mexico,0.24469382452348992
+Mountain Region_Fundy_Rockies[Up]_-_Ind,0.2336726727257424
+DryGasProduction,0.2250802571244211
+Mountain Region_Fundy_Rockies[SW]_-_Ind,-0.22086884290606545
+TotalSupply,0.21947990300832976
+Mountain Region_Fundy_Rockies_-_Ind,0.20389739485669395
+Mountain Region_Fundy_Rockies[Up]_-_Ind_WoW,-0.1960919579288158
+lag_4,0.19187023657723085
+HeatingSeason,0.19027883659430453
+CoolingSeason,0.18836011995837493
+Mountain Region_Fundy_Rockies[Up]_-_Power_WoW,0.1834379057752595
+Mountain Region_Fundy_Rockies[Up]_-_ResCom,-0.18310735927569874
+Mountain Region_Fundy_Rockies[Up]_-_ResCom_Smoothed_2wk,-0.17968895565003362
+Mountain Region_Fundy_Rockies_-_ResCom,-0.1716161667829036
+Mountain Region_Fundy_Rockies_-_Ind_WoW,-0.1697224955191837
+Mountain Region_Fundy_Rockies_-_Prod_WoW,0.16934656039507434
+Mountain Region_Fundy_Rockies_-_ResCom_Smoothed_2wk,-0.15797839858831092
+Mountain Region_Fundy_Rockies[SW]_-_Power_WoW,-0.15676154908673504
+PowerBurn,-0.14143420261120437
+Mountain Region_Fundy_Rockies_-_Balance_WoW,0.14098188970231892
+NetImportExport,-0.13977939992924304
+Mountain Region_Fundy_Rockies[SW]_-_Ind_WoW,0.13418349524311568
+Balance,0.11829297102424828
+Mountain Region Storage (Bcf)_lag_5,-0.1162575942211274
+lag_5,-0.11384059295839637
+Mountain Region_Fundy_Rockies[SW]_-_ResCom,-0.11005279865989784
+Mountain Region_Fundy_Rockies_-_Power_WoW,-0.1039440525542595
+lag_2,0.09909130085494665
+Mountain Region Storage (Bcf)_lag_3,-0.09729067793902077
+Mountain Region_Fundy_Rockies_-_Balance,0.09543266954377978
+Mountain Region Storage (Bcf)_lag_4,-0.09515131973242279
+LNG Sendout,-0.08782235679575053
+Mountain Region Storage (Bcf)_lag_2,-0.08637746608784838
+Mountain Region_Fundy_Rockies_-_Prod_Smoothed_2wk,-0.07690729667571558
+Mountain Region_Fundy_Rockies_-_ResCom_WoW,-0.07384711569537948
+Mountain Region_Fundy_Rockies_-_Balance_Smoothed_2wk,0.05921360683345969
+Mountain Region_Fundy_Rockies[SW]_-_ResCom_Smoothed_2wk,-0.052650261111253184
+Mountain Region_Fundy_Rockies_-_Prod,-0.04492969207569974
+Mountain Region Storage (Bcf)_lag_1,0.03962855484227862
+Mountain Region_Fundy_Rockies[Up]_-_ResCom_WoW,-0.03415940345259574
+Net Imports from Canada,0.033676109312847056
+Mountain Region_Fundy_Rockies[Up]_-_Power_Smoothed_2wk,-0.031877442064303665
+WeekOfYear,-0.030002514297697718
+Mountain Region_Fundy_Rockies[SW]_-_Power,-0.023819977612144612
+Mountain Region_Fundy_Rockies_-_Power_Smoothed_2wk,0.022353214842825375
+lag_3,-0.018602117833499097
+Mountain Region_Fundy_Rockies[Up]_-_Power,0.01668674434087568
+Month,-0.012569982703688767
+Mountain Region_Fundy_Rockies[SW]_-_Power_Smoothed_2wk,0.006575878320860094
+Mountain Region_Fundy_Rockies_-_Power,0.0018667835808365806
+ResComm,-0.0003513963769598708
