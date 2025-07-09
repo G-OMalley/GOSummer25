@@ -1,1443 +1,480 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
+from sklearn.linear_model import RidgeCV, LassoCV
+from sklearn.metrics import mean_absolute_error
 from datetime import datetime, timedelta
-from collections import defaultdict
-import ast # Required for ast.literal_eval in load_clean_df
-import matplotlib.pyplot as plt # Added import, though not used in backtest itself, good to keep if needed
-import joblib # Added import, though not used in backtest itself, good to keep if needed
-import random # Added as it was in the initial script content, though not directly used in the provided snippet
-import csv # Added as it was in the initial script content, though not directly used in the provided snippet
+from sklearn.preprocessing import StandardScaler
+import json
 
-# --- Configuration ---
-# Define the path for the output CSV file
-# This is now just the filename, the directory will be specified when constructing the full path
-OUTPUT_CSV_FILENAME = 'backtest_results.csv'
+# --- Data Loading ---
+data_folder_name = "INFO"
 
-# --- Path Setup ---
-# Determine the directory where this script is located
-script_dir = Path(__file__).resolve().parent
-# Assume project root is one level up from the script directory
-project_root = script_dir.parent
-# Define the primary INFO folder
-data_folder = project_root / "INFO"
-# Define the GOScripts folder
-goscripts_folder = project_root / "GOScripts"
+# Load primary datasets
+try:
+    eia_changes = pd.read_csv(f"{data_folder_name}/EIAchanges.csv", parse_dates=["Period"]).set_index("Period")
+    eia_totals = pd.read_csv(f"{data_folder_name}/EIAtotals.csv", parse_dates=["Period"]).set_index("Period")
+    weather = pd.read_csv(f"{data_folder_name}/WEATHER.csv", parse_dates=["Date"])
+    fundy = pd.read_csv(f"{data_folder_name}/Fundy.csv", parse_dates=["Date"])
+    criterion_df = pd.read_csv(f"{data_folder_name}/CriterionStorageChange.csv", parse_dates=["eff_gas_day"])
+    locs_df = pd.read_csv(f"{data_folder_name}/locs_list.csv").drop_duplicates(subset="storage_name")
+except FileNotFoundError as e:
+    print(f"Error loading file: {e}. Please ensure all CSV files are uploaded and located in the '{data_folder_name}' folder.")
+    exit()
+except Exception as e:
+    print(f"Data loading error: {e}")
+    exit()
 
-# Ensure these directories exist for data loading
-data_folder.mkdir(parents=True, exist_ok=True)
-goscripts_folder.mkdir(parents=True, exist_ok=True)
-# Specific subfolder for Natural_Gas_Data_Positioning.csv and now for backtest_results.csv
-goscripts_info_folder = goscripts_folder / "INFO"
-goscripts_info_folder.mkdir(parents=True, exist_ok=True) # Ensure this specific subfolder exists
+# === Region-specific feature toggles ===
+REGION_FEATURE_TOGGLES = {
+    'Lower 48 States': {'use_criterion': False, 'enhance_weather': True, 'model_type': 'Lasso'},
+    'East Region': {'use_criterion': False, 'enhance_weather': False, 'model_type': 'Ridge'},
+    'Midwest Region': {'use_criterion': True, 'enhance_weather': True, 'model_type': 'Ridge'},
+    'South Central Region': {'use_criterion': False, 'enhance_weather': False, 'model_type': 'Lasso'},
+    'Mountain Region': {'use_criterion': False, 'enhance_weather': True, 'model_type': 'Lasso'},
+    'Pacific Region': {'use_criterion': True, 'enhance_weather': False, 'model_type': 'Ridge'}
+}
+# === END Region-specific feature toggles ===
 
-print(f"Data folder resolved to: {data_folder.resolve()}")
-print(f"GOScripts folder resolved to: {goscripts_folder.resolve()}")
-print(f"GOScripts INFO folder resolved to: {goscripts_info_folder.resolve()}")
-
-
-# Standard base temperature for CDD/HDD in natural gas markets
-BASE_TEMP_CDD_HDD = 65
-
-# --- City Name Standardization Map ---
-CITY_STANDARDIZATION_MAP = {
-    'JFK NY': 'John F. Kennedy NY',
-    'Houston IAH TX': 'Houston TX',
-    'Ok. City OK': 'Oklahoma City OK',
-    'Chicago OHare IL': 'Chicago IL',
-    'Washington DC': 'Washington National DC',
-    'Ral-Durham NC': 'Raleigh/Durham NC',
-    'Atlanta GA': 'Atlanta GA',
-    'Boston MA': 'Boston MA',
-    'Buffalo NY': 'Buffalo NY',
-    'Denver CO': 'Denver CO',
-    'Detroit MI': 'Detroit IL',
-    'Los Angeles CA': 'Los Angeles CA',
-    'Little Rock AR': 'Little Rock AR',
-    'New Orleans LA': 'New Orleans LA',
-    'Philadelphia PA': 'Philadelphia PA',
-    'Pittsburgh PA': 'Pittsburgh PA',
-    'Seattle WA': 'Seattle WA',
-    'San Francisco CA': 'San Francisco CA',
-    'Tampa FL': 'Tampa FL',
+# --- State to Region Mapping ---
+state_to_region = {
+    "Maine": "East Region", "New Hampshire": "East Region", "New York": "East Region", "New Jersey": "East Region",
+    "Massachusetts": "East Region", "Rhode Island": "East Region", "Connecticut": "East Region", "Pennsylvania": "East Region",
+    "Ohio": "East Region", "West Virginia": "East Region", "Delaware": "East Region", "Maryland": "East Region",
+    "Virginia": "East Region", "North Carolina": "East Region", "South Carolina": "East Region",
+    "Georgia": "East Region", "Florida": "East Region",
+    "Illinois": "Midwest Region", "Indiana": "Midwest Region", "Michigan": "Midwest Region", "Wisconsin": "Midwest Region",
+    "Minnesota": "Midwest Region", "Iowa": "Midwest Region", "Missouri": "Midwest Region", "North Dakota": "Midwest Region",
+    "South Dakota": "South Dakota", "Nebraska": "Midwest Region", "Kansas": "Midwest Region",
+    "Texas": "South Central Region", "Oklahoma": "South Central Region", "Louisiana": "South Central Region",
+    "Arkansas": "South Central Region", "Mississippi": "South Central Region", "Alabama": "South Central Region",
+    "Tennessee": "South Central Region", "Kentucky": "South Central Region",
+    "Colorado": "Mountain Region", "Utah": "Mountain Region", "New Mexico": "New Mexico", "Arizona": "Mountain Region", # Corrected New Mexico
+    "Montana": "Mountain Region", "Idaho": "Mountain Region", "Wyoming": "Mountain Region", "Nevada": "Mountain Region",
+    "California": "Pacific Region", "Oregon": "Pacific Region", "Washington": "Pacific Region",
+    "Alaska": "Pacific Region", "Hawaii": "Pacific Region"
 }
 
-def standardize_city_name(city_name):
-    """Applies a common standardization (strip) and then uses the hardcoded map."""
-    city_name = str(city_name).strip()
-    return CITY_STANDARDIZATION_MAP.get(city_name, city_name)
+# --- Preprocess Criterion Data ---
+print("Preprocessing Criterion data...")
+criterion_merged = criterion_df.merge(locs_df, on="storage_name", how="left")
+criterion_merged = criterion_merged.dropna(subset=["state_name", "storage_name"])
+criterion_merged["Region"] = criterion_merged["state_name"].map(state_to_region)
+criterion_merged = criterion_merged.dropna(subset=["Region"])
+criterion_merged.set_index("eff_gas_day", inplace=True)
 
-# --- Hardcoded Component to City Mapping ---
-COMPONENT_TO_CITY_MAP_HARDCODED = {
-    'AGT-CG (non-G)': 'John F. Kennedy NY',
-    'ANR-SE-T': 'Houston TX',
-    'ANR-SW': 'Oklahoma City OK',
-    'APC-ACE': 'Chicago IL',
-    'CG-Mainline': 'New Orleans LA',
-    'CG-Onshore': 'New Orleans LA',
-    'Carthage': 'Oklahoma City OK',
-    'Chicago': 'Chicago IL',
-    'Dracut': 'Boston MA',
-    'Eastern Gas-South': 'Pittsburgh PA',
-    'FGT-Z3': 'Tampa FL',
-    'HSC-HPL Pool': 'Houston TX',
-    'Henry': 'Henry Hub',
-    'Iroquois (into)': 'Buffalo NY',
-    'Iroquois-Z2': 'John F. Kennedy NY',
-    'Leidy-Transco': 'Philadelphia PA',
-    'Michcon': 'Detroit IL',
-    'NBPL-Vector': 'Chicago IL',
-    'NGPL-Midcont Pool': 'Oklahoma City OK',
-    'NGPL-STX': 'Houston TX',
-    'NGPL-TXOK East': 'Houston TX',
-    'NNG-Demarc': 'Chicago IL',
-    'NNG-Ventura': 'Chicago IL',
-    'Panhandle': 'Oklahoma City OK',
-    'Pine Prairie': 'Atlanta GA',
-    'REX E-NGPL': 'Chicago IL',
-    'REX-Z3 (receipt)': 'Philadelphia PA',
-    'Sonat-Z0 South': 'Atlanta GA',
-    'TCO': 'Pittsburgh PA',
-    'TETCO-ELA': 'Houston TX',
-    'TETCO-M2 (receipt)': 'Pittsburgh PA',
-    'TETCO-M3': 'John F. Kennedy NY',
-    'TETCO-STX': 'Houston TX',
-    'TETCO-WLA': 'Houston TX',
-    'TGP-500L': 'Houston TX',
-    'TGP-800L': 'Houston TX',
-    'TGP-Z0 South': 'Houston TX',
-    'TGP-Z1 100L': 'Houston TX',
-    'TGP-Z1 Sta-87': 'Houston TX',
-    'TGP-Z4 Marcellus': 'Pittsburgh PA',
-    'TGP-Z4 Sta-219': 'Pittsburgh PA',
-    'TGP-Z4 Sta-313': 'Pittsburgh PA',
-    'TGT-Mainline': 'Houston TX',
-    'Transco Zn3': 'Atlanta GA',
-    'Transco-165': 'Raleigh/Durham NC',
-    'Transco-30': 'Houston TX',
-    'Transco-45': 'Atlanta GA',
-    'Transco-65': 'Atlanta GA',
-    'Transco-85': 'Atlanta GA',
-    'Transco-Z5 South': 'Washington National DC',
-    'Transco-Z6 (NY)': 'John F. Kennedy NY',
-    'Transco-Z6 (non-NY north)': 'Philadelphia PA',
-    'Transco-Z6 (non-NY)': 'Philadelphia PA',
-    'Transco-Z6 Sta-210': 'Philadelphia PA',
-    'Trunkline-Z1A': 'Houston TX',
-    'Union-Dawn': 'Buffalo NY',
-    'Waha': 'Waha',
+criterion_weekly = (
+    criterion_merged.groupby([pd.Grouper(freq="W-FRI"), "Region"])['daily_storage_change']
+    .sum()
+    .unstack("Region")
+    .rename(columns=lambda r: f"CriterionChange_{r.replace(' ', '')}")
+)
+criterion_weekly.index.name = 'Period'
+print("Criterion data preprocessed.")
+
+
+# --- Region Mapping ---
+REGION_COLUMNS = {
+    "Lower 48 States": "Lower 48 States Storage Change (Bcf)",
+    "East Region": "East Region Storage Change (Bcf)",
+    "Midwest Region": "Midwest Region Storage Change (Bcf)",
+    "South Central Region": "South Central Region Storage Change (Bcf)",
+    "Mountain Region": "Mountain Region Storage Change (Bcf)",
+    "Pacific Region": "Pacific Region Storage Change (Bcf)",
 }
 
-# --- Region and City Mappings for Storage and Weather ---
-EAST_CITIES = [
-    "Boston MA", "Buffalo NY", "John F. Kennedy NY",
-    "Philadelphia PA", "Pittsburgh PA", "Washington National DC",
-    "Raleigh/Durham NC"
-]
-
-MIDWEST_CITIES = [
-    "Chicago IL", "Detroit IL"
-]
-
-SALT_SC_CITIES = [
-    "Houston TX", "New Orleans LA"
-]
-
-NONSALT_SC_CITIES = [
-    "Little Rock AR", "Oklahoma City OK", "Atlanta GA"
-]
-
-SOUTH_CENTRAL_CITIES = SALT_SC_CITIES + NONSALT_SC_CITIES
-
-PACIFIC_CITIES = [
-    "Los Angeles CA", "San Francisco CA", "Seattle WA"
-]
-
-MOUNTAIN_CITIES = [
-    "Denver CO"
-]
-
-ALL_CITIES = sorted(list(set(
-    EAST_CITIES + MIDWEST_CITIES + SOUTH_CENTRAL_CITIES + PACIFIC_CITIES + MOUNTAIN_CITIES
-)))
-
-WEATHER_REGION_CITY_MAP = {
-    "East Region Storage (Bcf)": EAST_CITIES,
-    "Midwest Region Storage (Bcf)": MIDWEST_CITIES,
-    "Salt Region SC Storage (Bcf)": SALT_SC_CITIES,
-    "Nonsalt Region SC Storage (Bcf)": NONSALT_SC_CITIES,
-    "South Central Region Storage (Bcf)": SOUTH_CENTRAL_CITIES,
-    "Pacific Region Storage (Bcf)": PACIFIC_CITIES,
-    "Mountain Region Storage (Bcf)": MOUNTAIN_CITIES,
-    "Lower 48 States Storage (Bcf)": ALL_CITIES
+REGION_CITY = {
+    "Lower 48 States": "Conus",
+    "East Region": "Boston",
+    "Midwest Region": "Chicago OHare",
+    "South Central Region": "Houston IAH",
+    "Mountain Region": "Denver",
+    "Pacific Region": "Los Angeles",
 }
 
-region_map = {
-    "Lower 48 States Storage (Bcf)": "lower_48_states_storage",
-    "East Region Storage (Bcf)": "east_region_storage",
-    "Midwest Region Storage (Bcf)": "midwest_region_storage",
-    "South Central Region Storage (Bcf)": "south_central_region_storage",
-    "Salt Region SC Storage (Bcf)": "salt_region_sc_storage",
-    "Nonsalt Region SC Storage (Bcf)": "nonsalt_region_sc_storage",
-    "Mountain Region Storage (Bcf)": "mountain_region_storage",
-    "Pacific Region Storage (Bcf)": "pacific_region_storage"
-}
+# --- Preprocessing Fundy Data ---
+print("Preprocessing Fundy data...")
+fundy_pivoted = fundy.pivot_table(index='Date', columns='item', values='value')
+fundy_weekly_resampled = fundy_pivoted.resample('W-FRI').sum()
+fundy_weekly_resampled.index.name = 'Period'
+print("Fundy data preprocessed.")
 
-files = {
-    "eia_totals": "EIAtotals.csv",
-    "eia_changes": "EIAchanges.csv",
-    "weather": "WEATHER.csv",
-    "prices": "PRICES.csv",
-    "fundy": "Fundy.csv",
-    "forecast": "FundyForecast.csv",
-    "criterion_storage_change": "CriterionStorageChange.csv",
-    "criterion_nuclear_hist": "criterionnuclearhist.csv",
-    "plant_group_mapping": "Plant_Group_Mapping.csv",
-    "lng_hist": "CriterionLNGHist.csv",
-    "natural_gas_data_positioning": "Natural_Gas_Data_Positioning.csv"
-}
+# --- Preprocessing Weather Data ---
+print("Preprocessing Weather data...")
+unique_weather_cities = weather['City Title'].unique()
+print(f"Cities found in WEATHER.csv: {', '.join(unique_weather_cities)}")
 
-HENRY_HUB_NAME = 'Henry'
+weather_weekly_list = []
+for city in unique_weather_cities:
+    city_weather = weather[weather['City Title'] == city].copy()
+    city_weather = city_weather.set_index('Date')
+    
+    weekly_data = city_weather[['Avg Temp', 'CDD', 'HDD', 'Daily Precip Amount']].resample('W-FRI').agg({
+        'Avg Temp': 'mean',
+        'CDD': 'sum',
+        'HDD': 'sum',
+        'Daily Precip Amount': 'sum'
+    })
+    weekly_data.columns = [f"{city}_{col.replace(' ', '')}" for col in weekly_data.columns]
+    weather_weekly_list.append(weekly_data)
 
-# --- Data Loading and Cleaning ---
-def load_clean_df(file_key, fname, data_path):
-    fpath = data_path / fname
-    if not fpath.exists():
-        print(f"❌ Error: Required file '{fname}' not found at {fpath}. Skipping this file.")
-        return None
-    try:
-        if file_key == "lng_hist":
-            df = pd.read_csv(fpath)
-            df = df.rename(columns={
-                'Date': 'date',
-                'Flow_MMcfd': 'flow_mmcfd',
-                'Value': 'flow_mmcfd'
-            })
-            if 'date' in df.columns:
-                df['date'] = pd.to_datetime(df['date'], errors='coerce')
-            if 'flow_mmcfd' in df.columns:
-                df['flow_mmcfd'] = pd.to_numeric(df['flow_mmcfd'], errors='coerce')
-            return df
+weather_weekly_df = pd.concat(weather_weekly_list, axis=1)
+weather_weekly_df.index.name = 'Period'
 
-        elif file_key == "natural_gas_data_positioning":
-            df = pd.read_csv(fpath)
-            df = df.rename(columns={
-                'Report Date': 'date',
-                'Money Long': 'money_long', # These might not be present if "Managed Money" is net
-                'Money Short': 'money_short', # These might not be present if "Managed Money" is net
-                'Managed Money': 'managed_money_net' # Use this if it represents the net position directly
-            })
-            if 'date' in df.columns:
-                df['date'] = pd.to_datetime(df['date'], errors='coerce')
-            if 'money_long' in df.columns:
-                df['money_long'] = pd.to_numeric(df['money_long'], errors='coerce')
-            if 'money_short' in df.columns:
-                df['money_short'] = pd.to_numeric(df['money_short'], errors='coerce')
-            if 'managed_money_net' in df.columns:
-                df['managed_money_net'] = pd.to_numeric(df['managed_money_net'], errors='coerce')
-            return df
+print("Aggregating all city weather data for 'Lower 48 States' (Conus)...")
+conus_weather = weather.set_index('Date')
+conus_weather_weekly = conus_weather[['Avg Temp', 'CDD', 'HDD', 'Daily Precip Amount']].resample('W-FRI').agg({
+    'Avg Temp': 'mean',
+    'CDD': 'sum',
+    'HDD': 'sum',
+    'Daily Precip Amount': 'sum'
+})
+conus_weather_weekly.columns = [f"Conus_{col.replace(' ', '')}" for col in conus_weather_weekly.columns]
+weather_weekly_df = weather_weekly_df.join(conus_weather_weekly, how='outer')
+print("Weather data preprocessed.")
 
-        df = pd.read_csv(fpath)
-    except Exception as e:
-        print(f"❌ Error reading CSV file '{fname}' at {fpath}: {e}. Skipping this file.")
-        return None
+# --- Prepare output storage ---
+results = []
 
-    if file_key in ["eia_totals", "eia_changes"]:
-        df.columns = df.columns.str.lower().str.replace(" (bcf)", "", regex=False).str.replace(" ", "_").str.replace(":", "").str.strip()
-        if "period" in df.columns:
-            df["period"] = pd.to_datetime(df["period"], errors="coerce")
-    elif file_key == "weather":
-        df.columns = df.columns.str.strip()
-        if 'Date' in df.columns:
-            df = df.rename(columns={'Date': 'date'})
-            df['date'] = pd.to_datetime(df['date'], errors='coerce')
-        if 'City Title' in df.columns:
-            df = df.rename(columns={'City Title': 'city_title'})
-            df['city_title'] = df['city_title'].astype(str).apply(standardize_city_name)
-        if 'Avg Temp' in df.columns:
-            df = df.rename(columns={'Avg Temp': 'avg_temp'})
-        if 'avg_temp' in df.columns:
-            df['avg_temp'] = pd.to_numeric(df['avg_temp'], errors='coerce')
-    elif file_key == "prices":
-        df.columns = df.columns.str.strip()
-        if 'Date' in df.columns:
-            df = df.rename(columns={'Date': 'date'})
-            df['date'] = pd.to_datetime(df['date'], errors='coerce')
+# --- Main loop for each region ---
+for region, col in REGION_COLUMNS.items():
+    print(f"\n==== EIA STORAGE FORECAST + BACKTEST ====\nRegion: {region}")
 
-        henry_col_found = False
-        potential_henry_cols = [col for col in df.columns if 'Henry Hub' in col or 'Henry' == col]
-        if HENRY_HUB_NAME in potential_henry_cols:
-            df = df.rename(columns={HENRY_HUB_NAME: 'henry'})
-            henry_col_found = True
-        elif potential_henry_cols:
-            df = df.rename(columns={potential_henry_cols[0]: 'henry'})
-            henry_col_found = True
+    # Get region-specific toggles
+    toggles = REGION_FEATURE_TOGGLES.get(region, {})
+    use_criterion = toggles.get("use_criterion", False)
+    enhance_weather = toggles.get("enhance_weather", False)
+    model_type = toggles.get("model_type", "Lasso") # Default to Lasso
 
-        if henry_col_found:
-            df['henry'] = pd.to_numeric(df['henry'], errors='coerce')
-    elif file_key in ["fundy", "forecast"]:
-        df.columns = df.columns.str.strip()
-        if 'Date' in df.columns:
-            df['Date'] = pd.to_datetime(df['Date'], errors="coerce")
-    elif file_key == "criterion_storage_change":
-        df.columns = df.columns.str.strip()
-        if 'eff_gas_day' in df.columns:
-            df['eff_gas_day'] = pd.to_datetime(df['eff_gas_day'], errors="coerce")
-        if 'daily_storage_change' in df.columns:
-            df['daily_storage_change'] = pd.to_numeric(df['daily_storage_change'], errors="coerce")
-            df_cleaned = pd.DataFrame()
-            if not df.empty:
-                for (storage_name, year), group in df.groupby([df['storage_name'], df['eff_gas_day'].dt.year]):
-                    group = group.copy()
-                    if not group['daily_storage_change'].dropna().empty:
-                        min_val_group_year = group['daily_storage_change'].min()
-                        group['daily_storage_change'] = group['daily_storage_change'] - min_val_group_year
-                    df_cleaned = pd.concat([df_cleaned, group])
-                df = df_cleaned.sort_values(by=['storage_name', 'eff_gas_day']).reset_index(drop=True)
-            current_year = datetime.now().year
-            df = df[df['eff_gas_day'].dt.year == 2025].copy()
-    elif file_key in ["criterion_nuclear_hist", "nuclear_forecast"]:
-        df.columns = df.columns.str.strip()
-        if 'Date' in df.columns:
-            df = df.rename(columns={'Date': 'date'})
-            df['date'] = pd.to_datetime(df['date'], errors='coerce')
-        if 'Value' in df.columns:
-            df = df.rename(columns={'Value': 'mw_generated'})
-        elif 'value' in df.columns:
-            df = df.rename(columns={'value': 'mw_generated'})
-        else:
-            return None
-        if 'mw_generated' in df.columns:
-            df['mw_generated'] = pd.to_numeric(df['mw_generated'], errors='coerce')
-        if 'Type' in df.columns:
-            df['type'] = df['Type'].str.strip()
-        if 'Item' in df.columns:
-            df['item'] = df['Item'].str.strip()
-        elif 'item' not in df.columns:
-            df['item'] = 'Unknown Nuclear Plant'
-    elif file_key == "plant_group_mapping":
-        df.columns = df.columns.str.strip()
-        if 'Units' in df.columns and 'Group' in df.columns:
-            try:
-                df["Units"] = df["Units"].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
-                df["Units"] = df["Units"].apply(lambda x: x if isinstance(x, list) else [x])
-            except (ValueError, SyntaxError) as e:
-                print(f"⚠️ Warning: Could not parse 'Units' column in '{fname}'. Ensure it contains valid list-like strings. Error: {e}")
-                return None
-        else:
-            return None
-    return df
+    print(f"    ▶️ Use Criterion? {use_criterion}")
+    print(f"    ▶️ Enhance Weather? {enhance_weather}")
+    print(f"    ▶️ Model Type: {model_type}")
 
-# --- Simplified Storage Position Calculation (with std_dev for Z-score) ---
-def get_storage_position(display_name, internal_column_name, raw_data, eia_report_date):
-    """Calculates storage position relative to 5-year average and standard deviation for a given region."""
-    merged = pd.DataFrame()
-    if "eia_totals" in raw_data and "eia_changes" in raw_data:
-        merged = pd.merge(raw_data["eia_totals"], raw_data["eia_changes"], on="period", how="outer")
-        merged = merged.sort_values("period")
+    if col not in eia_changes.columns:
+        print(f"❌ Skipping {region}, target column not found in EIAchanges.csv: {col}")
+        continue
+
+    df = pd.DataFrame()
+    df["Target"] = eia_changes[col]
+
+    total_col = col.replace("Storage Change", "Storage")
+    if total_col in eia_totals.columns:
+        df = df.join(eia_totals[[total_col]], how="left")
+        df.rename(columns={total_col: "StorageTotal"}, inplace=True)
     else:
-        return None # Return None if essential data is missing
+        print(f"⚠️ Missing total storage data for {region} ({total_col}). Skipping region.")
+        continue
 
-    if internal_column_name not in merged.columns:
-        return None
+    fundy_region_items = []
+    if region == "Lower 48 States":
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('CONUS -')]
+    elif region == "East Region":
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('Northeast -')]
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('SouthEast -')])
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('SouthEast[Fl] -')])
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('SouthEast[Oth] -')])
+    elif region == "Midwest Region":
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('Midwest -')]
+    elif region == "South Central Region":
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('SouthCentral -')]
+    elif region == "Mountain Region":
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('Rockies -')]
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('Rockies[SW] -')])
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('Rockies[Up] -')])
+    elif region == "Pacific Region":
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('West -')]
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('West[CA] -')])
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('West[PNW] -')])
+    
+    if fundy_region_items:
+        df = df.join(fundy_weekly_resampled[fundy_region_items], how="left")
+    else:
+        print(f"⚠️ No matching Fundy data items found for {region}. Skipping Fundy features.")
 
-    df_for_latest = merged.dropna(subset=[internal_column_name])
-    if df_for_latest.empty:
-        return None
+    city_for_weather = REGION_CITY.get(region)
+    weather_cols_prefix = f"{city_for_weather}_"
 
-    latest_valid_row_series = df_for_latest.iloc[-1]
-    current_storage_value = latest_valid_row_series.get(internal_column_name)
+    weather_features_for_region = [col for col in weather_weekly_df.columns if col.startswith(weather_cols_prefix)]
+    
+    if not weather_features_for_region:
+        print(f"❌ Skipping {region}, weather data not found for city/conus: {city_for_weather}")
+        continue
 
-    storage_position_bcf_val = None
-    std_dev_bcf_val = None
+    df = df.join(weather_weekly_df[weather_features_for_region], how="left")
 
-    if pd.notna(current_storage_value):
-        current_storage = round(current_storage_value, 1)
-        current_week = latest_valid_row_series["period"].isocalendar().week
-        historical_data_for_week = merged[
-            (merged["period"].dt.isocalendar().week == current_week) &
-            (merged["period"].dt.year < datetime.now().year)
-        ]
+    new_weather_cols = {col: col.replace(weather_cols_prefix, "") for col in weather_features_for_region}
+    df.rename(columns=new_weather_cols, inplace=True)
 
-        min_years_for_avg = 5
-        num_historical_years = historical_data_for_week["period"].dt.year.nunique()
+    base_weather_cols = ["AvgTemp", "CDD", "HDD", "DailyPrecipAmount"]
+    for temp_col in base_weather_cols:
+        if temp_col in df.columns:
+            df[f"{temp_col}_roll3"] = df[temp_col].rolling(3).mean()
+        else:
+            print(f"Warning: Base weather column '{temp_col}' not found for rolling feature creation in {region}.")
 
-        if num_historical_years >= min_years_for_avg:
-            mean_bcf_for_week = historical_data_for_week[internal_column_name].mean()
-            std_bcf_for_week = historical_data_for_week[internal_column_name].std()
+    # === Conditional Enhanced Weather Features ===
+    if enhance_weather:
+        print(f"🌦️ Enhancing weather features for {region}")
+        for feature in ["CDD", "HDD"]:
+            if feature in df.columns:
+                df[f"{feature}_lag1"] = df[feature].shift(1)
+                df[f"{feature}_delta5yr"] = df[feature] - df[feature].rolling(window=260, min_periods=1).mean()
+            else:
+                print(f"⚠️ Skipped enhanced weather for {feature} in {region} – not found.")
+    else:
+        print(f"🌤️ Using standard weather for {region}")
 
-            if pd.notna(mean_bcf_for_week):
-                five_year_avg = round(mean_bcf_for_week, 1)
-                storage_position_bcf_val = current_storage - five_year_avg
-                if pd.notna(std_bcf_for_week):
-                    std_dev_bcf_val = std_bcf_for_week
+    # === Conditional Criterion Data Merge ===
+    criterion_col_name = f"CriterionChange_{region.replace(' ', '')}"
+    if use_criterion:
+        try:
+            if criterion_col_name in criterion_weekly.columns:
+                print(f"✅ Adding Criterion data for {region} ({criterion_col_name})")
+                df = df.join(criterion_weekly[[criterion_col_name]], how="left")
+            else:
+                print(f"⚠️ Criterion column '{criterion_col_name}' not found for {region} — skipping merge.")
+        except Exception as e:
+            print(f"❌ Error merging Criterion for {region}: {e}")
+    else:
+        print(f"⏩ Skipping Criterion data for {region} as per model tuning.")
 
-    return {
-        "storage_position_bcf": storage_position_bcf_val,
-        "std_dev_bcf": std_dev_bcf_val,
-        "display_name": display_name
+    # --- Create a Custom Feature: Rolling Injection Size ---
+    df["Target_roll3"] = df["Target"].rolling(window=3, min_periods=1).mean().shift(1) 
+
+    initial_rows = len(df)
+    df.dropna(inplace=True)
+    if len(df) < initial_rows:
+        print(f"Dropped {initial_rows - len(df)} rows due to NaN values for {region}.")
+
+    latest_training_data_date = df.index.max()
+    cutoff_date = latest_training_data_date - timedelta(days=5 * 365)
+
+    df_train = df[df.index >= cutoff_date].copy()
+
+    if len(df_train) < 10:
+        print(f"⚠️ Not enough usable data for {region} after 5-year cutoff. Records: {len(df_train)}. Skipping region.")
+        continue
+
+    features = df_train.drop(columns="Target")
+    target = df_train["Target"]
+
+    if features.empty:
+        print(f"❌ Skipping {region}, features DataFrame is empty after preprocessing.")
+        continue
+    
+    features = features.loc[:, (features != features.iloc[0]).any()]
+    if features.empty:
+        print(f"❌ Skipping {region}, all features are constant after filtering. Cannot train model.")
+        continue
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(features)
+    X_scaled_df = pd.DataFrame(X_scaled, columns=features.columns, index=features.index)
+    print(f"✅ Features standardized for {region}.")
+
+    # --- Model Selection ---
+    if model_type == "Lasso":
+        model = LassoCV(alphas=[0.01, 0.1, 1.0, 10.0], max_iter=10000, random_state=42)
+    elif model_type == "Ridge":
+        model = RidgeCV(alphas=[0.1, 1.0, 10.0])
+    else:
+        raise ValueError(f"Unknown model type: {model_type}")
+    
+    print(f"Using {type(model).__name__} for {region}.")
+    model.fit(X_scaled_df, target)
+
+    forecast_date = eia_changes.index.max() + timedelta(days=7)
+
+    forecast_features_dict = {}
+    
+    if total_col in eia_totals.columns:
+        forecast_features_dict["StorageTotal"] = eia_totals[total_col].iloc[-1]
+    else:
+        forecast_features_dict["StorageTotal"] = 0
+
+    for f_item in fundy_region_items:
+        if f_item in fundy_weekly_resampled.columns and not fundy_weekly_resampled[f_item].empty:
+            forecast_features_dict[f_item] = fundy_weekly_resampled[f_item].iloc[-1]
+        else:
+            forecast_features_dict[f_item] = 0 
+
+    for w_col_base in base_weather_cols:
+        actual_weather_col_name = f"Conus_{w_col_base}" if city_for_weather == "Conus" else f"{city_for_weather}_{w_col_base}"
+        
+        if actual_weather_col_name in weather_weekly_df.columns and not weather_weekly_df[actual_weather_col_name].empty:
+            forecast_features_dict[w_col_base] = weather_weekly_df[actual_weather_col_name].iloc[-1]
+        else:
+            forecast_features_dict[w_col_base] = 0
+
+        rolling_col_name = f"{w_col_base}_roll3"
+        if rolling_col_name in df.columns and not df[rolling_col_name].empty:
+            forecast_features_dict[rolling_col_name] = df[rolling_col_name].iloc[-1]
+        else:
+            forecast_features_dict[rolling_col_name] = 0
+
+    # === Forecast Enhanced Weather Features (Conditional) ===
+    if enhance_weather:
+        for feature in ["CDD", "HDD"]:
+            if feature in df.columns:
+                forecast_features_dict[f"{feature}_lag1"] = df[feature].iloc[-1]
+                
+                delta_col_name = f"{feature}_delta5yr"
+                last_5yr_roll_mean = df[feature].rolling(window=260, min_periods=1).mean().iloc[-1]
+                forecast_features_dict[delta_col_name] = df[feature].iloc[-1] - last_5yr_roll_mean
+            else:
+                forecast_features_dict[f"{feature}_lag1"] = 0
+                forecast_features_dict[f"{feature}_delta5yr"] = 0
+    # ELSE: If enhance_weather is False, these enhanced features won't exist in `features.columns`
+    # for the regions where it's off, so they won't be expected in `forecast_features_df`.
+    # No explicit 'else' needed here to set to 0, as `forecast_features_df` alignment handles it.
+
+    # === Forecast Criterion Data (Conditional) ===
+    criterion_col_name = f"CriterionChange_{region.replace(' ', '')}"
+    if use_criterion:
+        if criterion_col_name in criterion_weekly.columns and not criterion_weekly[criterion_col_name].empty:
+            forecast_features_dict[criterion_col_name] = criterion_weekly[criterion_col_name].iloc[-1]
+        else:
+            if criterion_col_name in features.columns: # Only add if trained with this column
+                forecast_features_dict[criterion_col_name] = 0
+    else:
+        if criterion_col_name in features.columns: # Only add if trained with this column
+            forecast_features_dict[criterion_col_name] = 0
+
+
+    if "Target_roll3" in df.columns and not df["Target_roll3"].empty:
+        forecast_features_dict["Target_roll3"] = df["Target_roll3"].iloc[-1]
+    else:
+        forecast_features_dict["Target_roll3"] = 0
+
+
+    forecast_features_df = pd.DataFrame([forecast_features_dict])
+    
+    missing_cols = set(features.columns) - set(forecast_features_df.columns)
+    for c in missing_cols:
+        forecast_features_df[c] = 0 
+
+    forecast_features_df = forecast_features_df[features.columns]
+
+    forecast = np.nan
+    try:
+        forecast_scaled = scaler.transform(forecast_features_df)
+        forecast = model.predict(forecast_scaled)[0]
+    except Exception as e:
+        print(f"⚠️ Forecast skipped for {region} due to error during prediction: {e}")
+        print(f"Forecast features used:\n{forecast_features_df}")
+
+
+    # --- Backtest ---
+    valid_dates_for_backtest = df_train.index
+    if len(valid_dates_for_backtest) > 4:
+        backtest_dates = valid_dates_for_backtest[-4:].to_list()
+    else:
+        backtest_dates = valid_dates_for_backtest.to_list()
+
+    preds, actuals = [], []
+    backtest_details = []
+
+    print(f"Attempting backtest for {region} on {len(backtest_dates)} dates.")
+    for bt_date in backtest_dates:
+        try:
+            x_bt = scaler.transform(features.loc[[bt_date]])
+            y_bt = target.loc[bt_date]
+            y_pred = model.predict(x_bt)[0]
+            preds.append(y_pred)
+            actuals.append(y_bt)
+            backtest_details.append(f"    {bt_date.date()} - Actual: {y_bt:+.2f}, Predicted: {y_pred:+.2f}")
+        except KeyError:
+            backtest_details.append(f"⚠️ Skipped backtest on {bt_date.date()} due to missing data for features or target.")
+        except Exception as e:
+            backtest_details.append(f"⚠️ Skipped backtest on {bt_date.date()} due to error: {e}")
+
+    for detail in backtest_details:
+        print(detail)
+
+    if preds:
+        mae = mean_absolute_error(actuals, preds)
+        print(f"\n📈 Forecast for {forecast_date.date()}: {forecast:+.2f} Bcf")
+        print(f"🧪 Backtest MAE (past {len(backtest_dates)} weeks): {mae:.2f} Bcf")
+    else:
+        mae = np.nan
+        print(f"⚠️ No valid backtest for {region}")
+
+    # --- LOG DEBUG INFO FOR LLM ANALYSIS ---
+    debug_log = {
+        "Region": region,
+        "Latest Date": str(df_train.index.max().date()),
+        "Training Sample Count": int(len(df_train)),
+        "Backtest MAE": float(round(mae, 3)) if not np.isnan(mae) else "N/A",
+        "Model Type": type(model).__name__,
+        "ModelParameters": str(model), # Changed from "Model" to "ModelParameters"
+        "Top Feature Coefficients": {},
+        "Zero Coefficient Count": 0,
+        "Total Feature Count": int(len(features.columns)),
+        "Feature Names": list(features.columns),
+        "UseCriterion": use_criterion, # Added this line
+        "EnhanceWeather": enhance_weather # Added this line
     }
 
-# --- Nuclear Outage Detection ---
-def get_nuclear_outage_impact(nuclear_hist_df, plant_group_df, check_date, days_threshold=3, drop_percentage_threshold=5):
-    """
-    Detects if there's a significant nuclear generation drop for any group
-    around the check_date.
-
-    Returns the maximum average drop percentage detected in any group
-    over the last 'days_threshold' days, or 0 if no qualifying drop.
-    """
-    if nuclear_hist_df is None or nuclear_hist_df.empty or plant_group_df is None or plant_group_df.empty:
-        return 0
-
-    nuclear_df_grouped = nuclear_hist_df.rename(columns={"item": "Unit", "mw_generated": "Output"})
-
-    expanded_group_map = []
-    if 'Units' in plant_group_df.columns and 'Group' in plant_group_df.columns:
-        for _, row in plant_group_df.iterrows():
-            group = row["Group"]
-            units = row["Units"]
-            if isinstance(units, str):
-                try: units = ast.literal_eval(units)
-                except (ValueError, SyntaxError): units = [units]
-            elif not isinstance(units, list): units = [units]
-            for unit in units:
-                expanded_group_map.append({"Group": group, "Unit": unit})
-    group_unit_df = pd.DataFrame(expanded_group_map)
-
-    nuclear_df_grouped = nuclear_df_grouped.merge(group_unit_df, on="Unit", how="left")
-    nuclear_df_grouped = nuclear_df_grouped.dropna(subset=["Group"])
-    nuclear_df_grouped = nuclear_df_grouped[
-        ~nuclear_df_grouped['Unit'].astype(str).str.contains('total|all', case=False, na=False)
-    ].copy()
-
-    if nuclear_df_grouped.empty:
-        return 0
-
-    group_daily_output = nuclear_df_grouped.groupby(["date", "Group"])["Output"].sum().reset_index()
-    group_daily_output = group_daily_output.sort_values(["Group", "date"])
-
-    group_daily_output["Baseline"] = (
-        group_daily_output.groupby("Group")["Output"]
-        .transform(lambda x: x.shift(1).rolling(window=7, min_periods=1).mean())
-    )
-
-    group_daily_output["Drop %"] = np.where(
-        (group_daily_output["Baseline"] != 0) & (~group_daily_output["Baseline"].isna()),
-        ((group_daily_output["Baseline"] - group_daily_output["Output"]) / group_daily_output["Baseline"]) * 100,
-        np.nan
-    )
-    group_daily_output["Drop %"] = np.where(
-        (group_daily_output["Output"] == 0) & (group_daily_output["Baseline"] > 0),
-        100,
-        group_daily_output["Drop %"]
-    )
-    group_daily_output["Drop %"] = group_daily_output["Drop %"].fillna(0)
-
-    max_overall_drop = 0
-    for group_name in group_daily_output['Group'].unique():
-        group_data = group_daily_output[group_daily_output['Group'] == group_name].set_index('date').sort_index()
-        recent_group_data = group_data.loc[check_date - timedelta(days=days_threshold-1):check_date]
-
-        if not recent_group_data.empty and len(recent_group_data) >= days_threshold:
-            if (recent_group_data['Drop %'] > drop_percentage_threshold).all():
-                max_overall_drop = max(max_overall_drop, recent_group_data['Drop %'].mean())
-    return max_overall_drop
-
-# NEW: LNG Flow Impact Detection
-def get_lng_flow_impact(lng_hist_df, check_date, days_threshold=3, drop_percentage_threshold=5):
-    """
-    Detects if there's a significant LNG flow drop (> X% over Y days).
-    Assumes lng_hist_df has 'date' and 'flow_mmcfd' columns.
-
-    Returns the maximum average drop percentage detected, or 0 if no qualifying drop.
-    """
-    if lng_hist_df is None or lng_hist_df.empty or \
-       'date' not in lng_hist_df.columns or 'flow_mmcfd' not in lng_hist_df.columns:
-        print("Warning: LNG historical flow data not available or missing required columns for drop detection.")
-        return 0
-
-    df_lng = lng_hist_df.dropna(subset=['date', 'flow_mmcfd']).copy()
-    df_lng = df_lng.sort_values('date').set_index('date')
-
-    # Calculate a 7-day rolling baseline (prior days only)
-    df_lng["Baseline"] = df_lng["flow_mmcfd"].shift(1).rolling(window=7, min_periods=1).mean()
-
-    # Calculate percentage drop from baseline
-    df_lng["Drop %"] = np.where(
-        (df_lng["Baseline"] != 0) & (~df_lng["Baseline"].isna()),
-        ((df_lng["Baseline"] - df_lng["flow_mmcfd"]) / df_lng["Baseline"]) * 100,
-        np.nan
-    )
-    # Handle cases where current flow is 0 and baseline is >0 as 100% drop
-    df_lng["Drop %"] = np.where(
-        (df_lng["flow_mmcfd"] == 0) & (df_lng["Baseline"] > 0),
-        100,
-        df_lng["Drop %"]
-    )
-    df_lng["Drop %"] = df_lng["Drop %"].fillna(0) # Fill other NaNs with 0
-
-    max_overall_lng_drop = 0
-    # Check for drops over the specified duration ending at check_date
-    recent_lng_data = df_lng.loc[check_date - timedelta(days=days_threshold-1):check_date]
-
-    if not recent_lng_data.empty and len(recent_lng_data) >= days_threshold:
-        if (recent_lng_data['Drop %'] > drop_percentage_threshold).all():
-            max_overall_lng_drop = recent_lng_data['Drop %'].mean() # Return average drop during qualifying period
-
-    return max_overall_lng_drop
-
-# NEW: Historical Outage Risk Prediction Functions
-def get_historical_outage_risk(hist_df, id_col, value_col, check_date, lookahead_days=30, min_drop_pct=5, min_drop_duration=3):
-    """
-    Analyzes historical data for a specific period (e.g., next 30 days) to assess
-    the average percentage drop for qualifying events.
-    Applies to both nuclear and LNG.
-
-    Args:
-        hist_df (pd.DataFrame): The historical data (nuclear_hist_df or lng_hist_df).
-        id_col (str): Column representing the individual unit/group ID ('Group' for nuclear, 'Item' or similar for LNG if applicable).
-        value_col (str): Column with the generation/flow value ('Output' for nuclear, 'flow_mmcfd' for LNG).
-        check_date (datetime.date): The current analysis date (used for finding corresponding period in historical years).
-        lookahead_days (int): Number of days to look ahead into the historical period.
-        min_drop_pct (int/float): Minimum percentage drop to consider an event.
-        min_drop_duration (int): Minimum duration in days for a qualifying event.
-
-    Returns:
-        float: Average percentage drop of qualifying events during the historical lookahead periods.
-               Returns 0 if no historical data or no qualifying events found.
-    """
-    if hist_df is None or hist_df.empty or \
-       'date' not in hist_df.columns or value_col not in hist_df.columns:
-        return 0
-
-    df_temp = hist_df.dropna(subset=['date', value_col]).copy()
-    df_temp['date'] = pd.to_datetime(df_temp['date'])
-    df_temp[value_col] = pd.to_numeric(df_temp[value_col], errors='coerce')
-    df_temp.dropna(subset=[value_col], inplace=True)
-
-    if df_temp.empty:
-        return 0
-
-    historical_drops = []
-    # Use month and day from check_date (which is today_date + 1 for lookahead)
-    current_month_day_of_lookahead_start = (check_date.month, check_date.day)
-
-    historical_years = sorted(df_temp['date'].dt.year.unique())
-    current_year_in_data = check_date.year
-
-    for year in historical_years:
-        if year >= current_year_in_data:
-            continue
-
-        try:
-            # Construct the start date for the lookahead period in the historical year
-            hist_lookahead_start = datetime(year, current_month_day_of_lookahead_start[0], current_month_day_of_lookahead_start[1]).date()
-        except ValueError: # Handle Feb 29 in a non-leap year gracefully
-            if current_month_day_of_lookahead_start == (2, 29):
-                hist_lookahead_start = datetime(year, 2, 28).date()
-            else:
-                continue
-
-        hist_lookahead_end = hist_lookahead_start + timedelta(days=lookahead_days -1)
-
-        window_data = df_temp[(df_temp['date'].dt.date >= hist_lookahead_start) &
-                              (df_temp['date'].dt.date <= hist_lookahead_end)].copy()
-
-        if window_data.empty:
-            continue
-
-        # Group and calculate baseline/drop percentage similar to current outage detection
-        if id_col and id_col in window_data.columns:
-            grouped_data = window_data.groupby(['date', id_col])[value_col].sum().reset_index()
-            grouped_data = grouped_data.sort_values([id_col, 'date'])
-            grouped_data["Baseline"] = grouped_data.groupby(id_col)[value_col].transform(lambda x: x.shift(1).rolling(window=7, min_periods=1).mean())
-        else: # For overall LNG flow (no grouping by 'Item' unless needed for breakdown)
-            grouped_data = window_data.groupby('date')[value_col].sum().reset_index()
-            grouped_data = grouped_data.sort_values('date')
-            grouped_data["Baseline"] = grouped_data[value_col].shift(1).rolling(window=7, min_periods=1).mean()
-
-        grouped_data["Drop %"] = np.where(
-            (grouped_data["Baseline"] != 0) & (~grouped_data["Baseline"].isna()),
-            ((grouped_data["Baseline"] - grouped_data[value_col]) / grouped_data["Baseline"]) * 100,
-            np.nan
-        )
-        grouped_data["Drop %"] = np.where(
-            (grouped_data[value_col] == 0) & (grouped_data["Baseline"] > 0),
-            100,
-            grouped_data["Drop %"]
-        )
-        grouped_data["Drop %"] = grouped_data["Drop %"].fillna(0)
-
-        grouped_data['Outage_Flag'] = grouped_data["Drop %"] > min_drop_pct
-        grouped_data['block'] = (grouped_data['Outage_Flag'] != grouped_data['Outage_Flag'].shift()).cumsum()
-
-        qualifying_outage_blocks = grouped_data[grouped_data['Outage_Flag']].groupby('block').filter(
-            lambda x: len(x) >= min_drop_duration and x['Outage_Flag'].all()
-        )
-
-        if not qualifying_outage_blocks.empty:
-            historical_drops.extend(qualifying_outage_blocks['Drop %'].tolist())
-
-    if historical_drops:
-        return np.mean(historical_drops)
-    return 0
-
-
-# --- Core Component Analysis Logic ---
-def analyze_components(today_date, raw_data, storage_positions):
-    """
-    Analyzes various market components based on the specified criteria, scores them,
-    and returns the top 5 sorted components and a list of all component analysis dictionaries.
-    """
-    components_analysis = {}
-    all_component_analysis_dicts = [] # This will hold the full dictionaries for all components
-
-    prices_df = raw_data.get("prices")
-    weather_df = raw_data.get("weather")
-    eia_totals_df = raw_data.get("eia_totals")
-    lng_hist_df = raw_data.get("lng_hist")
-    nuclear_hist_df = raw_data.get("criterion_nuclear_hist")
-    plant_group_mapping_df = raw_data.get("plant_group_mapping")
-    natural_gas_data_positioning_df = raw_data.get("natural_gas_data_positioning")
-    forecast_df = raw_data.get("forecast")
-
-    if prices_df is None or weather_df is None or eia_totals_df is None or \
-       prices_df.empty or weather_df.empty or eia_totals_df.empty:
-        print("\nFATAL: One or more critical dataframes (prices, weather, EIA totals) are missing or empty. Cannot proceed with analysis.")
-        return [], []
-
-    # Ensure date columns are datetime objects for critical DFs
-    prices_df['date'] = pd.to_datetime(prices_df['date'], errors='coerce')
-    weather_df['date'] = pd.to_datetime(weather_df['date'], errors='coerce')
-    eia_totals_df['period'] = pd.to_datetime(eia_totals_df['period'], errors='coerce')
-
-    # Drop rows where date parsing failed in critical DFs
-    prices_df.dropna(subset=['date'], inplace=True)
-    weather_df.dropna(subset=['date'], inplace=True)
-    eia_totals_df.dropna(subset=['period'], inplace=True)
-
-
-    # Get data for the last 7 days ending today
-    seven_days_ago = today_date - timedelta(days=6)
-
-    # Filter prices for the last 7 days
-    recent_prices = prices_df[(prices_df['date'].dt.date >= seven_days_ago) &
-                              (prices_df['date'].dt.date <= today_date)].copy()
-
-    # Filter weather for the last 7 days
-    recent_weather = weather_df[(weather_df['date'].dt.date >= seven_days_ago) &
-                                 (weather_df['date'].dt.date <= today_date)].copy()
-
-    # Calculate overall Henry Hub price momentum
-    henry_col_name_lower = HENRY_HUB_NAME.lower()
-    # Ensure 'henry' column exists before trying to rename/access
-    if HENRY_HUB_NAME in prices_df.columns:
-        prices_df.rename(columns={HENRY_HUB_NAME: henry_col_name_lower}, inplace=True)
-
-    today_henry_price = np.nan
-    last_5_day_avg_henry_price = np.nan
-    if not recent_prices.empty and henry_col_name_lower in recent_prices.columns:
-        today_henry_price_series = recent_prices[recent_prices['date'].dt.date == today_date][henry_col_name_lower]
-        today_henry_price = today_henry_price_series.iloc[0] if not today_henry_price_series.empty else np.nan
-
-        last_5_day_prices_for_avg = recent_prices[(recent_prices['date'].dt.date >= today_date - timedelta(days=4)) &
-                                                 (recent_prices['date'].dt.date <= today_date)][henry_col_name_lower]
-        last_5_day_avg_henry_price = last_5_day_prices_for_avg.mean()
-
-
-    # Calculate LNG feed gas drop impact from CriterionLNGHist.csv
-    if lng_hist_df is not None:
-        lng_hist_df_filtered = lng_hist_df[lng_hist_df['date'].dt.date <= today_date].copy()
+    if hasattr(model, 'coef_') and len(features.columns) == len(model.coef_):
+        coefs = pd.Series(model.coef_, index=features.columns)
+        nonzero_coefs = coefs[coefs != 0].sort_values(key=abs, ascending=False)
+        debug_log["Top Feature Coefficients"] = {k: float(v) for k, v in nonzero_coefs.head(10).to_dict().items()}
+        debug_log["Zero Coefficient Count"] = int((coefs == 0).sum())
+        if hasattr(model, 'alpha_'):
+            debug_log["Model Alpha"] = float(round(model.alpha_, 4))
+        else:
+            debug_log["Model Alpha"] = "N/A"
     else:
-        lng_hist_df_filtered = None
-
-    lng_flow_drop_impact = get_lng_flow_impact(lng_hist_df_filtered, today_date)
-
-    # Calculate nearby nuclear generation drop
-    if nuclear_hist_df is not None:
-        nuclear_hist_df_filtered = nuclear_hist_df[nuclear_hist_df['date'].dt.date <= today_date].copy()
-    else:
-        nuclear_hist_df_filtered = None
-
-    nuclear_generation_drop_impact = get_nuclear_outage_impact(nuclear_hist_df_filtered, plant_group_mapping_df, today_date)
-
-    # --- ENHANCEMENT 3: Improve Managed Money Score ---
-    net_managed_money_change = 0
-    if natural_gas_data_positioning_df is not None and not natural_gas_data_positioning_df.empty and \
-       'date' in natural_gas_data_positioning_df.columns and \
-       'managed_money_net' in natural_gas_data_positioning_df.columns:
-
-        df_mm = natural_gas_data_positioning_df.dropna(subset=['date', 'managed_money_net']).copy()
-        df_mm['date'] = pd.to_datetime(df_mm['date'])
-        df_mm = df_mm.sort_values('date')
-
-        df_mm_filtered = df_mm[df_mm['date'].dt.date <= today_date].copy()
-
-        if len(df_mm_filtered) >= 5:
-            latest_mm = df_mm_filtered["managed_money_net"].iloc[-1]
-            prior_mm = df_mm_filtered["managed_money_net"].iloc[-5]
-            net_managed_money_change = latest_mm - prior_mm
-        elif len(df_mm_filtered) >= 2:
-            latest_mm = df_mm_filtered["managed_money_net"].iloc[-1]
-            prior_mm = df_mm_filtered["managed_money_net"].iloc[-2]
-            net_managed_money_change = latest_mm - prior_mm
-        else:
-            pass
-
-    else:
-        pass
-
-    # Calculate historical risk of upcoming outages (next 30 days)
-    lookahead_start_date = today_date + timedelta(days=1)
-    lookahead_days = 30
-
-    historical_nuclear_risk_pct = get_historical_outage_risk(
-        nuclear_hist_df_filtered, id_col='Group', value_col='Output',
-        check_date=lookahead_start_date, lookahead_days=lookahead_days
-    )
-
-    historical_lng_risk_pct = get_historical_outage_risk(
-        lng_hist_df_filtered, id_col='Item', value_col='flow_mmcfd',
-        check_date=lookahead_start_date, lookahead_days=lookahead_days
-    )
-
-
-    # --- ENHANCEMENT 5: Add Forecasted Signal Using FundyForecast.csv ---
-    avg_future_balance_signal = "Neutral balance forecast"
-    forecast_signal_score = 0
-    if forecast_df is not None and not forecast_df.empty and \
-       'Date' in forecast_df.columns and 'item' in forecast_df.columns and 'value' in forecast_df.columns:
-
-        forecast_df['Date'] = pd.to_datetime(forecast_df['Date'], errors='coerce')
-        forecast_df.dropna(subset=['Date', 'item', 'value'], inplace=True)
-
-        next_7_days_start = today_date + timedelta(days=1)
-        next_7_days_end = today_date + timedelta(days=7)
-
-        future_balance_data = forecast_df[
-            (forecast_df['item'].str.contains("Balance", case=False, na=False)) &
-            (forecast_df['Date'].dt.date >= next_7_days_start) &
-            (forecast_df['Date'].dt.date <= next_7_days_end) &
-            (forecast_df['Date'].dt.date <= today_date)
-        ].copy()
-
-        if not future_balance_data.empty:
-            avg_future_balance = future_balance_data["value"].mean()
-
-            if pd.notna(avg_future_balance):
-                if avg_future_balance < -50000:
-                    avg_future_balance_signal = "Market expected to tighten (Bullish)"
-                    forecast_signal_score = 1
-                elif avg_future_balance > 50000:
-                    avg_future_balance_signal = "Market expected to loosen (Bearish)"
-                    forecast_signal_score = -1
-                else:
-                    avg_future_balance_signal = "Neutral balance forecast"
-            else:
-                avg_future_balance_signal = "Neutral balance forecast (Avg is NaN)"
-        else:
-            pass
-    else:
-        pass
-
-
-    # Iterate through each component (columns in prices_df, excluding 'date', 'henry', and other unwanted cols)
-    component_price_columns = prices_df.columns.drop(['date', henry_col_name_lower, 'Unnamed: 58', 'Date.1'], errors='ignore')
-
-    if component_price_columns.empty:
-        print("\nWarning: No component price columns found in PRICES.csv after filtering. Is Henry Hub named correctly or are other price columns present?")
-
-    # Filter prices_df to only include data up to today_date for price momentum and basis
-    prices_df_filtered = prices_df[prices_df['date'].dt.date <= today_date].copy().set_index('date').sort_index()
-
-
-    for component_name in component_price_columns:
-        component_scores = {} # This will hold the individual scores for breakdown/debugging
-        summary_parts = []
-        overall_score = 0
-
-        # Match to region and weather city
-        weather_city = COMPONENT_TO_CITY_MAP_HARDCODED.get(component_name)
-        if not weather_city:
-            continue
-
-        # Pull recent data for component
-        price_series_for_component = prices_df_filtered[[component_name]].dropna()
-
-        # 1. ΔStorage (vs 5-yr avg) - Scaled by Z-score
-        delta_storage_score = 0
-        storage_info_for_component = None
-        for region_display_name, cities_in_region in WEATHER_REGION_CITY_MAP.items():
-            if weather_city in cities_in_region:
-                storage_info_for_component = storage_positions.get(region_display_name)
-                break
-
-        if storage_info_for_component and pd.notna(storage_info_for_component['storage_position_bcf']):
-            delta_storage_bcf = storage_info_for_component['storage_position_bcf']
-            std_dev_bcf = storage_info_for_component['std_dev_bcf']
-
-            if pd.notna(std_dev_bcf) and std_dev_bcf > 0:
-                z_score = delta_storage_bcf / std_dev_bcf
-                if z_score < -1.5:
-                    delta_storage_score = 2
-                    summary_parts.append(f"Storage Deficit: {delta_storage_bcf:,.1f} Bcf (Z={z_score:.2f}) (Bullish)")
-                elif z_score < -0.5:
-                    delta_storage_score = 1
-                    summary_parts.append(f"Storage Deficit: {delta_storage_bcf:,.1f} Bcf (Z={z_score:.2f}) (Bullish)")
-                elif z_score > 1.5:
-                    delta_storage_score = -2
-                    summary_parts.append(f"Storage Surplus: +{delta_storage_bcf:,.1f} Bcf (Z={z_score:.2f}) (Bearish)")
-                elif z_score > 0.5:
-                    delta_storage_score = -1
-                    summary_parts.append(f"Storage Surplus: +{delta_storage_bcf:,.1f} Bcf (Z={z_score:.2f}) (Bearish)")
-                else:
-                    summary_parts.append("Storage In Line")
-            else:
-                if delta_storage_bcf < -100: delta_storage_score = 4
-                elif delta_storage_bcf < -20: delta_storage_score = 2
-                elif delta_storage_bcf > 100: delta_storage_score = -4
-                elif delta_storage_bcf > 20: delta_storage_score = -2
-                summary_parts.append(f"Storage Position: {delta_storage_bcf:,.1f} Bcf (No Z-score or zero std_dev)")
-        else:
-            summary_parts.append("Storage Data N/A")
-        component_scores["ΔStorage"] = delta_storage_score
-
-        # 2. ΔTemp / ΔHDD/CDD (using 7-day totals)
-        temp_cdd_score = 0
-        city_recent_weather_data = recent_weather[recent_weather['city_title'] == weather_city].copy()
-        if not city_recent_weather_data.empty:
-            avg_temp = city_recent_weather_data['avg_temp'].mean()
-            total_cdd = (city_recent_weather_data['avg_temp'] - BASE_TEMP_CDD_HDD).apply(lambda x: max(0, x)).sum()
-            total_hdd = (BASE_TEMP_CDD_HDD - city_recent_weather_data['avg_temp']).apply(lambda x: max(0, x)).sum()
-
-            if total_cdd > 30:
-                temp_cdd_score = 3
-                summary_parts.append(f"High CDDs ({total_cdd:.1f}) (Bullish Weather)")
-            elif total_hdd > 30:
-                temp_cdd_score = 3
-                summary_parts.append(f"High HDDs ({total_hdd:.1f}) (Bullish Weather)")
-            elif total_cdd > 10:
-                temp_cdd_score = 1
-                summary_parts.append(f"Moderate CDDs ({total_cdd:.1f}) (Bullish Weather)")
-            elif total_hdd > 10:
-                temp_cdd_score = 1
-                summary_parts.append(f"Moderate HDDs ({total_hdd:.1f}) (Bullish Weather)")
-            else:
-                summary_parts.append(f"Neutral Temps ({avg_temp:.1f}°F)")
-        else:
-            summary_parts.append("Weather Data N/A")
-        component_scores["ΔTemp/HDD/CDD"] = temp_cdd_score
-
-        # 3. Price momentum using Z-score over last 10 days
-        price_momentum_score = 0
-        price_window = price_series_for_component[component_name].tail(10).dropna()
-        if len(price_window) >= 10:
-            price_mean = price_window.mean()
-            price_std = price_window.std()
-            today_price = price_window.iloc[-1]
-            z_score = (today_price - price_mean) / price_std if price_std > 0 else 0
-
-            if z_score > 1.5:
-                price_momentum_score = 2
-                summary_parts.append(f"Strong Price Momentum (Z={z_score:.2f}) (Bullish)")
-            elif z_score < -1.5:
-                price_momentum_score = -2
-                summary_parts.append(f"Strong Negative Momentum (Z={z_score:.2f}) (Bearish)")
-            elif z_score > 0.5:
-                price_momentum_score = 1
-                summary_parts.append(f"Weak Price Momentum (Z={z_score:.2f}) (Bullish)")
-            elif z_score < -0.5:
-                price_momentum_score = -1
-                summary_parts.append(f"Weak Negative Momentum (Z={z_score:.2f}) (Bearish)")
-            else:
-                summary_parts.append(f"Stable Price Momentum (Z={z_score:.2f})")
-        else:
-            summary_parts.append("Price Momentum N/A (Insufficient data)")
-        component_scores["Price Momentum"] = price_momentum_score
-
-        # Improved Basis Deviation using rolling z-score and momentum
-        basis_deviation_score = 0
-        price_series_for_basis = price_series_for_component[component_name].tail(20).dropna()
-        if len(price_series_for_basis) >= 20:
-            basis_mean = price_series_for_basis[:-1].mean()
-            basis_std = price_series_for_basis[:-1].std()
-            basis_today = price_series_for_basis.iloc[-1]
-            basis_zscore = (basis_today - basis_mean) / basis_std if basis_std > 0 else 0
-
-            if basis_zscore > 1.5:
-                basis_deviation_score = 2
-                summary_parts.append(f"Strong Positive Basis (Z={basis_zscore:.2f}) (Bullish)")
-            elif basis_zscore < -1.5:
-                basis_deviation_score = -2
-                summary_parts.append(f"Strong Negative Basis (Z={basis_zscore:.2f}) (Bearish)")
-            elif basis_zscore > 0.5:
-                basis_deviation_score = 1
-                summary_parts.append(f"Weak Positive Basis (Z={basis_zscore:.2f}) (Bullish)")
-            elif basis_zscore < -0.5:
-                basis_deviation_score = -1
-                summary_parts.append(f"Weak Negative Basis (Z={basis_zscore:.2f}) (Bearish)")
-            else:
-                summary_parts.append(f"Stable Basis (Z={basis_zscore:.2f})")
-        else:
-            summary_parts.append("Basis Deviation N/A (Insufficient data)")
-        component_scores["Basis Deviation"] = basis_deviation_score
-
-
-        # ΔLNG feed gas nearby (NOW uses percentage drop logic)
-        lng_score = 0
-        if lng_flow_drop_impact > 10:
-            lng_score = -3
-            summary_parts.append(f"Significant Current LNG Flow Drop ({lng_flow_drop_impact:.1f}%) (Bearish)")
-        elif lng_flow_drop_impact > 0:
-            lng_score = -1
-            summary_parts.append(f"Minor Current LNG Flow Drop ({lng_flow_drop_impact:.1f}%) (Slightly Bearish)")
-        else:
-            summary_parts.append("Stable Current LNG Flow")
-        component_scores["ΔLNG Feed Gas"] = lng_score
-
-        # Nearby nuclear generation drop (>5% over 3+ days)
-        nuclear_score = 0
-        if nuclear_generation_drop_impact > 10:
-            nuclear_score = 3
-            summary_parts.append(f"Significant Current Nuclear Gen. Drop ({nuclear_generation_drop_impact:.1f}%) (Bullish)")
-        elif nuclear_generation_drop_impact > 0:
-            nuclear_score = 1
-            summary_parts.append(f"Minor Current Nuclear Gen. Drop ({nuclear_generation_drop_impact:.1f}%) (Bullish)")
-        else:
-            summary_parts.append("Stable Current Nuclear Generation")
-        component_scores["Nuclear Drop"] = nuclear_score
-
-        # 7. Net change in Managed Money positioning (Improved calculation)
-        managed_money_score = 0
-        if net_managed_money_change > 10000:
-            managed_money_score = 1
-            summary_parts.append(f"Managed Money Net Long Increase ({net_managed_money_change:+.0f} contracts) (Bullish)")
-        elif net_managed_money_change < -10000:
-            managed_money_score = -1
-            summary_parts.append(f"Managed Money Net Short Increase ({net_managed_money_change:+.0f} contracts) (Bearish)")
-        else:
-            summary_parts.append("Managed Money Positioning Stable")
-        component_scores["Managed Money"] = managed_money_score
-
-        # 8. Upcoming Outage Risk (Historical)
-        upcoming_outage_risk_score = 0
-        risk_desc_parts = []
-        if historical_nuclear_risk_pct > 10:
-            upcoming_outage_risk_score += 1
-            risk_desc_parts.append(f"Nuclear ({historical_nuclear_risk_pct:.1f}%)")
-        if historical_lng_risk_pct > 10:
-            upcoming_outage_risk_score += 1
-            risk_desc_parts.append(f"LNG ({historical_lng_risk_pct:.1f}%)")
-
-        if upcoming_outage_risk_score > 0:
-            summary_parts.append(f"High Historical Outage Risk Soon ({', '.join(risk_desc_parts)}) (Bullish)")
-        else:
-            summary_parts.append("Low Historical Outage Risk Soon")
-        component_scores["Upcoming Outage Risk"] = upcoming_outage_risk_score
-
-        # 9. Forecasted Signal Using FundyForecast.csv
-        summary_parts.append(f"Forecast: {avg_future_balance_signal}")
-        component_scores["Forecasted Balance"] = forecast_signal_score
-
-        # Moving average crossover (short-term trend)
-        ma_score = 0
-        comp_prices = price_series_for_component[component_name].dropna()
-        if len(comp_prices) >= 20:
-            sma10 = comp_prices.tail(10).mean()
-            sma20 = comp_prices.tail(20).mean()
-            if sma10 > sma20:
-                ma_score = 1
-                summary_parts.append("Short-Term Trend Up (SMA10 > SMA20)")
-            elif sma10 < sma20:
-                ma_score = -1
-                summary_parts.append("Short-Term Trend Down (SMA10 < SMA20)")
-            else:
-                summary_parts.append("Flat Short-Term Trend")
-        component_scores["SMA Crossover"] = ma_score # Add to component_scores
-        overall_score += ma_score # Add to overall_score
-
-        # Volatility breakout check
-        vol_score = 0
-        if len(comp_prices) >= 10:
-            daily_ranges = comp_prices.diff().abs().tail(5)
-            avg_range = daily_ranges.mean()
-            current_range = abs(comp_prices.iloc[-1] - comp_prices.iloc[-2])
-            if avg_range > 0 and current_range > 1.5 * avg_range: # Ensure avg_range is not zero
-                if comp_prices.iloc[-1] > comp_prices.iloc[-2]:
-                    vol_score = 1
-                    summary_parts.append("Volatility Breakout Up (Bullish)")
-                else:
-                    vol_score = -1
-                    summary_parts.append("Volatility Breakout Down (Bearish)")
-        component_scores["Volatility Breakout"] = vol_score # Add to component_scores
-        overall_score += vol_score # Add to overall_score
-
-
-        # Calculate total score
-        overall_score = sum(component_scores.values())
-
-        # --- ENHANCEMENT 1: Add Bias Tag ---
-        bias_tag = "UNKNOWN"
-        if overall_score >= 5:
-            bias_tag = "STRONG BUY"
-        elif overall_score >= 3:
-            bias_tag = "BUY"
-        elif overall_score >= 1:
-            bias_tag = "NEUTRAL"
-        elif overall_score == 0:
-            bias_tag = "WEAK"
-        else:
-            bias_tag = "SELL"
-
-        # Prepare component_data to include all individual scores
-        component_data = {
-            "name": component_name,
-            "total_score": overall_score,
-            "bias_tag": bias_tag,
-            "summary": f"{bias_tag} bias: {'; '.join(summary_parts)}"
-        }
-        # Add all individual scores to the component_data dictionary
-        for signal_name, score in component_scores.items():
-            component_data[signal_name] = score
-
-        components_analysis[component_name] = component_data
-        all_component_analysis_dicts.append(component_data)
-
-
-    # Sort components by total score (descending)
-    sorted_top_components = sorted(components_analysis.values(), key=lambda x: x["total_score"], reverse=True)
-
-    return sorted_top_components[:5], all_component_analysis_dicts
-
-
-# === NEW BACKTESTING FUNCTIONS ===
-
-def backtest_component(df, component_name, signal_col, price_col='Price', days_hold=7):
-    """
-    Simulates trades based on signals and actual price movements for a single component.
-
-    Args:
-        df (pd.DataFrame): DataFrame with historical data for a single component,
-                            including 'Date', 'Component', 'Price', and the signal column,
-                            plus individual signal scores.
-        component_name (str): Component to backtest.
-        signal_col (str): Column name with Buy/Sell/Hold signal.
-        price_col (str): Column with component price.
-        days_hold (int): Number of days to hold the position.
-
-    Returns:
-        pd.DataFrame: Backtest results with entry/exit/return metrics for this component,
-                      including individual signal scores.
-    """
-    trades = []
-    df['Date'] = pd.to_datetime(df['Date'])
-    df = df.set_index('Date').sort_index()
-
-    # Define all expected signal columns to ensure they exist, filling with 0 if not
-    expected_signal_cols = [
-        'ΔStorage', 'ΔTemp/HDD/CDD', 'Price Momentum', 'Basis Deviation',
-        'ΔLNG Feed Gas', 'Nuclear Drop', 'Managed Money', 'Upcoming Outage Risk',
-        'Forecasted Balance', 'SMA Crossover', 'Volatility Breakout' # Added new signals
+        debug_log["Top Feature Coefficients"] = "Model does not have coefficients or mismatch in length."
+        debug_log["Zero Coefficient Count"] = "N/A"
+        debug_log["Model Alpha"] = "N/A"
+    
+    # Identify top weather features and top fundamentals for the debug log
+    # These are based on column names in the final 'df' after all joins
+    debug_log["TopWeatherFeatures"] = [
+        col for col in df.columns if any(s in col.lower() for s in ['temp', 'cdd', 'hdd', 'precip'])
     ]
-    for col in expected_signal_cols:
-        if col not in df.columns:
-            df[col] = 0.0 # Fill missing signal columns with 0
-
-    for i in range(len(df) - days_hold):
-        current_date_idx = df.index[i]
-        exit_date_idx = current_date_idx + timedelta(days=days_hold)
-        exit_row_data = df.loc[df.index <= exit_date_idx].tail(1)
-
-        if exit_row_data.empty:
-            continue
-
-        row = df.iloc[i]
-        signal = row[signal_col]
-        entry_price = row[price_col]
-        entry_date = current_date_idx
-
-        # Only take trades with high score and confidence, skip neutral setups
-        # Loosened the conditions slightly to allow trades to be generated
-        total_score_for_trade = sum(row.get(s, 0) for s in expected_signal_cols) # Recalculate total score from row
-        confidence_for_trade = sum(int(row.get(s, 0) > 0) for s in expected_signal_cols) / len(expected_signal_cols) if expected_signal_cols else 0
-
-        # Modified gating logic: total_score >= 3 and confidence >= 0.5
-        if signal not in ["BUY", "STRONG BUY", "SELL"] or total_score_for_trade < 3 or confidence_for_trade < 0.5:
-            continue
-
-        exit_price = exit_row_data.iloc[0][price_col]
-        exit_date = exit_row_data.index[0]
-
-        if pd.isna(entry_price) or pd.isna(exit_price):
-            continue
-
-        ret = 0.0
-        # Avoid division by zero for return calculation
-        if entry_price != 0:
-            if signal == 'BUY' or signal == 'STRONG BUY':
-                ret = (exit_price - entry_price) / entry_price
-            elif signal == 'SELL':
-                ret = (entry_price - exit_price) / entry_price
-        else:
-            ret = np.nan # Or np.inf if that's preferred, but np.nan is safer
-
-        trade_data = {
-            'Component': component_name,
-            'Entry Date': entry_date,
-            'Exit Date': exit_date,
-            'Signal': signal,
-            'Entry Price': entry_price,
-            'Exit Price': exit_price,
-            'Holding Days Actual': (exit_date - entry_date).days,
-            'Return': ret
-        }
-        # Add individual signal scores to the trade data
-        for col in expected_signal_cols:
-            trade_data[col] = row[col]
-
-        trades.append(trade_data)
-
-    return pd.DataFrame(trades)
-
-# === Modified run_backtest to integrate new backtesting functions ===
-def run_backtest(prices_df, raw_data, storage_positions, start_date, end_date, holding_period=7, output_file_path=None):
-    """
-    Runs a historical backtest of component predictions over a date range.
-    Collects daily signals and then processes them using backtest_component.
-    """
-    all_daily_signals_raw = []
-
-    prices_df['date'] = pd.to_datetime(prices_df['date'], errors='coerce')
-    prices_df = prices_df.sort_values('date').dropna(subset=['date'])
-    prices_df = prices_df.set_index('date')
-
-    available_dates = prices_df.index.unique().sort_values()
-
-    all_dates_to_test = available_dates[
-        (available_dates >= pd.to_datetime(start_date)) &
-        (available_dates <= pd.to_datetime(end_date))
+    debug_log["TopFundamentals"] = [
+        col for col in df.columns if any(s in col.lower() for s in ['fundy', 'total', 'storage', 'balance'])
+        and 'storage' not in col.lower() # Exclude 'StorageTotal' here as it's often a key feature
     ]
+    # Adjust TopFundamentals to specifically look for Fundy items more robustly
+    debug_log["TopFundamentals"].extend([item for item in fundy_region_items if item not in debug_log["TopFundamentals"]])
+    debug_log["TopFundamentals"] = sorted(list(set(debug_log["TopFundamentals"]))) # Remove duplicates and sort
 
-    if all_dates_to_test.empty:
-        print(f"⚠️ No valid dates found in prices data between {start_date} and {end_date} for backtesting.")
-        return
+    serializable_forecast_features = {k: float(v) if isinstance(v, (np.float32, np.float64)) else v for k, v in forecast_features_dict.items()}
+    serializable_forecast_features = {k: int(v) if isinstance(v, np.int64) else v for k, v in serializable_forecast_features.items()}
+    debug_log["Latest Forecast Features"] = serializable_forecast_features
 
-    # Define the list of signal score keys that will be stored
-    signal_score_keys = [
-        'ΔStorage', 'ΔTemp/HDD/CDD', 'Price Momentum', 'Basis Deviation',
-        'ΔLNG Feed Gas', 'Nuclear Drop', 'Managed Money', 'Upcoming Outage Risk',
-        'Forecasted Balance', 'SMA Crossover', 'Volatility Breakout' # Added new signals
-    ]
+    debug_log["Backtest Actuals"] = [float(round(a, 2)) for a in actuals]
+    debug_log["Backtest Predicted"] = [float(round(p, 2)) for p in preds]
+    debug_log["Backtest Dates"] = [str(d.date()) for d in backtest_dates]
 
-    for current_date_ts in all_dates_to_test:
-        today = current_date_ts.date()
+    Path("GOScripts/GDebug").mkdir(parents=True, exist_ok=True)
+    with open(f"GOScripts/GDebug/{region.replace(' ', '_')}_debug.json", "w") as f:
+        json.dump(debug_log, f, indent=2)
+    print(f"✅ Debug log saved for {region} to GOScripts/GDebug/{region.replace(' ', '_')}_debug.json")
 
-        theoretical_exit_date_ts = current_date_ts + timedelta(days=holding_period)
-        if prices_df.index.max() < theoretical_exit_date_ts:
-            print(f"Skipping {today}: Not enough future price data available for a {holding_period}-day holding period (last price date: {prices_df.index.max().date()}).")
-            continue
+    results.append({
+        "Region": region,
+        "Forecast Date": forecast_date.date(),
+        "Forecast (Bcf)": round(forecast, 2) if not np.isnan(forecast) else "N/A",
+        "Backtest MAE (Bcf)": round(mae, 2) if not np.isnan(mae) else "N/A",
+        "Backtest Dates": [str(d.date()) for d in backtest_dates],
+        "Backtest Actuals (Bcf)": [float(round(a, 2)) for a in actuals],
+        "Backtest Predicted (Bcf)": [float(round(p, 2)) for p in preds]
+    })
 
-        # Henry Hub 5-day volatility filter (skip trades in flat markets)
-        # Assuming 'henry' is the column name for Henry Hub prices after load_clean_df
-        hub_prices = prices_df.loc[prices_df.index <= current_date_ts, 'henry'].dropna().tail(6)
-        if len(hub_prices) == 6:
-            hh_returns = hub_prices.pct_change().dropna()
-            if not hh_returns.empty: # Ensure there are returns to calculate std
-                hh_volatility = hh_returns.std()
-                if hh_volatility < 0.01: # Threshold for low volatility
-                    print(f"Skipping {today}: Henry Hub market too flat (volatility: {hh_volatility:.4f}).")
-                    continue
-            else:
-                print(f"Skipping {today}: Insufficient Henry Hub return data for volatility calculation.")
-                continue
-        else:
-            print(f"Skipping {today}: Insufficient Henry Hub price data for volatility calculation.")
-            continue
+results_df = pd.DataFrame(results)
+results_df["Backtest Dates"] = results_df["Backtest Dates"].apply(lambda x: str(x))
+results_df["Backtest Actuals (Bcf)"] = results_df["Backtest Actuals (Bcf)"].apply(lambda x: str(x))
+results_df["Backtest Predicted (Bcf)"] = results_df["Backtest Predicted (Bcf)"].apply(lambda x: str(x))
 
+output_directory = "GOScripts/GOutput"
+Path(output_directory).mkdir(parents=True, exist_ok=True)
+output_filename = f"{output_directory}/EIAStoragePred.csv"
+results_df.to_csv(output_filename, index=False)
 
-        print(f"Running component analysis for backtest date: {today}...")
-
-        try:
-            _, all_component_analysis_dicts = analyze_components(today, raw_data, storage_positions)
-        except Exception as e:
-            print(f"Error running analyze_components for {today}: {e}")
-            continue
-
-        if not all_component_analysis_dicts:
-            continue
-
-        for comp_data in all_component_analysis_dicts:
-            component_name = comp_data['name']
-            prediction_tag = comp_data['bias_tag']
-
-            entry_price = prices_df.loc[current_date_ts, component_name] if component_name in prices_df.columns else np.nan
-
-            if pd.isna(entry_price):
-                continue
-
-            daily_signal_entry = {
-                'Date': current_date_ts,
-                'Component': component_name,
-                'Price': entry_price,
-                'Signal': prediction_tag
-            }
-            # Add individual signal scores to the daily signal entry
-            for key in signal_score_keys:
-                daily_signal_entry[key] = comp_data.get(key, 0.0) # Use .get() with default 0.0 for safety
-
-            all_daily_signals_raw.append(daily_signal_entry)
-
-    df_all_signals = pd.DataFrame(all_daily_signals_raw)
-
-    if df_all_signals.empty:
-        print("⚠️ Backtest completed, but no daily signals were collected. No trades to simulate.")
-        return
-
-    final_backtest_trades = []
-    unique_components = df_all_signals['Component'].unique()
-
-    print(f"\n--- Simulating trades for {len(unique_components)} components with {holding_period}-day holding period ---")
-    for comp in unique_components:
-        comp_df_signals = df_all_signals[df_all_signals['Component'] == comp].copy()
-        comp_df_signals = comp_df_signals.sort_values(by='Date').reset_index(drop=True)
-
-        if len(comp_df_signals) > holding_period:
-            comp_results = backtest_component(
-                df=comp_df_signals,
-                component_name=comp,
-                signal_col='Signal',
-                price_col='Price',
-                days_hold=holding_period
-            )
-            if not comp_results.empty:
-                final_backtest_trades.append(comp_results)
-        else:
-            pass # Insufficient data for this component
-
-    df_final_backtest_results = pd.concat(final_backtest_trades, ignore_index=True) if final_backtest_trades else pd.DataFrame()
-
-    if not df_final_backtest_results.empty:
-        # --- Handle infinite values in 'Return' column ---
-        # Replace positive and negative infinity with NaN (Not a Number)
-        # If you explicitly want 0, use: df_final_backtest_results.replace([np.inf, -np.inf], 0, inplace=True)
-        df_final_backtest_results.replace([np.inf, -np.inf], np.nan, inplace=True)
-
-        # --- Calculate True Confidence based on individual signal scores ---
-        # Note: This calculation is applied *after* all trades are compiled.
-        # Ensure all required columns exist before calculation, fill with 0 if not.
-        confidence_signals = [
-            'ΔStorage',
-            'ΔTemp/HDD/CDD',
-            'Price Momentum',
-            'Basis Deviation',
-            'ΔLNG Feed Gas',
-            'Nuclear Drop',
-            'Managed Money',
-            'Upcoming Outage Risk',
-            'Forecasted Balance',
-            'SMA Crossover', # Added new signal
-            'Volatility Breakout' # Added new signal
-        ]
-        
-        # Ensure all columns exist before attempting to access them
-        for col in confidence_signals:
-            if col not in df_final_backtest_results.columns:
-                df_final_backtest_results[col] = 0.0 # Add missing columns with default 0.0
-
-        # Sum of bullish signals (score > 0) divided by the total number of signals
-        df_final_backtest_results['Confidence'] = (
-            (df_final_backtest_results['ΔStorage'] > 0).astype(int) +
-            (df_final_backtest_results['ΔTemp/HDD/CDD'] > 0).astype(int) +
-            (df_final_backtest_results['Price Momentum'] > 0).astype(int) +
-            (df_final_backtest_results['Basis Deviation'] > 0).astype(int) +
-            (df_final_backtest_results['ΔLNG Feed Gas'] > 0).astype(int) +
-            (df_final_backtest_results['Nuclear Drop'] > 0).astype(int) +
-            (df_final_backtest_results['Managed Money'] > 0).astype(int) +
-            (df_final_backtest_results['Upcoming Outage Risk'] > 0).astype(int) +
-            (df_final_backtest_results['Forecasted Balance'] > 0).astype(int) +
-            (df_final_backtest_results['SMA Crossover'] > 0).astype(int) + # Added new signal
-            (df_final_backtest_results['Volatility Breakout'] > 0).astype(int) # Added new signal
-        ) / len(confidence_signals) # Dynamically use the number of signal columns
-
-        if output_file_path:
-            df_final_backtest_results.to_csv(output_file_path, index=False)
-            print(f"✅ Backtest completed. Results saved to {output_file_path}.")
-
-        # --- Analyze and Print Performance Metrics ---
-        print("\n--- Backtest Performance Metrics ---")
-        total_trades = len(df_final_backtest_results)
-        print(f"Total Trades: {total_trades}")
-
-        if total_trades > 0:
-            winning_trades_count = (df_final_backtest_results['Return'] > 0).sum()
-            losing_trades_count = (df_final_backtest_results['Return'] < 0).sum()
-            flat_trades_count = total_trades - winning_trades_count - losing_trades_count
-
-            win_rate = winning_trades_count / total_trades
-            print(f"Win Rate: {win_rate:.2%}")
-            print(f"Average Return per Trade: {df_final_backtest_results['Return'].mean():.4f}")
-            print(f"Median Return per Trade: {df_final_backtest_results['Return'].median():.4f}")
-
-            total_compounded_return = (df_final_backtest_results['Return'] + 1).prod() - 1
-            print(f"Total Compounded Return: {total_compounded_return:.2%}")
-
-            if df_final_backtest_results['Return'].std() > 0:
-                sharpe_ratio_naive = df_final_backtest_results['Return'].mean() / df_final_backtest_results['Return'].std()
-                print(f"Naive Sharpe Ratio (per trade): {sharpe_ratio_naive:.2f}")
-            else:
-                print("Naive Sharpe Ratio: N/A (Standard deviation of returns is zero)")
-
-            max_single_drawdown = df_final_backtest_results['Return'].min()
-            print(f"Max Single Trade Drawdown: {max_single_drawdown:.2%}")
-
-            if winning_trades_count > 0:
-                avg_win_return = df_final_backtest_results[df_final_backtest_results['Return'] > 0]['Return'].mean()
-                print(f"Average Winning Trade Return: {avg_win_return:.2%}")
-            else:
-                print("Average Winning Trade Return: N/A (No winning trades)")
-
-            if losing_trades_count > 0:
-                avg_loss_return = df_final_backtest_results[df_final_backtest_results['Return'] < 0]['Return'].mean()
-                print(f"Average Losing Trade Return: {avg_loss_return:.2%}")
-            else:
-                print("Average Losing Trade Return: N/A (No losing trades)")
-
-            gross_wins = df_final_backtest_results[df_final_backtest_results['Return'] > 0]['Return'].sum()
-            gross_losses = abs(df_final_backtest_results[df_final_backtest_results['Return'] < 0]['Return'].sum())
-            if gross_losses > 0:
-                profit_factor = gross_wins / gross_losses
-                print(f"Profit Factor: {profit_factor:.2f}")
-            else:
-                print("Profit Factor: N/A (No gross losses)")
-
-            # --- Confidence Score Analysis ---
-            print("\n--- Confidence Score Distribution ---")
-            print(df_final_backtest_results['Confidence'].describe())
-            print("\nAverage Confidence for Winning Trades:")
-            print(df_final_backtest_results[df_final_backtest_results['Return'] > 0]['Confidence'].mean())
-            print("Average Confidence for Losing Trades:")
-            print(df_final_backtest_results[df_final_backtest_results['Return'] < 0]['Confidence'].mean())
-            print("Average Confidence for All Trades:")
-            print(df_final_backtest_results['Confidence'].mean())
-
-            # --- Confidence vs Return Correlation ---
-            if 'Confidence' in df_final_backtest_results.columns and 'Return' in df_final_backtest_results.columns:
-                # Drop rows with NaN in either column before calculating correlation
-                clean_df_for_corr = df_final_backtest_results.dropna(subset=['Confidence', 'Return'])
-                if not clean_df_for_corr.empty:
-                    correlation = clean_df_for_corr['Confidence'].corr(clean_df_for_corr['Return'])
-                    print(f"\nCorrelation between Confidence and Return: {correlation:.2f}")
-                else:
-                    print("\nCorrelation between Confidence and Return: N/A (Insufficient clean data)")
-            else:
-                print("\nCorrelation between Confidence and Return: N/A (Confidence or Return column missing)")
-
-        else:
-            print("No trades were executed during the backtest period.")
-    else:
-        print("⚠️ Backtest completed, but no trade results were generated.")
-
-
-# --- Main Execution ---
-if __name__ == "__main__":
-    raw_data = {}
-    for key, fname in files.items():
-        if key == "lng_hist":
-            raw_data[key] = load_clean_df(key, fname, data_folder)
-        elif key == "natural_gas_data_positioning":
-            raw_data[key] = load_clean_df(key, fname, goscripts_info_folder)
-        elif key == "plant_group_mapping":
-            raw_data[key] = load_clean_df(key, fname, goscripts_folder)
-        else:
-            raw_data[key] = load_clean_df(key, fname, data_folder)
-
-    raw_data = {k: v for k, v in raw_data.items() if v is not None}
-
-    latest_eia_report_date = None
-    if "eia_totals" in raw_data and "period" in raw_data["eia_totals"].columns:
-        df_eia_period = raw_data["eia_totals"].dropna(subset=["period"])
-        if not df_eia_period.empty:
-            latest_eia_report_date = df_eia_period["period"].max().date()
-
-    storage_positions = {}
-    for d_name, i_col_name in region_map.items():
-        pos_data = get_storage_position(d_name, i_col_name, raw_data, latest_eia_report_date)
-        if pos_data:
-            storage_positions[d_name] = pos_data
-
-    today_analysis_date = None
-    prices_df_for_date_check = raw_data.get("prices")
-    if prices_df_for_date_check is not None and not prices_df_for_date_check.empty and 'date' in prices_df_for_date_check.columns:
-        prices_df_for_date_check['date'] = pd.to_datetime(prices_df_for_date_check['date'], errors='coerce')
-        prices_df_for_date_check.dropna(subset=['date'], inplace=True)
-        if not prices_df_for_date_check.empty:
-            today_analysis_date = prices_df_for_date_check['date'].max().date()
-        else:
-            print("CRITICAL ERROR: PRICES.csv loaded but is empty or dates are invalid after cleaning. Cannot determine analysis date.")
-            exit()
-    else:
-        print("CRITICAL ERROR: PRICES.csv not loaded or missing 'Date' column. Cannot determine analysis date.")
-        exit()
-
-    print(f"\n--- Running Natural Gas Market Component Analysis for {today_analysis_date} ---")
-    print("--------------------------------------------------------------------------\n")
-
-    top_components, all_component_tags_for_summary = analyze_components(today_analysis_date, raw_data, storage_positions)
-
-    if top_components:
-        print("\n### Top 5 Natural Gas Market Components by Score ###")
-        print("--------------------------------------------------\n")
-        for i, comp in enumerate(top_components):
-            print(f"**{i+1}. Component: {comp['name']}**")
-            print(f"    Total Score: {comp['total_score']} points")
-            print(f"    📌 Bias Tag: {comp['bias_tag']}")
-            # Calculate and print confidence for the single daily run
-            # This is a temporary calculation for display, the main one is in run_backtest
-            current_day_confidence_signals = [
-                'ΔStorage', 'ΔTemp/HDD/CDD', 'Price Momentum', 'Basis Deviation',
-                'ΔLNG Feed Gas', 'Nuclear Drop', 'Managed Money', 'Upcoming Outage Risk',
-                'Forecasted Balance', 'SMA Crossover', 'Volatility Breakout' # Added new signals
-            ]
-            current_day_confidence = sum(int(comp.get(signal, 0) > 0) for signal in current_day_confidence_signals) / len(current_day_confidence_signals)
-
-            print(f"    Confidence Score: {current_day_confidence:.2f}")
-            print("    Score Breakdown:")
-            # Use comp.get() for score breakdown as well to handle potential missing keys
-            for signal_name in current_day_confidence_signals: # Use the full list here
-                print(f"      - {signal_name}: {comp.get(signal_name, 'N/A')} points")
-            print(f"    Summary: {comp['summary']}")
-            print("\n" + "---" * 15 + "\n")
-
-        if all_component_tags_for_summary:
-            print("\n🔍 Recommendation Summary:")
-            for comp_data in all_component_tags_for_summary:
-                # Recalculate confidence for summary display
-                summary_confidence_signals = [
-                    'ΔStorage', 'ΔTemp/HDD/CDD', 'Price Momentum', 'Basis Deviation',
-                    'ΔLNG Feed Gas', 'Nuclear Drop', 'Managed Money', 'Upcoming Outage Risk',
-                    'Forecasted Balance', 'SMA Crossover', 'Volatility Breakout' # Added new signals
-                ]
-                summary_confidence = sum(int(comp_data.get(signal, 0) > 0) for signal in summary_confidence_signals) / len(summary_confidence_signals)
-                print(f"- {comp_data['name']}: {comp_data['bias_tag']} (Confidence: {summary_confidence:.2f})")
-            print("\n" + "---" * 15 + "\n")
-
-    else:
-        print("\nNo components found for analysis or insufficient data to perform calculations.")
-        print("Please ensure all necessary CSV files are present, correctly named, and contain valid data.")
-
-    backtest_path = goscripts_info_folder / OUTPUT_CSV_FILENAME
-
-    print("Running full backtest and saving results to CSV...")
-    if raw_data.get("prices") is not None:
-        run_backtest(
-            prices_df=raw_data["prices"].copy(),
-            raw_data=raw_data,
-            storage_positions=storage_positions,
-            start_date="2023-01-01",
-            end_date="2024-12-31",
-            holding_period=7,
-            output_file_path=backtest_path
-        )
-    else:
-        print("⚠️ Cannot run backtest: 'prices' data not loaded.")
+print(f"\n✅ CSV saved: {output_filename}")
+print("Columns in output:")
+print(results_df.columns.tolist())

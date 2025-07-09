@@ -1,0 +1,92 @@
+{
+  "Region": "South Central Region",
+  "Latest Date": "2025-06-27",
+  "Training Sample Count": 261,
+  "Backtest MAE": 7.785,
+  "Model Type": "LassoCV",
+  "ModelParameters": "LassoCV(alphas=[0.01, 0.1, 1.0, 10.0], max_iter=10000, random_state=42)",
+  "Top Feature Coefficients": {
+    "HDD": -15.974394480763994,
+    "SouthCentral - Power": -7.954386748104727,
+    "Target_roll3": 6.2590650905815854,
+    "SouthCentral - ResCom": -5.066930252518551,
+    "SouthCentral - Balance": 3.539774837288964,
+    "SouthCentral - Ind": -3.2119255898034256,
+    "DailyPrecipAmount": -0.8473739478212812,
+    "DailyPrecipAmount_roll3": -0.40033386704523793
+  },
+  "Zero Coefficient Count": 7,
+  "Total Feature Count": 15,
+  "Feature Names": [
+    "StorageTotal",
+    "SouthCentral - Balance",
+    "SouthCentral - Ind",
+    "SouthCentral - Power",
+    "SouthCentral - Prod",
+    "SouthCentral - ResCom",
+    "AvgTemp",
+    "CDD",
+    "HDD",
+    "DailyPrecipAmount",
+    "AvgTemp_roll3",
+    "CDD_roll3",
+    "HDD_roll3",
+    "DailyPrecipAmount_roll3",
+    "Target_roll3"
+  ],
+  "UseCriterion": false,
+  "EnhanceWeather": false,
+  "Model Alpha": 1.0,
+  "TopWeatherFeatures": [
+    "AvgTemp",
+    "CDD",
+    "HDD",
+    "DailyPrecipAmount",
+    "AvgTemp_roll3",
+    "CDD_roll3",
+    "HDD_roll3",
+    "DailyPrecipAmount_roll3"
+  ],
+  "TopFundamentals": [
+    "SouthCentral - Balance",
+    "SouthCentral - Ind",
+    "SouthCentral - Power",
+    "SouthCentral - Prod",
+    "SouthCentral - ResCom"
+  ],
+  "Latest Forecast Features": {
+    "StorageTotal": 1148,
+    "SouthCentral - Balance": 90537.82459999999,
+    "SouthCentral - Ind": 9594.881,
+    "SouthCentral - Power": 9260.392,
+    "SouthCentral - Prod": 110423.348,
+    "SouthCentral - ResCom": 1030.2504,
+    "AvgTemp": 86.0,
+    "AvgTemp_roll3": 84.76190476190476,
+    "CDD": 21.0,
+    "CDD_roll3": 138.33333333333334,
+    "HDD": 0.0,
+    "HDD_roll3": 0.0,
+    "DailyPrecipAmount": 0.0,
+    "DailyPrecipAmount_roll3": 1.4633333333333336,
+    "Target_roll3": 28.333333333333332
+  },
+  "Backtest Actuals": [
+    36.0,
+    20.0,
+    29.0,
+    8.0
+  ],
+  "Backtest Predicted": [
+    23.85,
+    20.88,
+    22.25,
+    19.36
+  ],
+  "Backtest Dates": [
+    "2025-06-06",
+    "2025-06-13",
+    "2025-06-20",
+    "2025-06-27"
+  ]
+}

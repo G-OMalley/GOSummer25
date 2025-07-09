@@ -1,0 +1,77 @@
+{
+  "Lower 48 States": {
+    "use_criterion": false,
+    "enhance_weather": true,
+    "use_rolling_weather_basic": true,
+    "use_target_roll3": true,
+    "weather_cities": [
+      "Conus"
+    ],
+    "use_ridge": false,
+    "notes": "Code 2 logic: No Criterion, Enhanced Weather On. Full Conus aggregation, LassoCV."
+  },
+  "East Region": {
+    "use_criterion": true,
+    "enhance_weather": true,
+    "use_rolling_weather_basic": true,
+    "use_target_roll3": true,
+    "weather_cities": [
+      "Boston",
+      "Buffalo",
+      "Pittsburgh",
+      "Washington",
+      "JFK",
+      "Ral-Durham"
+    ],
+    "use_ridge": false,
+    "notes": "Code 2 logic: Criterion On, Enhanced Weather On. Expanded weather cities, lagged target, LassoCV."
+  },
+  "Midwest Region": {
+    "use_criterion": false,
+    "enhance_weather": false,
+    "use_rolling_weather_basic": false,
+    "use_target_roll3": false,
+    "weather_cities": [
+      "Chicago OHare"
+    ],
+    "use_ridge": false,
+    "notes": "Reverted to Code 1 logic (simpler): No Criterion, No Enhanced Weather, No Basic Rolling Weather, No Target Roll3, LassoCV, single city."
+  },
+  "South Central Region": {
+    "use_criterion": false,
+    "enhance_weather": true,
+    "use_rolling_weather_basic": true,
+    "use_target_roll3": true,
+    "weather_cities": [
+      "Houston IAH",
+      "Little Rock",
+      "New Orleans",
+      "Ok. City"
+    ],
+    "use_ridge": false,
+    "notes": "Code 2 logic: No Criterion, Enhanced Weather On. Specific cities for South Central."
+  },
+  "Mountain Region": {
+    "use_criterion": false,
+    "enhance_weather": true,
+    "use_rolling_weather_basic": true,
+    "use_target_roll3": true,
+    "weather_cities": [
+      "Denver"
+    ],
+    "use_ridge": false,
+    "notes": "Code 2 logic: No Criterion, Enhanced Weather On. Specific city for Mountain."
+  },
+  "Pacific Region": {
+    "use_criterion": false,
+    "enhance_weather": false,
+    "use_rolling_weather_basic": false,
+    "use_target_roll3": false,
+    "weather_cities": [
+      "Los Angeles",
+      "Seattle"
+    ],
+    "use_ridge": true,
+    "notes": "Reverted to Code 1 logic (simpler): No Criterion, No Enhanced Weather, No Basic Rolling Weather, No Target Roll3, RidgeCV, limited core cities."
+  }
+}

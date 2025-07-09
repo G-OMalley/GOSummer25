@@ -1,0 +1,6 @@
+Component,Signal Date,Signal,Confidence,Predicted Direction,Price on Signal Date,Price on Prev Day,Daily Change %,Actual Direction,Prediction Matched Actual
+TETCO-M3,2025-07-04,SELL,1.0,Down,2.87,2.88,-0.0034722222222221483,Down,True
+Transco Zn3,2025-07-04,SELL,1.0,Down,3.415,3.675,-0.07074829931972784,Down,True
+Chicago,2025-07-04,SELL,1.0,Down,2.92,2.83,0.031802120141342705,Up,False
+Henry,2025-07-04,SELL,1.0,Down,,,,N/A (Missing Price Data),False
+Waha,2025-07-04,SELL,1.0,Down,1.78,1.955,-0.0895140664961637,Down,True
