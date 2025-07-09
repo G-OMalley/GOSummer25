@@ -4,15 +4,37 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from collections import defaultdict
 import ast # Required for ast.literal_eval in load_clean_df
+import matplotlib.pyplot as plt # Added import, though not used in backtest itself, good to keep if needed
+import joblib # Added import, though not used in backtest itself, good to keep if needed
+import random # Added as it was in the initial script content, though not directly used in the provided snippet
+import csv # Added as it was in the initial script content, though not directly used in the provided snippet
 
-# --- Setup ---
+# --- Configuration ---
+# Define the path for the output CSV file
+# This is now just the filename, the directory will be specified when constructing the full path
+OUTPUT_CSV_FILENAME = 'backtest_results.csv'
+
+# --- Path Setup ---
+# Determine the directory where this script is located
 script_dir = Path(__file__).resolve().parent
+# Assume project root is one level up from the script directory
 project_root = script_dir.parent
-data_folder = project_root / "INFO" # This is the primary INFO folder
+# Define the primary INFO folder
+data_folder = project_root / "INFO"
+# Define the GOScripts folder
 goscripts_folder = project_root / "GOScripts"
+
+# Ensure these directories exist for data loading
+data_folder.mkdir(parents=True, exist_ok=True)
+goscripts_folder.mkdir(parents=True, exist_ok=True)
+# Specific subfolder for Natural_Gas_Data_Positioning.csv and now for backtest_results.csv
+goscripts_info_folder = goscripts_folder / "INFO"
+goscripts_info_folder.mkdir(parents=True, exist_ok=True) # Ensure this specific subfolder exists
 
 print(f"Data folder resolved to: {data_folder.resolve()}")
 print(f"GOScripts folder resolved to: {goscripts_folder.resolve()}")
+print(f"GOScripts INFO folder resolved to: {goscripts_info_folder.resolve()}")
+
 
 # Standard base temperature for CDD/HDD in natural gas markets
 BASE_TEMP_CDD_HDD = 65
@@ -196,7 +218,7 @@ def load_clean_df(file_key, fname, data_path):
             if 'flow_mmcfd' in df.columns:
                 df['flow_mmcfd'] = pd.to_numeric(df['flow_mmcfd'], errors='coerce')
             return df
-            
+
         elif file_key == "natural_gas_data_positioning":
             df = pd.read_csv(fpath)
             df = df.rename(columns={
@@ -549,7 +571,7 @@ def get_historical_outage_risk(hist_df, id_col, value_col, check_date, lookahead
 
         grouped_data['Outage_Flag'] = grouped_data["Drop %"] > min_drop_pct
         grouped_data['block'] = (grouped_data['Outage_Flag'] != grouped_data['Outage_Flag'].shift()).cumsum()
-        
+
         qualifying_outage_blocks = grouped_data[grouped_data['Outage_Flag']].groupby('block').filter(
             lambda x: len(x) >= min_drop_duration and x['Outage_Flag'].all()
         )
@@ -566,10 +588,10 @@ def get_historical_outage_risk(hist_df, id_col, value_col, check_date, lookahead
 def analyze_components(today_date, raw_data, storage_positions):
     """
     Analyzes various market components based on the specified criteria, scores them,
-    and returns the top 5 sorted components.
+    and returns the top 5 sorted components and a list of all component analysis dictionaries.
     """
     components_analysis = {}
-    top_5_summary_list = [] # ENHANCEMENT 4: For final polish summary
+    all_component_analysis_dicts = [] # This will hold the full dictionaries for all components
 
     prices_df = raw_data.get("prices")
     weather_df = raw_data.get("weather")
@@ -580,30 +602,10 @@ def analyze_components(today_date, raw_data, storage_positions):
     natural_gas_data_positioning_df = raw_data.get("natural_gas_data_positioning")
     forecast_df = raw_data.get("forecast")
 
-    # --- DIAGNOSTIC CHECKS ---
-    print("\n--- Diagnostic: DataFrames Status ---")
-    critical_dfs = {
-        "prices_df": prices_df,
-        "weather_df": weather_df,
-        "eia_totals_df": eia_totals_df,
-        "lng_hist_df": lng_hist_df,
-        "nuclear_hist_df": nuclear_hist_df,
-        "plant_group_mapping_df": plant_group_mapping_df,
-        "natural_gas_data_positioning_df": natural_gas_data_positioning_df,
-        "forecast_df": forecast_df
-    }
-    for df_name, df in critical_dfs.items():
-        if df is None:
-            print(f"  {df_name}: NOT LOADED (Check file path/name/errors during load)")
-        elif df.empty:
-            print(f"  {df_name}: LOADED BUT EMPTY")
-        else:
-            print(f"  {df_name}: Loaded, {len(df)} rows. Columns: {df.columns.tolist()}")
-
     if prices_df is None or weather_df is None or eia_totals_df is None or \
        prices_df.empty or weather_df.empty or eia_totals_df.empty:
         print("\nFATAL: One or more critical dataframes (prices, weather, EIA totals) are missing or empty. Cannot proceed with analysis.")
-        return []
+        return [], []
 
     # Ensure date columns are datetime objects for critical DFs
     prices_df['date'] = pd.to_datetime(prices_df['date'], errors='coerce')
@@ -622,18 +624,15 @@ def analyze_components(today_date, raw_data, storage_positions):
     # Filter prices for the last 7 days
     recent_prices = prices_df[(prices_df['date'].dt.date >= seven_days_ago) &
                               (prices_df['date'].dt.date <= today_date)].copy()
-    if recent_prices.empty:
-        print("Warning: No recent price data for the last 7 days. Price momentum might be N/A for all components.")
 
     # Filter weather for the last 7 days
     recent_weather = weather_df[(weather_df['date'].dt.date >= seven_days_ago) &
-                                (weather_df['date'].dt.date <= today_date)].copy()
-    if recent_weather.empty:
-        print("Warning: No recent weather data for the last 7 days. Temperature/HDD/CDD will be N/A.")
+                                 (weather_df['date'].dt.date <= today_date)].copy()
 
     # Calculate overall Henry Hub price momentum
     henry_col_name_lower = HENRY_HUB_NAME.lower()
-    if henry_col_name_lower not in prices_df.columns and HENRY_HUB_NAME in prices_df.columns:
+    # Ensure 'henry' column exists before trying to rename/access
+    if HENRY_HUB_NAME in prices_df.columns:
         prices_df.rename(columns={HENRY_HUB_NAME: henry_col_name_lower}, inplace=True)
 
     today_henry_price = np.nan
@@ -643,61 +642,65 @@ def analyze_components(today_date, raw_data, storage_positions):
         today_henry_price = today_henry_price_series.iloc[0] if not today_henry_price_series.empty else np.nan
 
         last_5_day_prices_for_avg = recent_prices[(recent_prices['date'].dt.date >= today_date - timedelta(days=4)) &
-                                                  (recent_prices['date'].dt.date <= today_date)][henry_col_name_lower]
+                                                 (recent_prices['date'].dt.date <= today_date)][henry_col_name_lower]
         last_5_day_avg_henry_price = last_5_day_prices_for_avg.mean()
 
 
     # Calculate LNG feed gas drop impact from CriterionLNGHist.csv
-    lng_flow_drop_impact = get_lng_flow_impact(lng_hist_df, today_date)
-    if lng_flow_drop_impact > 0:
-        print(f"Detected LNG flow drop of {lng_flow_drop_impact:.1f}% over 3+ days ending {today_date}.")
+    if lng_hist_df is not None:
+        lng_hist_df_filtered = lng_hist_df[lng_hist_df['date'].dt.date <= today_date].copy()
+    else:
+        lng_hist_df_filtered = None
 
+    lng_flow_drop_impact = get_lng_flow_impact(lng_hist_df_filtered, today_date)
 
     # Calculate nearby nuclear generation drop
-    nuclear_generation_drop_impact = get_nuclear_outage_impact(nuclear_hist_df, plant_group_mapping_df, today_date)
+    if nuclear_hist_df is not None:
+        nuclear_hist_df_filtered = nuclear_hist_df[nuclear_hist_df['date'].dt.date <= today_date].copy()
+    else:
+        nuclear_hist_df_filtered = None
+
+    nuclear_generation_drop_impact = get_nuclear_outage_impact(nuclear_hist_df_filtered, plant_group_mapping_df, today_date)
 
     # --- ENHANCEMENT 3: Improve Managed Money Score ---
     net_managed_money_change = 0
     if natural_gas_data_positioning_df is not None and not natural_gas_data_positioning_df.empty and \
        'date' in natural_gas_data_positioning_df.columns and \
-       'managed_money_net' in natural_gas_data_positioning_df.columns: # Rely on 'managed_money_net' as the source
+       'managed_money_net' in natural_gas_data_positioning_df.columns:
 
         df_mm = natural_gas_data_positioning_df.dropna(subset=['date', 'managed_money_net']).copy()
-        df_mm['date'] = pd.to_datetime(df_mm['date']) # Ensure date is datetime for sorting
+        df_mm['date'] = pd.to_datetime(df_mm['date'])
         df_mm = df_mm.sort_values('date')
 
-        if len(df_mm) >= 5: # Need at least 5 data points for iloc[-5]
-            latest_mm = df_mm["managed_money_net"].iloc[-1]
-            prior_mm = df_mm["managed_money_net"].iloc[-5] # As per user's suggestion (5 rows ago)
-            net_managed_money_change = latest_mm - prior_mm
-        elif len(df_mm) >= 2: # Fallback to latest vs previous if less than 5 points
-            latest_mm = df_mm["managed_money_net"].iloc[-1]
-            prior_mm = df_mm["managed_money_net"].iloc[-2]
-            net_managed_money_change = latest_mm - prior_mm
-            print(f"Warning: Less than 5 Managed Money data points ({len(df_mm)}) for comparison. Using latest vs previous point.")
-        else:
-            print(f"Warning: Insufficient Managed Money data points ({len(df_mm)}) for change calculation.")
-    else:
-        print(f"Warning: Managed Money data not available or missing required 'date' and 'managed_money_net' columns.")
+        df_mm_filtered = df_mm[df_mm['date'].dt.date <= today_date].copy()
 
+        if len(df_mm_filtered) >= 5:
+            latest_mm = df_mm_filtered["managed_money_net"].iloc[-1]
+            prior_mm = df_mm_filtered["managed_money_net"].iloc[-5]
+            net_managed_money_change = latest_mm - prior_mm
+        elif len(df_mm_filtered) >= 2:
+            latest_mm = df_mm_filtered["managed_money_net"].iloc[-1]
+            prior_mm = df_mm_filtered["managed_money_net"].iloc[-2]
+            net_managed_money_change = latest_mm - prior_mm
+        else:
+            pass
+
+    else:
+        pass
 
     # Calculate historical risk of upcoming outages (next 30 days)
     lookahead_start_date = today_date + timedelta(days=1)
-    lookahead_days = 30 # Default lookahead period
+    lookahead_days = 30
 
     historical_nuclear_risk_pct = get_historical_outage_risk(
-        nuclear_hist_df, id_col='Group', value_col='Output',
+        nuclear_hist_df_filtered, id_col='Group', value_col='Output',
         check_date=lookahead_start_date, lookahead_days=lookahead_days
     )
-    if historical_nuclear_risk_pct > 0:
-        print(f"Historical Nuclear Outage Risk for next {lookahead_days} days: Avg drop {historical_nuclear_risk_pct:.1f}%")
 
     historical_lng_risk_pct = get_historical_outage_risk(
-        lng_hist_df, id_col='Item', value_col='flow_mmcfd', # Assuming 'Item' column for LNG facility ID
+        lng_hist_df_filtered, id_col='Item', value_col='flow_mmcfd',
         check_date=lookahead_start_date, lookahead_days=lookahead_days
     )
-    if historical_lng_risk_pct > 0:
-        print(f"Historical LNG Outage Risk for next {lookahead_days} days: Avg drop {historical_lng_risk_pct:.1f}%")
 
 
     # --- ENHANCEMENT 5: Add Forecasted Signal Using FundyForecast.csv ---
@@ -705,18 +708,18 @@ def analyze_components(today_date, raw_data, storage_positions):
     forecast_signal_score = 0
     if forecast_df is not None and not forecast_df.empty and \
        'Date' in forecast_df.columns and 'item' in forecast_df.columns and 'value' in forecast_df.columns:
-        
+
         forecast_df['Date'] = pd.to_datetime(forecast_df['Date'], errors='coerce')
         forecast_df.dropna(subset=['Date', 'item', 'value'], inplace=True)
-        
-        # Filter for "Balance" items and next 7 days
+
         next_7_days_start = today_date + timedelta(days=1)
         next_7_days_end = today_date + timedelta(days=7)
 
         future_balance_data = forecast_df[
             (forecast_df['item'].str.contains("Balance", case=False, na=False)) &
             (forecast_df['Date'].dt.date >= next_7_days_start) &
-            (forecast_df['Date'].dt.date <= next_7_days_end)
+            (forecast_df['Date'].dt.date <= next_7_days_end) &
+            (forecast_df['Date'].dt.date <= today_date)
         ].copy()
 
         if not future_balance_data.empty:
@@ -734,11 +737,9 @@ def analyze_components(today_date, raw_data, storage_positions):
             else:
                 avg_future_balance_signal = "Neutral balance forecast (Avg is NaN)"
         else:
-            print("Warning: No future balance data found in FundyForecast.csv for next 7 days.")
-            avg_future_balance_signal = "Neutral balance forecast (No data)"
+            pass
     else:
-        print("Warning: FundyForecast.csv not loaded or missing required columns for forecasted signal.")
-        avg_future_balance_signal = "Neutral balance forecast (File missing)"
+        pass
 
 
     # Iterate through each component (columns in prices_df, excluding 'date', 'henry', and other unwanted cols)
@@ -747,8 +748,12 @@ def analyze_components(today_date, raw_data, storage_positions):
     if component_price_columns.empty:
         print("\nWarning: No component price columns found in PRICES.csv after filtering. Is Henry Hub named correctly or are other price columns present?")
 
+    # Filter prices_df to only include data up to today_date for price momentum and basis
+    prices_df_filtered = prices_df[prices_df['date'].dt.date <= today_date].copy().set_index('date').sort_index()
+
+
     for component_name in component_price_columns:
-        component_scores = {}
+        component_scores = {} # This will hold the individual scores for breakdown/debugging
         summary_parts = []
         overall_score = 0
 
@@ -758,8 +763,7 @@ def analyze_components(today_date, raw_data, storage_positions):
             continue
 
         # Pull recent data for component
-        # Ensure enough data for 10-day basis deviation (needs 11 points: today + 10 prior)
-        price_series_for_component = prices_df[[component_name, 'date']].dropna().set_index('date').sort_index()
+        price_series_for_component = prices_df_filtered[[component_name]].dropna()
 
         # 1. ΔStorage (vs 5-yr avg) - Scaled by Z-score
         delta_storage_score = 0
@@ -773,7 +777,7 @@ def analyze_components(today_date, raw_data, storage_positions):
             delta_storage_bcf = storage_info_for_component['storage_position_bcf']
             std_dev_bcf = storage_info_for_component['std_dev_bcf']
 
-            if pd.notna(std_dev_bcf) and std_dev_bcf > 0: # Check for non-zero std_dev
+            if pd.notna(std_dev_bcf) and std_dev_bcf > 0:
                 z_score = delta_storage_bcf / std_dev_bcf
                 if z_score < -1.5:
                     delta_storage_score = 2
@@ -789,7 +793,7 @@ def analyze_components(today_date, raw_data, storage_positions):
                     summary_parts.append(f"Storage Surplus: +{delta_storage_bcf:,.1f} Bcf (Z={z_score:.2f}) (Bearish)")
                 else:
                     summary_parts.append("Storage In Line")
-            else: # Fallback if std_dev is NaN or zero (e.g., all historical values are same)
+            else:
                 if delta_storage_bcf < -100: delta_storage_score = 4
                 elif delta_storage_bcf < -20: delta_storage_score = 2
                 elif delta_storage_bcf > 100: delta_storage_score = -4
@@ -825,46 +829,56 @@ def analyze_components(today_date, raw_data, storage_positions):
             summary_parts.append("Weather Data N/A")
         component_scores["ΔTemp/HDD/CDD"] = temp_cdd_score
 
-        # 3. Price momentum (today vs last 5-day avg for *component's own price*)
+        # 3. Price momentum using Z-score over last 10 days
         price_momentum_score = 0
-        # Ensure enough data points for the 5-day average
-        price_data_for_momentum = price_series_for_component[component_name].tail(5).dropna()
-        if len(price_data_for_momentum) >= 5:
-            today_comp_price = price_data_for_momentum.iloc[-1]
-            last_5_day_avg_comp_price = price_data_for_momentum.mean()
-            price_momentum_comp = today_comp_price - last_5_day_avg_comp_price
+        price_window = price_series_for_component[component_name].tail(10).dropna()
+        if len(price_window) >= 10:
+            price_mean = price_window.mean()
+            price_std = price_window.std()
+            today_price = price_window.iloc[-1]
+            z_score = (today_price - price_mean) / price_std if price_std > 0 else 0
 
-            if price_momentum_comp > 0.05:
+            if z_score > 1.5:
                 price_momentum_score = 2
-                summary_parts.append(f"Strong Price Momentum ({price_momentum_comp:+.2f}) (Bullish)")
-            elif price_momentum_comp < -0.05:
+                summary_parts.append(f"Strong Price Momentum (Z={z_score:.2f}) (Bullish)")
+            elif z_score < -1.5:
                 price_momentum_score = -2
-                summary_parts.append(f"Negative Price Momentum ({price_momentum_comp:+.2f}) (Bearish)")
+                summary_parts.append(f"Strong Negative Momentum (Z={z_score:.2f}) (Bearish)")
+            elif z_score > 0.5:
+                price_momentum_score = 1
+                summary_parts.append(f"Weak Price Momentum (Z={z_score:.2f}) (Bullish)")
+            elif z_score < -0.5:
+                price_momentum_score = -1
+                summary_parts.append(f"Weak Negative Momentum (Z={z_score:.2f}) (Bearish)")
             else:
-                summary_parts.append("Stable Price Momentum")
+                summary_parts.append(f"Stable Price Momentum (Z={z_score:.2f})")
         else:
             summary_parts.append("Price Momentum N/A (Insufficient data)")
         component_scores["Price Momentum"] = price_momentum_score
 
-        # --- ENHANCEMENT 4: Add Basis Deviation Check ---
+        # Improved Basis Deviation using rolling z-score and momentum
         basis_deviation_score = 0
-        basis_delta = np.nan
-        # Ensure at least 11 points: 1 (today) + 10 (for average)
-        price_series_for_basis = price_series_for_component[component_name].tail(11).dropna()
-        
-        if len(price_series_for_basis) >= 11:
-            basis_today_val = price_series_for_basis.iloc[-1]
-            basis_avg_val = price_series_for_basis[:-1].mean() # Mean of the preceding 10 days
-            basis_delta = basis_today_val - basis_avg_val
+        price_series_for_basis = price_series_for_component[component_name].tail(20).dropna()
+        if len(price_series_for_basis) >= 20:
+            basis_mean = price_series_for_basis[:-1].mean()
+            basis_std = price_series_for_basis[:-1].std()
+            basis_today = price_series_for_basis.iloc[-1]
+            basis_zscore = (basis_today - basis_mean) / basis_std if basis_std > 0 else 0
 
-            if basis_delta > 0.2:
+            if basis_zscore > 1.5:
+                basis_deviation_score = 2
+                summary_parts.append(f"Strong Positive Basis (Z={basis_zscore:.2f}) (Bullish)")
+            elif basis_zscore < -1.5:
+                basis_deviation_score = -2
+                summary_parts.append(f"Strong Negative Basis (Z={basis_zscore:.2f}) (Bearish)")
+            elif basis_zscore > 0.5:
                 basis_deviation_score = 1
-                summary_parts.append(f"Positive Basis Deviation ({basis_delta:+.2f}) (Bullish)")
-            elif basis_delta < -0.2:
+                summary_parts.append(f"Weak Positive Basis (Z={basis_zscore:.2f}) (Bullish)")
+            elif basis_zscore < -0.5:
                 basis_deviation_score = -1
-                summary_parts.append(f"Negative Basis Deviation ({basis_delta:+.2f}) (Bearish)")
+                summary_parts.append(f"Weak Negative Basis (Z={basis_zscore:.2f}) (Bearish)")
             else:
-                summary_parts.append("Stable Basis Deviation")
+                summary_parts.append(f"Stable Basis (Z={basis_zscore:.2f})")
         else:
             summary_parts.append("Basis Deviation N/A (Insufficient data)")
         component_scores["Basis Deviation"] = basis_deviation_score
@@ -926,6 +940,39 @@ def analyze_components(today_date, raw_data, storage_positions):
         summary_parts.append(f"Forecast: {avg_future_balance_signal}")
         component_scores["Forecasted Balance"] = forecast_signal_score
 
+        # Moving average crossover (short-term trend)
+        ma_score = 0
+        comp_prices = price_series_for_component[component_name].dropna()
+        if len(comp_prices) >= 20:
+            sma10 = comp_prices.tail(10).mean()
+            sma20 = comp_prices.tail(20).mean()
+            if sma10 > sma20:
+                ma_score = 1
+                summary_parts.append("Short-Term Trend Up (SMA10 > SMA20)")
+            elif sma10 < sma20:
+                ma_score = -1
+                summary_parts.append("Short-Term Trend Down (SMA10 < SMA20)")
+            else:
+                summary_parts.append("Flat Short-Term Trend")
+        component_scores["SMA Crossover"] = ma_score # Add to component_scores
+        overall_score += ma_score # Add to overall_score
+
+        # Volatility breakout check
+        vol_score = 0
+        if len(comp_prices) >= 10:
+            daily_ranges = comp_prices.diff().abs().tail(5)
+            avg_range = daily_ranges.mean()
+            current_range = abs(comp_prices.iloc[-1] - comp_prices.iloc[-2])
+            if avg_range > 0 and current_range > 1.5 * avg_range: # Ensure avg_range is not zero
+                if comp_prices.iloc[-1] > comp_prices.iloc[-2]:
+                    vol_score = 1
+                    summary_parts.append("Volatility Breakout Up (Bullish)")
+                else:
+                    vol_score = -1
+                    summary_parts.append("Volatility Breakout Down (Bearish)")
+        component_scores["Volatility Breakout"] = vol_score # Add to component_scores
+        overall_score += vol_score # Add to overall_score
+
 
         # Calculate total score
         overall_score = sum(component_scores.values())
@@ -937,65 +984,388 @@ def analyze_components(today_date, raw_data, storage_positions):
         elif overall_score >= 3:
             bias_tag = "BUY"
         elif overall_score >= 1:
-            bias_tag = "NEUTRAL" # As per user's request (1 or 2 points)
+            bias_tag = "NEUTRAL"
         elif overall_score == 0:
-            bias_tag = "WEAK" # As per user's request (0 points)
-        else: # total_score < 0
+            bias_tag = "WEAK"
+        else:
             bias_tag = "SELL"
-        
-        # Update component analysis dictionary
-        components_analysis[component_name] = {
+
+        # Prepare component_data to include all individual scores
+        component_data = {
             "name": component_name,
-            "score_breakdown": component_scores,
             "total_score": overall_score,
             "bias_tag": bias_tag,
             "summary": f"{bias_tag} bias: {'; '.join(summary_parts)}"
         }
-        # ENHANCEMENT 4: Add to top_5_summary_list for final print
-        top_5_summary_list.append((component_name, bias_tag))
+        # Add all individual scores to the component_data dictionary
+        for signal_name, score in component_scores.items():
+            component_data[signal_name] = score
+
+        components_analysis[component_name] = component_data
+        all_component_analysis_dicts.append(component_data)
 
 
     # Sort components by total score (descending)
-    sorted_components = sorted(components_analysis.values(), key=lambda x: x["total_score"], reverse=True)
+    sorted_top_components = sorted(components_analysis.values(), key=lambda x: x["total_score"], reverse=True)
 
-    return sorted_components[:5], top_5_summary_list # Return both
+    return sorted_top_components[:5], all_component_analysis_dicts
+
+
+# === NEW BACKTESTING FUNCTIONS ===
+
+def backtest_component(df, component_name, signal_col, price_col='Price', days_hold=7):
+    """
+    Simulates trades based on signals and actual price movements for a single component.
+
+    Args:
+        df (pd.DataFrame): DataFrame with historical data for a single component,
+                            including 'Date', 'Component', 'Price', and the signal column,
+                            plus individual signal scores.
+        component_name (str): Component to backtest.
+        signal_col (str): Column name with Buy/Sell/Hold signal.
+        price_col (str): Column with component price.
+        days_hold (int): Number of days to hold the position.
+
+    Returns:
+        pd.DataFrame: Backtest results with entry/exit/return metrics for this component,
+                      including individual signal scores.
+    """
+    trades = []
+    df['Date'] = pd.to_datetime(df['Date'])
+    df = df.set_index('Date').sort_index()
+
+    # Define all expected signal columns to ensure they exist, filling with 0 if not
+    expected_signal_cols = [
+        'ΔStorage', 'ΔTemp/HDD/CDD', 'Price Momentum', 'Basis Deviation',
+        'ΔLNG Feed Gas', 'Nuclear Drop', 'Managed Money', 'Upcoming Outage Risk',
+        'Forecasted Balance', 'SMA Crossover', 'Volatility Breakout' # Added new signals
+    ]
+    for col in expected_signal_cols:
+        if col not in df.columns:
+            df[col] = 0.0 # Fill missing signal columns with 0
+
+    for i in range(len(df) - days_hold):
+        current_date_idx = df.index[i]
+        exit_date_idx = current_date_idx + timedelta(days=days_hold)
+        exit_row_data = df.loc[df.index <= exit_date_idx].tail(1)
+
+        if exit_row_data.empty:
+            continue
+
+        row = df.iloc[i]
+        signal = row[signal_col]
+        entry_price = row[price_col]
+        entry_date = current_date_idx
+
+        # Only take trades with high score and confidence, skip neutral setups
+        # Loosened the conditions slightly to allow trades to be generated
+        total_score_for_trade = sum(row.get(s, 0) for s in expected_signal_cols) # Recalculate total score from row
+        confidence_for_trade = sum(int(row.get(s, 0) > 0) for s in expected_signal_cols) / len(expected_signal_cols) if expected_signal_cols else 0
+
+        # Modified gating logic: total_score >= 3 and confidence >= 0.5
+        if signal not in ["BUY", "STRONG BUY", "SELL"] or total_score_for_trade < 3 or confidence_for_trade < 0.5:
+            continue
+
+        exit_price = exit_row_data.iloc[0][price_col]
+        exit_date = exit_row_data.index[0]
+
+        if pd.isna(entry_price) or pd.isna(exit_price):
+            continue
+
+        ret = 0.0
+        # Avoid division by zero for return calculation
+        if entry_price != 0:
+            if signal == 'BUY' or signal == 'STRONG BUY':
+                ret = (exit_price - entry_price) / entry_price
+            elif signal == 'SELL':
+                ret = (entry_price - exit_price) / entry_price
+        else:
+            ret = np.nan # Or np.inf if that's preferred, but np.nan is safer
+
+        trade_data = {
+            'Component': component_name,
+            'Entry Date': entry_date,
+            'Exit Date': exit_date,
+            'Signal': signal,
+            'Entry Price': entry_price,
+            'Exit Price': exit_price,
+            'Holding Days Actual': (exit_date - entry_date).days,
+            'Return': ret
+        }
+        # Add individual signal scores to the trade data
+        for col in expected_signal_cols:
+            trade_data[col] = row[col]
+
+        trades.append(trade_data)
+
+    return pd.DataFrame(trades)
+
+# === Modified run_backtest to integrate new backtesting functions ===
+def run_backtest(prices_df, raw_data, storage_positions, start_date, end_date, holding_period=7, output_file_path=None):
+    """
+    Runs a historical backtest of component predictions over a date range.
+    Collects daily signals and then processes them using backtest_component.
+    """
+    all_daily_signals_raw = []
+
+    prices_df['date'] = pd.to_datetime(prices_df['date'], errors='coerce')
+    prices_df = prices_df.sort_values('date').dropna(subset=['date'])
+    prices_df = prices_df.set_index('date')
+
+    available_dates = prices_df.index.unique().sort_values()
+
+    all_dates_to_test = available_dates[
+        (available_dates >= pd.to_datetime(start_date)) &
+        (available_dates <= pd.to_datetime(end_date))
+    ]
+
+    if all_dates_to_test.empty:
+        print(f"⚠️ No valid dates found in prices data between {start_date} and {end_date} for backtesting.")
+        return
+
+    # Define the list of signal score keys that will be stored
+    signal_score_keys = [
+        'ΔStorage', 'ΔTemp/HDD/CDD', 'Price Momentum', 'Basis Deviation',
+        'ΔLNG Feed Gas', 'Nuclear Drop', 'Managed Money', 'Upcoming Outage Risk',
+        'Forecasted Balance', 'SMA Crossover', 'Volatility Breakout' # Added new signals
+    ]
+
+    for current_date_ts in all_dates_to_test:
+        today = current_date_ts.date()
+
+        theoretical_exit_date_ts = current_date_ts + timedelta(days=holding_period)
+        if prices_df.index.max() < theoretical_exit_date_ts:
+            print(f"Skipping {today}: Not enough future price data available for a {holding_period}-day holding period (last price date: {prices_df.index.max().date()}).")
+            continue
+
+        # Henry Hub 5-day volatility filter (skip trades in flat markets)
+        # Assuming 'henry' is the column name for Henry Hub prices after load_clean_df
+        hub_prices = prices_df.loc[prices_df.index <= current_date_ts, 'henry'].dropna().tail(6)
+        if len(hub_prices) == 6:
+            hh_returns = hub_prices.pct_change().dropna()
+            if not hh_returns.empty: # Ensure there are returns to calculate std
+                hh_volatility = hh_returns.std()
+                if hh_volatility < 0.01: # Threshold for low volatility
+                    print(f"Skipping {today}: Henry Hub market too flat (volatility: {hh_volatility:.4f}).")
+                    continue
+            else:
+                print(f"Skipping {today}: Insufficient Henry Hub return data for volatility calculation.")
+                continue
+        else:
+            print(f"Skipping {today}: Insufficient Henry Hub price data for volatility calculation.")
+            continue
+
+
+        print(f"Running component analysis for backtest date: {today}...")
+
+        try:
+            _, all_component_analysis_dicts = analyze_components(today, raw_data, storage_positions)
+        except Exception as e:
+            print(f"Error running analyze_components for {today}: {e}")
+            continue
+
+        if not all_component_analysis_dicts:
+            continue
+
+        for comp_data in all_component_analysis_dicts:
+            component_name = comp_data['name']
+            prediction_tag = comp_data['bias_tag']
+
+            entry_price = prices_df.loc[current_date_ts, component_name] if component_name in prices_df.columns else np.nan
+
+            if pd.isna(entry_price):
+                continue
+
+            daily_signal_entry = {
+                'Date': current_date_ts,
+                'Component': component_name,
+                'Price': entry_price,
+                'Signal': prediction_tag
+            }
+            # Add individual signal scores to the daily signal entry
+            for key in signal_score_keys:
+                daily_signal_entry[key] = comp_data.get(key, 0.0) # Use .get() with default 0.0 for safety
+
+            all_daily_signals_raw.append(daily_signal_entry)
+
+    df_all_signals = pd.DataFrame(all_daily_signals_raw)
+
+    if df_all_signals.empty:
+        print("⚠️ Backtest completed, but no daily signals were collected. No trades to simulate.")
+        return
+
+    final_backtest_trades = []
+    unique_components = df_all_signals['Component'].unique()
+
+    print(f"\n--- Simulating trades for {len(unique_components)} components with {holding_period}-day holding period ---")
+    for comp in unique_components:
+        comp_df_signals = df_all_signals[df_all_signals['Component'] == comp].copy()
+        comp_df_signals = comp_df_signals.sort_values(by='Date').reset_index(drop=True)
+
+        if len(comp_df_signals) > holding_period:
+            comp_results = backtest_component(
+                df=comp_df_signals,
+                component_name=comp,
+                signal_col='Signal',
+                price_col='Price',
+                days_hold=holding_period
+            )
+            if not comp_results.empty:
+                final_backtest_trades.append(comp_results)
+        else:
+            pass # Insufficient data for this component
+
+    df_final_backtest_results = pd.concat(final_backtest_trades, ignore_index=True) if final_backtest_trades else pd.DataFrame()
+
+    if not df_final_backtest_results.empty:
+        # --- Handle infinite values in 'Return' column ---
+        # Replace positive and negative infinity with NaN (Not a Number)
+        # If you explicitly want 0, use: df_final_backtest_results.replace([np.inf, -np.inf], 0, inplace=True)
+        df_final_backtest_results.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+        # --- Calculate True Confidence based on individual signal scores ---
+        # Note: This calculation is applied *after* all trades are compiled.
+        # Ensure all required columns exist before calculation, fill with 0 if not.
+        confidence_signals = [
+            'ΔStorage',
+            'ΔTemp/HDD/CDD',
+            'Price Momentum',
+            'Basis Deviation',
+            'ΔLNG Feed Gas',
+            'Nuclear Drop',
+            'Managed Money',
+            'Upcoming Outage Risk',
+            'Forecasted Balance',
+            'SMA Crossover', # Added new signal
+            'Volatility Breakout' # Added new signal
+        ]
+        
+        # Ensure all columns exist before attempting to access them
+        for col in confidence_signals:
+            if col not in df_final_backtest_results.columns:
+                df_final_backtest_results[col] = 0.0 # Add missing columns with default 0.0
+
+        # Sum of bullish signals (score > 0) divided by the total number of signals
+        df_final_backtest_results['Confidence'] = (
+            (df_final_backtest_results['ΔStorage'] > 0).astype(int) +
+            (df_final_backtest_results['ΔTemp/HDD/CDD'] > 0).astype(int) +
+            (df_final_backtest_results['Price Momentum'] > 0).astype(int) +
+            (df_final_backtest_results['Basis Deviation'] > 0).astype(int) +
+            (df_final_backtest_results['ΔLNG Feed Gas'] > 0).astype(int) +
+            (df_final_backtest_results['Nuclear Drop'] > 0).astype(int) +
+            (df_final_backtest_results['Managed Money'] > 0).astype(int) +
+            (df_final_backtest_results['Upcoming Outage Risk'] > 0).astype(int) +
+            (df_final_backtest_results['Forecasted Balance'] > 0).astype(int) +
+            (df_final_backtest_results['SMA Crossover'] > 0).astype(int) + # Added new signal
+            (df_final_backtest_results['Volatility Breakout'] > 0).astype(int) # Added new signal
+        ) / len(confidence_signals) # Dynamically use the number of signal columns
+
+        if output_file_path:
+            df_final_backtest_results.to_csv(output_file_path, index=False)
+            print(f"✅ Backtest completed. Results saved to {output_file_path}.")
+
+        # --- Analyze and Print Performance Metrics ---
+        print("\n--- Backtest Performance Metrics ---")
+        total_trades = len(df_final_backtest_results)
+        print(f"Total Trades: {total_trades}")
+
+        if total_trades > 0:
+            winning_trades_count = (df_final_backtest_results['Return'] > 0).sum()
+            losing_trades_count = (df_final_backtest_results['Return'] < 0).sum()
+            flat_trades_count = total_trades - winning_trades_count - losing_trades_count
+
+            win_rate = winning_trades_count / total_trades
+            print(f"Win Rate: {win_rate:.2%}")
+            print(f"Average Return per Trade: {df_final_backtest_results['Return'].mean():.4f}")
+            print(f"Median Return per Trade: {df_final_backtest_results['Return'].median():.4f}")
+
+            total_compounded_return = (df_final_backtest_results['Return'] + 1).prod() - 1
+            print(f"Total Compounded Return: {total_compounded_return:.2%}")
+
+            if df_final_backtest_results['Return'].std() > 0:
+                sharpe_ratio_naive = df_final_backtest_results['Return'].mean() / df_final_backtest_results['Return'].std()
+                print(f"Naive Sharpe Ratio (per trade): {sharpe_ratio_naive:.2f}")
+            else:
+                print("Naive Sharpe Ratio: N/A (Standard deviation of returns is zero)")
+
+            max_single_drawdown = df_final_backtest_results['Return'].min()
+            print(f"Max Single Trade Drawdown: {max_single_drawdown:.2%}")
+
+            if winning_trades_count > 0:
+                avg_win_return = df_final_backtest_results[df_final_backtest_results['Return'] > 0]['Return'].mean()
+                print(f"Average Winning Trade Return: {avg_win_return:.2%}")
+            else:
+                print("Average Winning Trade Return: N/A (No winning trades)")
+
+            if losing_trades_count > 0:
+                avg_loss_return = df_final_backtest_results[df_final_backtest_results['Return'] < 0]['Return'].mean()
+                print(f"Average Losing Trade Return: {avg_loss_return:.2%}")
+            else:
+                print("Average Losing Trade Return: N/A (No losing trades)")
+
+            gross_wins = df_final_backtest_results[df_final_backtest_results['Return'] > 0]['Return'].sum()
+            gross_losses = abs(df_final_backtest_results[df_final_backtest_results['Return'] < 0]['Return'].sum())
+            if gross_losses > 0:
+                profit_factor = gross_wins / gross_losses
+                print(f"Profit Factor: {profit_factor:.2f}")
+            else:
+                print("Profit Factor: N/A (No gross losses)")
+
+            # --- Confidence Score Analysis ---
+            print("\n--- Confidence Score Distribution ---")
+            print(df_final_backtest_results['Confidence'].describe())
+            print("\nAverage Confidence for Winning Trades:")
+            print(df_final_backtest_results[df_final_backtest_results['Return'] > 0]['Confidence'].mean())
+            print("Average Confidence for Losing Trades:")
+            print(df_final_backtest_results[df_final_backtest_results['Return'] < 0]['Confidence'].mean())
+            print("Average Confidence for All Trades:")
+            print(df_final_backtest_results['Confidence'].mean())
+
+            # --- Confidence vs Return Correlation ---
+            if 'Confidence' in df_final_backtest_results.columns and 'Return' in df_final_backtest_results.columns:
+                # Drop rows with NaN in either column before calculating correlation
+                clean_df_for_corr = df_final_backtest_results.dropna(subset=['Confidence', 'Return'])
+                if not clean_df_for_corr.empty:
+                    correlation = clean_df_for_corr['Confidence'].corr(clean_df_for_corr['Return'])
+                    print(f"\nCorrelation between Confidence and Return: {correlation:.2f}")
+                else:
+                    print("\nCorrelation between Confidence and Return: N/A (Insufficient clean data)")
+            else:
+                print("\nCorrelation between Confidence and Return: N/A (Confidence or Return column missing)")
+
+        else:
+            print("No trades were executed during the backtest period.")
+    else:
+        print("⚠️ Backtest completed, but no trade results were generated.")
 
 
 # --- Main Execution ---
 if __name__ == "__main__":
-    # Load all CSVs at the start
     raw_data = {}
-    # Define the specific subdirectory for Natural_Gas_Data_Positioning.csv
-    goscripts_info_folder = goscripts_folder / "INFO"
-    goscripts_info_folder.mkdir(parents=True, exist_ok=True) # Ensure this specific subfolder exists
-
     for key, fname in files.items():
-        if key == "lng_hist": # This is in main INFO folder
+        if key == "lng_hist":
             raw_data[key] = load_clean_df(key, fname, data_folder)
-        elif key == "natural_gas_data_positioning": # This is in GOScripts/INFO folder
+        elif key == "natural_gas_data_positioning":
             raw_data[key] = load_clean_df(key, fname, goscripts_info_folder)
-        elif key == "plant_group_mapping": # This is in GOScripts folder
+        elif key == "plant_group_mapping":
             raw_data[key] = load_clean_df(key, fname, goscripts_folder)
-        else: # All other files remain in the main INFO folder
+        else:
             raw_data[key] = load_clean_df(key, fname, data_folder)
 
     raw_data = {k: v for k, v in raw_data.items() if v is not None}
 
-    # Extract the EIA report date for weather alignment (also used for storage positions)
     latest_eia_report_date = None
     if "eia_totals" in raw_data and "period" in raw_data["eia_totals"].columns:
         df_eia_period = raw_data["eia_totals"].dropna(subset=["period"])
         if not df_eia_period.empty:
             latest_eia_report_date = df_eia_period["period"].max().date()
 
-    # Precompute Storage Position for all regions
     storage_positions = {}
     for d_name, i_col_name in region_map.items():
         pos_data = get_storage_position(d_name, i_col_name, raw_data, latest_eia_report_date)
         if pos_data:
             storage_positions[d_name] = pos_data
 
-    # --- Determine the "today_analysis_date" based on the latest available data ---
     today_analysis_date = None
     prices_df_for_date_check = raw_data.get("prices")
     if prices_df_for_date_check is not None and not prices_df_for_date_check.empty and 'date' in prices_df_for_date_check.columns:
@@ -1013,29 +1383,61 @@ if __name__ == "__main__":
     print(f"\n--- Running Natural Gas Market Component Analysis for {today_analysis_date} ---")
     print("--------------------------------------------------------------------------\n")
 
-    # Perform the analysis
-    top_components, final_recommendation_summary = analyze_components(today_analysis_date, raw_data, storage_positions)
+    top_components, all_component_tags_for_summary = analyze_components(today_analysis_date, raw_data, storage_positions)
 
     if top_components:
         print("\n### Top 5 Natural Gas Market Components by Score ###")
         print("--------------------------------------------------\n")
         for i, comp in enumerate(top_components):
             print(f"**{i+1}. Component: {comp['name']}**")
-            print(f"   Total Score: {comp['total_score']} points")
-            print(f"   📌 Bias Tag: {comp['bias_tag']}") # Print the new bias tag
-            print("   Score Breakdown:")
-            for signal, score in comp['score_breakdown'].items():
-                print(f"     - {signal}: {score} points")
-            print(f"   Summary: {comp['summary']}")
+            print(f"    Total Score: {comp['total_score']} points")
+            print(f"    📌 Bias Tag: {comp['bias_tag']}")
+            # Calculate and print confidence for the single daily run
+            # This is a temporary calculation for display, the main one is in run_backtest
+            current_day_confidence_signals = [
+                'ΔStorage', 'ΔTemp/HDD/CDD', 'Price Momentum', 'Basis Deviation',
+                'ΔLNG Feed Gas', 'Nuclear Drop', 'Managed Money', 'Upcoming Outage Risk',
+                'Forecasted Balance', 'SMA Crossover', 'Volatility Breakout' # Added new signals
+            ]
+            current_day_confidence = sum(int(comp.get(signal, 0) > 0) for signal in current_day_confidence_signals) / len(current_day_confidence_signals)
+
+            print(f"    Confidence Score: {current_day_confidence:.2f}")
+            print("    Score Breakdown:")
+            # Use comp.get() for score breakdown as well to handle potential missing keys
+            for signal_name in current_day_confidence_signals: # Use the full list here
+                print(f"      - {signal_name}: {comp.get(signal_name, 'N/A')} points")
+            print(f"    Summary: {comp['summary']}")
             print("\n" + "---" * 15 + "\n")
-        
-        # ENHANCEMENT 4: Final Polish: Add Clear Recommendation Summary
-        if final_recommendation_summary:
+
+        if all_component_tags_for_summary:
             print("\n🔍 Recommendation Summary:")
-            for component_name, bias_tag in final_recommendation_summary:
-                print(f"- {component_name}: {bias_tag}")
+            for comp_data in all_component_tags_for_summary:
+                # Recalculate confidence for summary display
+                summary_confidence_signals = [
+                    'ΔStorage', 'ΔTemp/HDD/CDD', 'Price Momentum', 'Basis Deviation',
+                    'ΔLNG Feed Gas', 'Nuclear Drop', 'Managed Money', 'Upcoming Outage Risk',
+                    'Forecasted Balance', 'SMA Crossover', 'Volatility Breakout' # Added new signals
+                ]
+                summary_confidence = sum(int(comp_data.get(signal, 0) > 0) for signal in summary_confidence_signals) / len(summary_confidence_signals)
+                print(f"- {comp_data['name']}: {comp_data['bias_tag']} (Confidence: {summary_confidence:.2f})")
             print("\n" + "---" * 15 + "\n")
 
     else:
         print("\nNo components found for analysis or insufficient data to perform calculations.")
         print("Please ensure all necessary CSV files are present, correctly named, and contain valid data.")
+
+    backtest_path = goscripts_info_folder / OUTPUT_CSV_FILENAME
+
+    print("Running full backtest and saving results to CSV...")
+    if raw_data.get("prices") is not None:
+        run_backtest(
+            prices_df=raw_data["prices"].copy(),
+            raw_data=raw_data,
+            storage_positions=storage_positions,
+            start_date="2023-01-01",
+            end_date="2024-12-31",
+            holding_period=7,
+            output_file_path=backtest_path
+        )
+    else:
+        print("⚠️ Cannot run backtest: 'prices' data not loaded.")

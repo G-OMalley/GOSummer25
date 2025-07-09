@@ -1,0 +1,342 @@
+import pandas as pd
+import numpy as np
+from pathlib import Path
+from sklearn.linear_model import RidgeCV
+from sklearn.metrics import mean_absolute_error
+from datetime import datetime, timedelta
+
+# --- Data Loading ---
+# In this environment, files are directly accessible by their names IF they are in the root.
+# If files are in a subfolder like 'INFO', we need to specify that path.
+data_folder_name = "INFO" # Assuming 'INFO' is a subfolder where CSVs reside
+
+try:
+    eia_changes = pd.read_csv(f"{data_folder_name}/EIAchanges.csv", parse_dates=["Period"]).set_index("Period")
+    eia_totals = pd.read_csv(f"{data_folder_name}/EIAtotals.csv", parse_dates=["Period"]).set_index("Period")
+    weather = pd.read_csv(f"{data_folder_name}/WEATHER.csv", parse_dates=["Date"])
+    fundy = pd.read_csv(f"{data_folder_name}/Fundy.csv", parse_dates=["Date"])
+except FileNotFoundError as e:
+    print(f"Error loading file: {e}. Please ensure all CSV files are uploaded and located in the '{data_folder_name}' folder.")
+    exit()
+
+# --- Region Mapping ---
+# These mappings define the target columns in EIAchanges.csv and representative cities for weather.
+REGION_COLUMNS = {
+    "Lower 48 States": "Lower 48 States Storage Change (Bcf)",
+    "East Region": "East Region Storage Change (Bcf)",
+    "Midwest Region": "Midwest Region Storage Change (Bcf)",
+    "South Central Region": "South Central Region Storage Change (Bcf)",
+    "Mountain Region": "Mountain Region Storage Change (Bcf)",
+    "Pacific Region": "Pacific Region Storage Change (Bcf)",
+}
+
+# Representative cities for weather data for each region.
+# Updated to match the exact "City Title" values found in your WEATHER.csv.
+REGION_CITY = {
+    "Lower 48 States": "Conus", # Special case, aggregates all weather data
+    "East Region": "Boston", # Changed from "Boston MA"
+    "Midwest Region": "Chicago OHare", # Changed from "Chicago IL"
+    "South Central Region": "Houston IAH", # Changed from "Houston TX"
+    "Mountain Region": "Denver", # Changed from "Denver CO"
+    "Pacific Region": "Los Angeles", # Changed from "Los Angeles CA"
+}
+
+# --- Preprocessing Fundy Data ---
+# Pivot fundy data to have 'item' values as columns.
+# Then, resample daily fundy data to weekly, taking the sum for the week ending Friday ('W-FRI').
+# This aligns the Fundy data with the weekly EIA reporting periods.
+print("Preprocessing Fundy data...")
+fundy_pivoted = fundy.pivot_table(index='Date', columns='item', values='value')
+fundy_weekly_resampled = fundy_pivoted.resample('W-FRI').sum() # Summing flows/levels over the week
+fundy_weekly_resampled.index.name = 'Period' # Rename index to match EIA data
+print("Fundy data preprocessed.")
+
+# --- Preprocessing Weather Data ---
+# Aggregate daily weather data to weekly averages/sums for each city, ending on Friday.
+print("Preprocessing Weather data...")
+unique_weather_cities = weather['City Title'].unique()
+print(f"Cities found in WEATHER.csv: {', '.join(unique_weather_cities)}")
+
+weather_weekly_list = []
+for city in unique_weather_cities:
+    city_weather = weather[weather['City Title'] == city].copy()
+    city_weather = city_weather.set_index('Date')
+    
+    # Resample to weekly, ending on Friday.
+    # Avg Temp should be averaged, CDD/HDD/Precip should be summed for the week.
+    weekly_data = city_weather[['Avg Temp', 'CDD', 'HDD', 'Daily Precip Amount']].resample('W-FRI').agg({
+        'Avg Temp': 'mean',
+        'CDD': 'sum',
+        'HDD': 'sum',
+        'Daily Precip Amount': 'sum'
+    })
+    # Prefix column names with city for unique identification
+    weekly_data.columns = [f"{city}_{col.replace(' ', '')}" for col in weekly_data.columns]
+    weather_weekly_list.append(weekly_data)
+
+# Concatenate all city weekly weather data into a single DataFrame
+weather_weekly_df = pd.concat(weather_weekly_list, axis=1)
+weather_weekly_df.index.name = 'Period'
+
+# Handle 'Conus' weather for 'Lower 48 States' by aggregating all city weather data.
+# This assumes 'Conus' is a representation of the overall US weather.
+print("Aggregating all city weather data for 'Lower 48 States' (Conus)...")
+conus_weather = weather.set_index('Date')
+conus_weather_weekly = conus_weather[['Avg Temp', 'CDD', 'HDD', 'Daily Precip Amount']].resample('W-FRI').agg({
+    'Avg Temp': 'mean',
+    'CDD': 'sum',
+    'HDD': 'sum',
+    'Daily Precip Amount': 'sum'
+})
+conus_weather_weekly.columns = [f"Conus_{col.replace(' ', '')}" for col in conus_weather_weekly.columns]
+# Join Conus weather with the existing weather_weekly_df
+weather_weekly_df = weather_weekly_df.join(conus_weather_weekly, how='outer')
+print("Weather data preprocessed.")
+
+# --- Prepare output storage ---
+results = []
+
+# --- Main loop for each region ---
+for region, col in REGION_COLUMNS.items():
+    print(f"\n==== EIA STORAGE FORECAST + BACKTEST ====\nRegion: {region}")
+    if col not in eia_changes.columns:
+        print(f"❌ Skipping {region}, target column not found in EIAchanges.csv: {col}")
+        continue
+
+    # Create a base DataFrame for the current region, starting with the target variable
+    df = pd.DataFrame()
+    df["Target"] = eia_changes[col]
+
+    # Add EIA Totals for the region as a feature (current storage level)
+    total_col = col.replace("Storage Change", "Storage")
+    if total_col in eia_totals.columns:
+        df = df.join(eia_totals[[total_col]], how="left")
+        df.rename(columns={total_col: "StorageTotal"}, inplace=True)
+    else:
+        print(f"⚠️ Missing total storage data for {region} ({total_col}). Skipping region.")
+        continue # Skip the region if its total storage data is not available
+
+    # Add Fundy data features for the region
+    # Map Fundy items to EIA regions based on common naming conventions.
+    fundy_region_items = []
+    if region == "Lower 48 States":
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('CONUS -')]
+    elif region == "East Region":
+        # EIA's East region is broad, covering Northeast and Southeast in Fundy data.
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('Northeast -')]
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('SouthEast -')])
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('SouthEast[Fl] -')])
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('SouthEast[Oth] -')])
+    elif region == "Midwest Region":
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('Midwest -')]
+    elif region == "South Central Region":
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('SouthCentral -')]
+    elif region == "Mountain Region":
+        # Fundy's 'Rockies' corresponds to EIA's Mountain region.
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('Rockies -')]
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('Rockies[SW] -')])
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('Rockies[Up] -')])
+    elif region == "Pacific Region":
+        # Fundy's 'West' often corresponds to EIA's Pacific region.
+        fundy_region_items = [item for item in fundy_weekly_resampled.columns if item.startswith('West -')]
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('West[CA] -')])
+        fundy_region_items.extend([item for item in fundy_weekly_resampled.columns if item.startswith('West[PNW] -')])
+    
+    # Join the selected Fundy items to the main DataFrame
+    if fundy_region_items:
+        # Filter fundy_weekly_resampled to only include the relevant columns before joining
+        df = df.join(fundy_weekly_resampled[fundy_region_items], how="left")
+    else:
+        print(f"⚠️ No matching Fundy data items found for {region}. Skipping Fundy features.")
+
+    # Add Weather features for the region
+    city_for_weather = REGION_CITY.get(region)
+    weather_cols_prefix = f"{city_for_weather}_"
+
+    # Select weather columns based on the region's city mapping
+    weather_features_for_region = [col for col in weather_weekly_df.columns if col.startswith(weather_cols_prefix)]
+    
+    if not weather_features_for_region:
+        print(f"❌ Skipping {region}, weather data not found for city/conus: {city_for_weather}")
+        continue
+
+    df = df.join(weather_weekly_df[weather_features_for_region], how="left")
+
+    # Rename weather columns to remove city prefix for cleaner feature names
+    new_weather_cols = {col: col.replace(weather_cols_prefix, "") for col in weather_features_for_region}
+    df.rename(columns=new_weather_cols, inplace=True)
+
+    # Add rolling features for weather (3-week rolling mean)
+    # Ensure these base columns exist before attempting to create rolling features
+    base_weather_cols = ["AvgTemp", "CDD", "HDD", "DailyPrecipAmount"]
+    for temp_col in base_weather_cols:
+        if temp_col in df.columns:
+            df[f"{temp_col}_roll3"] = df[temp_col].rolling(3).mean()
+        else:
+            print(f"Warning: Base weather column '{temp_col}' not found for rolling feature creation in {region}.")
+
+    # Drop rows with any NaN values after all joins and feature creations
+    df.dropna(inplace=True)
+
+    # --- Prepare Data for Model Training ---
+    # Use only the past 5 years of data for training, as specified in the original code.
+    # The cutoff date is relative to the latest available data point in the combined DataFrame.
+    latest_training_data_date = df.index.max()
+    cutoff_date = latest_training_data_date - timedelta(days=5 * 365) # 5 years back
+
+    df_train = df[df.index >= cutoff_date].copy()
+
+    if len(df_train) < 10: # Ensure sufficient data for training
+        print(f"⚠️ Not enough usable data for {region} after 5-year cutoff. Records: {len(df_train)}. Skipping region.")
+        continue
+
+    # Define features (X) and target (y) for the model
+    features = df_train.drop(columns="Target")
+    target = df_train["Target"]
+
+    # Check if features DataFrame is empty or contains only constant values (which can cause model errors)
+    if features.empty:
+        print(f"❌ Skipping {region}, features DataFrame is empty after preprocessing.")
+        continue
+    
+    # Drop constant columns from features (columns where all values are the same)
+    # This prevents issues with models that require variance in features.
+    features = features.loc[:, (features != features.iloc[0]).any()]
+    if features.empty:
+        print(f"❌ Skipping {region}, all features are constant after filtering. Cannot train model.")
+        continue
+
+    # Initialize and train the RidgeCV model
+    model = RidgeCV(alphas=[0.1, 1.0, 10.0])
+    model.fit(features, target)
+
+    # --- Forecast next week's EIA change ---
+    # The forecast date is the next week's reporting period after the latest EIA data.
+    forecast_date = eia_changes.index.max() + timedelta(days=7)
+
+    # Prepare forecast features using the latest available data for each component.
+    forecast_features_dict = {}
+    
+    # 1. Latest EIA Total Storage for the region
+    if total_col in eia_totals.columns:
+        forecast_features_dict["StorageTotal"] = eia_totals[total_col].iloc[-1]
+    else:
+        forecast_features_dict["StorageTotal"] = np.nan # Should ideally not happen due to earlier check
+
+    # 2. Latest Fundy data for the region
+    for f_item in fundy_region_items:
+        if f_item in fundy_weekly_resampled.columns and not fundy_weekly_resampled[f_item].empty:
+            forecast_features_dict[f_item] = fundy_weekly_resampled[f_item].iloc[-1]
+        else:
+            forecast_features_dict[f_item] = np.nan # Assign NaN if Fundy item data is missing
+
+    # 3. Latest Weather data for the region (including rolling averages)
+    for w_col_base in base_weather_cols:
+        # Get the actual column name used in weather_weekly_df
+        actual_weather_col_name = f"Conus_{w_col_base}" if city_for_weather == "Conus" else f"{city_for_weather}_{w_col_base}"
+        
+        if actual_weather_col_name in weather_weekly_df.columns and not weather_weekly_df[actual_weather_col_name].empty:
+            forecast_features_dict[w_col_base] = weather_weekly_df[actual_weather_col_name].iloc[-1]
+        else:
+            forecast_features_dict[w_col_base] = np.nan # Assign NaN if base weather data is missing
+
+        # For rolling features, use the last calculated rolling average from the training data,
+        # or re-calculate if necessary (more complex for a single forecast point).
+        # For simplicity, we'll use the last available rolling value from the `df` (which contains all data).
+        rolling_col_name = f"{w_col_base}_roll3"
+        if rolling_col_name in df.columns and not df[rolling_col_name].empty:
+            forecast_features_dict[rolling_col_name] = df[rolling_col_name].iloc[-1]
+        else:
+            forecast_features_dict[rolling_col_name] = np.nan
+
+    # Create a DataFrame for forecast features, ensuring column order matches training features.
+    # This is crucial for the model to make correct predictions.
+    forecast_features_df = pd.DataFrame([forecast_features_dict])
+    
+    # Align columns of forecast_features_df with the features used during training
+    # Fill any missing columns with 0 or a suitable default, and drop extra columns.
+    missing_cols = set(features.columns) - set(forecast_features_df.columns)
+    for c in missing_cols:
+        forecast_features_df[c] = 0 # Or np.nan, depending on how you want to handle missing values for new features
+
+    forecast_features_df = forecast_features_df[features.columns] # Reorder columns to match training features
+
+    forecast = np.nan
+    try:
+        # Check for NaN values in the forecast features before predicting
+        if forecast_features_df.isnull().values.any():
+            print(f"⚠️ Forecast features for {region} contain NaN values. Cannot predict.")
+            print(forecast_features_df)
+        else:
+            forecast = model.predict(forecast_features_df)[0]
+    except Exception as e:
+        print(f"⚠️ Forecast skipped for {region} due to error during prediction: {e}")
+        print(f"Forecast features used:\n{forecast_features_df}")
+
+
+    # --- Backtest ---
+    # Backtest on the last 4 available data points from the `df_train` (5-year window).
+    # This evaluates the model's performance on recent historical data.
+    valid_dates_for_backtest = df_train.index
+    if len(valid_dates_for_backtest) > 4:
+        backtest_dates = valid_dates_for_backtest[-4:].to_list()
+    else:
+        backtest_dates = valid_dates_for_backtest.to_list() # Use all available if less than 4
+
+    preds, actuals = [], []
+    backtest_details = [] # To store details for terminal and CSV
+
+    print(f"Attempting backtest for {region} on {len(backtest_dates)} dates.")
+    for bt_date in backtest_dates:
+        try:
+            # Ensure features for backtesting are from the 'features' DataFrame (training set)
+            x_bt = features.loc[bt_date].values.reshape(1, -1)
+            y_bt = target.loc[bt_date]
+            y_pred = model.predict(x_bt)[0]
+            preds.append(y_pred)
+            actuals.append(y_bt)
+            backtest_details.append(f"  {bt_date.date()} - Actual: {y_bt:+.2f}, Predicted: {y_pred:+.2f}")
+        except KeyError:
+            backtest_details.append(f"⚠️ Skipped backtest on {bt_date.date()} due to missing data for features or target.")
+        except Exception as e:
+            backtest_details.append(f"⚠️ Skipped backtest on {bt_date.date()} due to error: {e}")
+
+    # Print detailed backtest results to terminal
+    for detail in backtest_details:
+        print(detail)
+
+    if preds:
+        mae = mean_absolute_error(actuals, preds)
+        print(f"\n📈 Forecast for {forecast_date.date()}: {forecast:+.2f} Bcf")
+        print(f"🧪 Backtest MAE (past {len(backtest_dates)} weeks): {mae:.2f} Bcf")
+    else:
+        mae = np.nan
+        print(f"⚠️ No valid backtest for {region}")
+
+    # Store results for this region, including detailed backtest actuals and predictions
+    results.append({
+        "Region": region,
+        "Forecast Date": forecast_date.date(),
+        "Forecast (Bcf)": round(forecast, 2) if not np.isnan(forecast) else "N/A",
+        "Backtest MAE (Bcf)": round(mae, 2) if not np.isnan(mae) else "N/A",
+        "Backtest Dates": [str(d.date()) for d in backtest_dates], # Store dates as strings
+        "Backtest Actuals (Bcf)": [round(a, 2) for a in actuals],
+        "Backtest Predicted (Bcf)": [round(p, 2) for p in preds]
+    })
+
+# Convert results into a DataFrame and format long columns
+results_df = pd.DataFrame(results)
+# Convert lists to string format so they save nicely in CSV
+results_df["Backtest Dates"] = results_df["Backtest Dates"].apply(lambda x: str(x))
+results_df["Backtest Actuals (Bcf)"] = results_df["Backtest Actuals (Bcf)"].apply(lambda x: str(x))
+results_df["Backtest Predicted (Bcf)"] = results_df["Backtest Predicted (Bcf)"].apply(lambda x: str(x))
+
+# Set output file name and save to the specified directory
+output_directory = "GOScripts/GOutput"
+Path(output_directory).mkdir(parents=True, exist_ok=True) # Create directory if it doesn't exist
+output_filename = f"{output_directory}/EIAStoragePred.csv"
+results_df.to_csv(output_filename, index=False)
+
+print(f"\n✅ CSV saved: {output_filename}")
+print("Columns in output:")
+print(results_df.columns.tolist())

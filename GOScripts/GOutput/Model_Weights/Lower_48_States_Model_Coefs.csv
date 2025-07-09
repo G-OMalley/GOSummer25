@@ -1,0 +1,100 @@
+Feature,Coefficient
+Total Demand,-13.578261132106968
+USDemand,-13.102321197777512
+normalized_target,10.725438656659557
+ResComm,-10.44655985154335
+DryGasProduction,9.642603910500393
+Lower 48 States_Fundy_CONUS_-_Balance_Smoothed_2wk,9.511048627074311
+Lower 48 States_Fundy_CONUS_-_Balance,9.364651908628248
+TotalSupply,9.019404752238037
+Industrial,-7.001828450301488
+Lower 48 States_Fundy_CONUS_-_ResCom,-6.616893135107542
+Lower 48 States_Fundy_CONUS_-_ResCom_Smoothed_2wk,-6.6085338410362136
+lag_1,6.5481898542841765
+PowerBurn,-5.127266852245896
+PipeLoss,-4.187600080842084
+Balance,4.117675241903358
+Lower 48 States_Power_PJM_-_Total_Generation,-3.7288533634653924
+index,3.6795237914781924
+Lower 48 States_Fundy_CONUS_-_Ind_WoW,-3.5794569779332854
+Lower 48 States_Fundy_CONUS_-_LNGexp,-3.464892542747118
+Lower 48 States_Fundy_CONUS_-_LNGexp_Smoothed_2wk,-3.4152753883713522
+LNG Feedgas,-3.3110106950168277
+NetExports to Mexico,-3.224017291696454
+Lower 48 States_Power_PJM_-_Total_Generation_Smoothed_2wk,-3.054647337797575
+Lower 48 States_Power_PJM_-_PeakLoad_WoW,-2.7918243965640555
+Lower 48 States_Power_PJM_-_Total_Generation_WoW,-2.6091832553069105
+Lower 48 States_Fundy_CONUS_-_Power_Smoothed_2wk,-2.468794421479447
+Lower 48 States_Power_NYISO_-_PeakLoad,2.2740778610966688
+Lower 48 States_Fundy_CONUS_-_Power,-2.1700294968598617
+Lower 48 States_Power_NYISO_-_PeakLoad_Smoothed_2wk,2.1313440885686767
+Net Imports from Canada,-2.0708678378859884
+Lower 48 States_Fundy_CONUS_-_Ind,-2.0520988886998985
+Lower 48 States_Power_ISONE_-_PeakLoad_Smoothed_2wk,-1.7103068703423367
+lag_4,-1.6500217290591581
+Lower 48 States_Power_ERCOT_-_PeakLoad_Smoothed_2wk,1.5398552073528824
+Lower 48 States_Fundy_CONUS_-_LNGimp_WoW,-1.4378774477553502
+Month,1.3510288086641926
+Lower 48 States_Power_PJM_-_PeakLoad_Smoothed_2wk,1.3086521898290207
+Lower 48 States_Power_ISONE_-_PeakLoad,-1.2791082515351053
+Lower 48 States_Power_ERCOT_-_PeakLoad,1.2716911508384319
+Lower 48 States_Fundy_CONUS_-_Prod,1.2658692115548567
+lag_5,1.2385963752758138
+Lower 48 States_Fundy_CONUS_-_Prod_Smoothed_2wk,1.1964929631313597
+lag_3,1.1957600533124786
+Lower 48 States_Fundy_CONUS_-_Ind_Smoothed_2wk,-1.1173385302629797
+Lower 48 States_Fundy_CONUS_-_Power_WoW,1.0394206442703722
+Lower 48 States_Power_ISONE_-_PeakLoad_WoW,1.0394017720228754
+Lower 48 States_Power_ERCOT_-_PeakLoad_WoW,-1.0301801801386556
+Lower 48 States_Fundy_CONUS_-_Prod_WoW,1.0285628796964204
+Lower 48 States_Power_NYISO_-_Total_Generation_Smoothed_2wk,-0.9714423913358585
+WeekOfYear,-0.9664530925992548
+Lower 48 States_Power_NYISO_-_Total_Generation,-0.9332439799792476
+Lower 48 States_Power_MISO_-_PeakLoad_WoW,0.9247334393903014
+Lower 48 States_Power_CAISO_-_Total_Generation_Smoothed_2wk,0.8583571629562247
+Lower 48 States_Power_CAISO_-_Total_Generation_WoW,-0.8293530544340776
+Lower 48 States_Fundy_CONUS_-_L&P,0.8279073264579855
+Lower 48 States_Fundy_CONUS_-_P'loss,0.8279052811345461
+Lower 48 States_Fundy_CONUS_-_L&P_Smoothed_2wk,0.8246730499432747
+Lower 48 States_Fundy_CONUS_-_P'loss_Smoothed_2wk,0.824670303845612
+Lower 48 States_Power_NYISO_-_PeakLoad_WoW,0.811159401251131
+Lower 48 States_Fundy_CONUS_-_MexExp,0.800706910932535
+Lower 48 States_Power_ISONE_-_Total_Generation_WoW,-0.7756390496508749
+Lower 48 States_Fundy_CONUS_-_CADimp,0.7753015356996208
+LNG Sendout,-0.7748117981962225
+Lower 48 States_Power_MISO_-_PeakLoad_Smoothed_2wk,-0.7545081348425811
+HeatingSeason,-0.7471383515165546
+Lower 48 States_Fundy_CONUS_-_CADimp_Smoothed_2wk,0.7258252008632631
+Lower 48 States_Fundy_CONUS_-_MexExp_Smoothed_2wk,0.7198742048105665
+Lower 48 States_Fundy_CONUS_-_LNGexp_WoW,-0.7138927492785275
+Lower 48 States Storage (Bcf)_lag_4,-0.7118995922064802
+Lower 48 States_Fundy_CONUS_-_Balance_WoW,0.6329685463916527
+Lower 48 States_Power_CAISO_-_Total_Generation,0.6257235383099536
+Lower 48 States Storage (Bcf)_lag_3,-0.5481110775526751
+Lower 48 States_Fundy_CONUS_-_ResCom_WoW,-0.540703293958825
+Lower 48 States_Power_ISONE_-_Total_Generation_Smoothed_2wk,0.520660930922908
+Lower 48 States_Fundy_CONUS_-_MexExp_WoW,0.5162494371119208
+Lower 48 States_Power_MISO_-_Total_Generation_Smoothed_2wk,-0.5121399367601563
+lag_2,0.49050547775045045
+Lower 48 States Storage (Bcf)_lag_5,-0.48427214166318294
+Lower 48 States Storage (Bcf)_lag_2,-0.4811403069935864
+Lower 48 States_Power_CAISO_-_PeakLoad_WoW,-0.4726424898103763
+Lower 48 States_Power_MISO_-_PeakLoad,-0.4582607600825266
+Lower 48 States_Power_CAISO_-_PeakLoad,-0.45674672855032117
+Lower 48 States_Fundy_CONUS_-_LNGimp,-0.4255746769549088
+Lower 48 States_Power_ERCOT_-_Total_Generation_WoW,0.42446547252560046
+Lower 48 States Storage (Bcf)_lag_1,0.42097735489903815
+Lower 48 States_Power_MISO_-_Total_Generation,-0.38599594801302917
+Lower 48 States_Power_PJM_-_PeakLoad,0.3609928451052848
+Lower 48 States_Power_CAISO_-_PeakLoad_Smoothed_2wk,-0.3560910565061372
+Lower 48 States_Fundy_CONUS_-_CADimp_WoW,0.2725606576914342
+Lower 48 States_Power_MISO_-_Total_Generation_WoW,0.2701682702038551
+NetImportExport,0.24283969989310555
+Lower 48 States_Power_ISONE_-_Total_Generation,0.23121770521750634
+CoolingSeason,-0.20648195253770218
+Lower 48 States_Power_ERCOT_-_Total_Generation_Smoothed_2wk,-0.19542977350998753
+Lower 48 States_Power_NYISO_-_Total_Generation_WoW,0.12031468074019
+Lower 48 States_Fundy_CONUS_-_LNGimp_Smoothed_2wk,0.11918427036311594
+Lower 48 States_Power_ERCOT_-_Total_Generation,-0.1179743091211214
+Lower 48 States_Fundy_CONUS_-_P'loss_WoW,0.0642187445114246
+Lower 48 States_Fundy_CONUS_-_L&P_WoW,0.06421074725476758

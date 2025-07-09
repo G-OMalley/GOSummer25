@@ -1,0 +1,74 @@
+Feature,Coefficient
+normalized_target,4.820100947122914
+PipeLoss,-0.9748786014270413
+HeatingSeason,0.6704242296922045
+LNG Sendout,-0.42753350177134414
+NetExports to Mexico,0.4089292121384374
+index,-0.40560499237683073
+ImpliedStorageChange,0.38962499084733726
+USDemand,-0.3558386705577514
+LNG Feedgas,0.34219380308521663
+Pacific Region_Fundy_West[PNW]_-_ResCom,-0.33424788990838966
+Pacific Region_Fundy_West[PNW]_-_ResCom_WoW,-0.30872777709722676
+Pacific Region_Fundy_West[PNW]_-_ResCom_Smoothed_2wk,-0.26761285472763696
+Total Demand,-0.24326630146900932
+lag_2,-0.2377563303212193
+Net Imports from Canada,0.23170206091113674
+Pacific Region_Fundy_West[CA]_-_Ind_Smoothed_2wk,-0.21908508352444636
+ResComm,-0.21863860438956917
+Pacific Region_Fundy_West[PNW]_-_Ind_WoW,-0.2181439079677008
+Pacific Region_Fundy_West_-_Balance,0.21787786782799598
+Month,0.20694232937567433
+Pacific Region_Fundy_West_-_ResCom,-0.19827781971263367
+Pacific Region_Fundy_West_-_Balance_Smoothed_2wk,0.19298611815951983
+TotalSupply,0.19003755794744517
+lag_1,0.18853937880622249
+Pacific Region_Fundy_West[CA]_-_Ind,-0.18763039165686432
+DryGasProduction,0.17531395367642474
+Pacific Region_Fundy_West_-_ResCom_Smoothed_2wk,-0.17524779193904716
+CoolingSeason,0.16278900700524854
+Pacific Region_Fundy_West[PNW]_-_Power_Smoothed_2wk,-0.15489837983231947
+Balance,0.15251635333943386
+Pacific Region_Fundy_West_-_Ind_Smoothed_2wk,-0.15028274041944994
+Pacific Region_Power_CAISO_-_PeakLoad_Smoothed_2wk,-0.14910957224711077
+Pacific Region_Fundy_West_-_Ind,-0.14072225298430344
+lag_3,-0.1398841609938127
+Pacific Region_Power_CAISO_-_PeakLoad,-0.13910165024991167
+Pacific Region_Fundy_West[PNW]_-_Ind_Smoothed_2wk,0.13217658868774443
+Pacific Region_Fundy_West[CA]_-_ResCom_Smoothed_2wk,-0.12428547841039618
+Pacific Region_Fundy_West[CA]_-_ResCom,-0.12374707389273229
+Pacific Region_Max_LMP,-0.12121125371615177
+Pacific Region_Fundy_West_-_ResCom_WoW,-0.12014876726501172
+WeekOfYear,-0.11734125514059154
+Pacific Region_Fundy_West[CA]_-_Power_WoW,-0.1146248288651656
+Pacific Region_Fundy_West_-_Balance_WoW,0.11228409700714925
+Pacific Region_Fundy_West[PNW]_-_Power_WoW,0.11062791167895182
+lag_5,-0.1049194258255205
+Pacific Region_Fundy_West[PNW]_-_Power,-0.10084279408607225
+Pacific Region_Max_LMP_Smoothed_2wk,-0.09050461812517341
+Pacific Region_Max_LMP_WoW,-0.0826400798474908
+NetImportExport,-0.08206305077631995
+Pacific Region_Fundy_West_-_Prod_WoW,0.0776946363232599
+Pacific Region_Power_CAISO_-_Total_Generation_WoW,-0.07718821049011718
+Pacific Region_Fundy_West[PNW]_-_Ind,0.07255930839160908
+Pacific Region_Fundy_West[CA]_-_Ind_WoW,0.06827160973555328
+Pacific Region_Fundy_West_-_Power_WoW,-0.058082225181618256
+Pacific Region Storage (Bcf)_lag_2,-0.054535820720197775
+PowerBurn,0.05237713720067668
+Pacific Region_Fundy_West_-_Prod,0.052187575773215145
+Industrial,-0.04188376797222782
+Pacific Region_Fundy_West_-_Power,-0.037849726463723414
+Pacific Region_Fundy_West_-_Prod_Smoothed_2wk,0.03732509510694132
+Pacific Region_Fundy_West[CA]_-_Power_Smoothed_2wk,0.036241178091946914
+Pacific Region Storage (Bcf)_lag_1,-0.028830647308976096
+Pacific Region_Power_CAISO_-_PeakLoad_WoW,0.022387500797149684
+Pacific Region Storage (Bcf)_lag_3,-0.021562429856219204
+Pacific Region_Fundy_West_-_Power_Smoothed_2wk,-0.019968432394218066
+Pacific Region_Power_CAISO_-_Total_Generation,-0.015461626895081761
+Pacific Region_Fundy_West[CA]_-_ResCom_WoW,-0.014486223592698468
+lag_4,0.010736511406566342
+Pacific Region_Fundy_West[CA]_-_Power,-0.006978101374311436
+Pacific Region_Fundy_West_-_Ind_WoW,0.005877581261487106
+Pacific Region_Power_CAISO_-_Total_Generation_Smoothed_2wk,0.004809720474453317
+Pacific Region Storage (Bcf)_lag_5,-0.003827003301763871
+Pacific Region Storage (Bcf)_lag_4,-0.0023888004677890522

@@ -1,0 +1,7 @@
+Region,Forecast Date,Forecast (Bcf),Backtest MAE (Bcf),Backtest Dates,Backtest Actuals (Bcf),Backtest Predicted (Bcf)
+Lower 48 States,2025-07-04,159.72,6.61,"['2025-06-06', '2025-06-13', '2025-06-20', '2025-06-27']","[np.int64(109), np.int64(95), np.int64(96), np.int64(55)]","[np.float64(101.23), np.float64(97.09), np.float64(92.96), np.float64(41.45)]"
+East Region,2025-07-04,28.75,2.56,"['2025-06-06', '2025-06-13', '2025-06-20', '2025-06-27']","[np.int64(33), np.int64(32), np.int64(26), np.int64(13)]","[np.float64(28.58), np.float64(30.94), np.float64(28.37), np.float64(15.39)]"
+Midwest Region,2025-07-04,34.7,2.78,"['2025-06-06', '2025-06-13', '2025-06-20', '2025-06-27']","[np.int64(29), np.int64(30), np.int64(27), np.int64(23)]","[np.float64(27.99), np.float64(32.37), np.float64(28.78), np.float64(17.03)]"
+South Central Region,2025-07-04,104.55,11.66,"['2025-06-06', '2025-06-13', '2025-06-20', '2025-06-27']","[np.int64(36), np.int64(20), np.int64(29), np.int64(8)]","[np.float64(16.19), np.float64(13.04), np.float64(13.51), np.float64(12.37)]"
+Mountain Region,2025-07-04,10.37,1.61,"['2025-06-06', '2025-06-13', '2025-06-20', '2025-06-27']","[np.int64(5), np.int64(6), np.int64(7), np.int64(5)]","[np.float64(8.53), np.float64(7.49), np.float64(6.15), np.float64(5.58)]"
+Pacific Region,2025-07-04,28.8,1.13,"['2025-06-06', '2025-06-13', '2025-06-20', '2025-06-27']","[np.int64(5), np.int64(8), np.int64(7), np.int64(6)]","[np.float64(7.07), np.float64(6.89), np.float64(5.83), np.float64(6.19)]"
