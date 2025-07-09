@@ -12,12 +12,17 @@ import matplotlib
 matplotlib.use('Agg') # Use Agg backend for non-interactive plotting
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.ticker as mticker
 from matplotlib.colors import ListedColormap
 import seaborn as sns
 from pathlib import Path
 import calendar as py_calendar
 import io
 import base64
+import icepython as ice
+import traceback
+import mplfinance as mpf
+
 
 # --- Constants ---
 HENRY_HUB_NAME_INDIVIDUAL = 'Henry'
@@ -25,6 +30,7 @@ COMPLETENESS_LOOKBACK_DAYS_REGIONAL = 90
 COMPLETENESS_THRESHOLD_REGIONAL = 0.75
 CHART_IMAGE_FORMAT_REGIONAL = 'png'
 HENRY_HUB_NAME_REGIONAL = 'Henry'
+MONTH_CODES = {1: 'F', 2: 'G', 3: 'H', 4: 'J', 5: 'K', 6: 'M', 7: 'N', 8: 'Q', 9: 'U', 10: 'V', 11: 'X', 12: 'Z'}
 
 
 # --- Data Loading and Preparation Functions ---
@@ -45,7 +51,7 @@ def load_and_filter_prices(prices_file_path, current_processing_date, lookback_d
         return pd.DataFrame(), []
 
     if 'Date' not in prices_df.columns:
-        print("ERROR: 'Date' column not found in PRICES.csv.")
+        print("ERROR: 'Date' column not in PRICES.csv.")
         return pd.DataFrame(), []
 
     prices_df['Date_dt'] = pd.to_datetime(prices_df['Date'], errors='coerce')
@@ -89,16 +95,29 @@ def load_and_filter_prices(prices_file_path, current_processing_date, lookback_d
     return prices_df_dt_indexed, active_components
 
 
-def load_ice_data_and_group_by_region(ice_file_path, active_prices_components,
+def load_ice_data_and_group_by_region(df_price_admin, ice_file_path, active_prices_components,
                                       sheet_name="Daily_pricingLIVE",
-                                      component_col='Description', forward_col='Mark0', region_col='Unnamed: 35',
+                                      component_col='Description', forward_col='Mark0',
                                       component_name_map=None):
     """
-    Loads ICE data, maps components, and groups them by region.
+    Loads ICE data for forward values and groups components by region sourced from PriceAdmin.csv.
     """
     if component_name_map is None:
         component_name_map = {}
 
+    # --- Create a mapping from Market Component to PriceRegion from the provided df_price_admin ---
+    if 'PriceRegion' not in df_price_admin.columns or 'Market Component' not in df_price_admin.columns:
+        print("ERROR: 'PriceRegion' or 'Market Component' not found in the PriceAdmin DataFrame.")
+        return {}, []
+    
+    region_map_df = df_price_admin.dropna(subset=['PriceRegion'])
+    component_to_region_map = pd.Series(
+        region_map_df['PriceRegion'].values,
+        index=region_map_df['Market Component']
+    ).to_dict()
+    print("Built Market Component-to-PriceRegion map from PriceAdmin.csv.")
+
+    # --- Load ICE Data to get forward values ---
     print(f"Attempting to load ICE data from: {os.path.abspath(ice_file_path)}")
     try:
         ice_df = pd.read_excel(ice_file_path, sheet_name=sheet_name)
@@ -111,41 +130,34 @@ def load_ice_data_and_group_by_region(ice_file_path, active_prices_components,
         return {}, []
 
     ice_data_slice = ice_df.iloc[2:].copy()
-    required_cols = [component_col, forward_col, region_col]
+    required_cols = [component_col, forward_col] 
     if not all(col in ice_data_slice.columns for col in required_cols):
-        print(f"ERROR: Required column(s) not found in ICE data sheet '{sheet_name}'.")
+        print(f"ERROR: Required column(s) {required_cols} not in ICE data sheet '{sheet_name}'.")
         return {}, []
 
     ice_data_slice.loc[:, forward_col] = pd.to_numeric(ice_data_slice[forward_col], errors='coerce')
-    ice_data_slice = ice_data_slice.dropna(subset=[region_col])
-    ice_data_slice[region_col] = ice_data_slice[region_col].astype(str).str.strip()
-    ice_data_slice = ice_data_slice[ice_data_slice[region_col] != '0']
-    ice_data_slice = ice_data_slice[ice_data_slice[region_col] != '']
 
+    # --- Map components to regions (from PriceAdmin) and forward values (from ICE) ---
     prices_name_to_ice_desc_map = {v: k for k, v in component_name_map.items()}
     mapped_components_details = []
 
-    print("Mapping active PRICES.csv components to ICE regions and forward values...")
+    print("Mapping active PRICES.csv components to PriceAdmin regions and ICE forward values...")
     for prices_comp_name in active_prices_components:
+        region = component_to_region_map.get(prices_comp_name)
+
         ice_desc_name = prices_name_to_ice_desc_map.get(prices_comp_name, prices_comp_name)
         component_data_from_ice = ice_data_slice[ice_data_slice[component_col] == ice_desc_name]
-
+        forward_val = np.nan
         if not component_data_from_ice.empty:
-            region = component_data_from_ice.iloc[0][region_col]
-            forward = component_data_from_ice.iloc[0][forward_col]
-            if pd.notna(region) and str(region).strip():
-                mapped_components_details.append({
-                    'prices_csv_name': prices_comp_name, 'price_region': str(region).strip(), 'forward_value': forward
-                })
-            else:
-                mapped_components_details.append({
-                    'prices_csv_name': prices_comp_name, 'price_region': None, 'forward_value': forward
-                })
-        else:
-            mapped_components_details.append({
-                'prices_csv_name': prices_comp_name, 'price_region': None, 'forward_value': np.nan
-            })
-
+            forward_val = component_data_from_ice.iloc[0][forward_col]
+        
+        mapped_components_details.append({
+            'prices_csv_name': prices_comp_name, 
+            'price_region': region, 
+            'forward_value': forward_val
+        })
+    
+    # --- Grouping logic ---
     regional_groups = {}
     unregioned_components_details = []
     for item in mapped_components_details:
@@ -196,13 +208,14 @@ def load_key_and_weather_data(price_admin_file_path, weather_file_path):
     component_to_city_symbol_map = {}
     city_symbol_to_title_map = {}
     df_weather = pd.DataFrame()
+    df_price_admin = pd.DataFrame()
 
     try:
         df_weather = pd.read_csv(weather_file_path)
         required_weather_cols = ['Date', 'City Title', 'City Symbol', 'Avg Temp']
         if not all(col in df_weather.columns for col in required_weather_cols):
             print(f"ERROR: {weather_file_path} is missing required columns: {required_weather_cols}.")
-            return {}, {}, pd.DataFrame()
+            return {}, {}, pd.DataFrame(), pd.DataFrame()
 
         df_weather['Date'] = pd.to_datetime(df_weather['Date'])
         df_weather['City Symbol'] = df_weather['City Symbol'].str.strip() # Trim whitespace
@@ -215,15 +228,23 @@ def load_key_and_weather_data(price_admin_file_path, weather_file_path):
 
     except FileNotFoundError:
         print(f"FATAL: WEATHER file not found at {weather_file_path}. Cannot proceed.")
-        return {}, {}, pd.DataFrame()
+        return {}, {}, pd.DataFrame(), pd.DataFrame()
     except Exception as e:
         print(f"Error loading or processing '{weather_file_path}': {e}.")
-        return {}, {}, pd.DataFrame()
+        return {}, {}, pd.DataFrame(), pd.DataFrame()
 
     try:
-        required_admin_cols = ['Market Component', 'City Symbol']
-        df_price_admin = pd.read_csv(price_admin_file_path, usecols=required_admin_cols)
-        df_price_admin.dropna(subset=required_admin_cols, inplace=True)
+        df_price_admin = pd.read_csv(price_admin_file_path)
+        df_price_admin.columns = df_price_admin.columns.str.strip()
+        
+        # --- EDIT: Added 'PriceRegion' to required columns ---
+        required_admin_cols = ['Market Component', 'City Symbol', 'Fin Basis', 'PriceRegion']
+        
+        if not all(col in df_price_admin.columns for col in required_admin_cols):
+            print(f"ERROR: Could not find required columns {required_admin_cols} in {price_admin_file_path}.")
+            return component_to_city_symbol_map, city_symbol_to_title_map, df_weather, pd.DataFrame()
+
+        df_price_admin.dropna(subset=['Market Component', 'City Symbol'], inplace=True)
         df_price_admin['Market Component'] = df_price_admin['Market Component'].str.strip()
         df_price_admin['City Symbol'] = df_price_admin['City Symbol'].str.strip() # Trim whitespace
 
@@ -235,28 +256,28 @@ def load_key_and_weather_data(price_admin_file_path, weather_file_path):
 
     except FileNotFoundError:
         print(f"Warning: PriceAdmin file not found at {price_admin_file_path}.")
-    except ValueError:
-        print(f"ERROR: Could not find required columns ['Market Component', 'City Symbol'] in {price_admin_file_path}.")
     except Exception as e:
         print(f"Error loading or processing '{price_admin_file_path}': {e}.")
 
-    return component_to_city_symbol_map, city_symbol_to_title_map, df_weather
+    return component_to_city_symbol_map, city_symbol_to_title_map, df_weather, df_price_admin
 
 # --- Regional Report Generation Functions ---
 
 def generate_regional_daily_overlay_chart(region_name, components_in_region, prices_df_dt_indexed,
-                                            chart_start_dt, chart_end_dt, fwd_mark_dt,
-                                            output_charts_dir, henry_hub_name=HENRY_HUB_NAME_REGIONAL):
-    """Generates and saves the daily regional overlay chart."""
+                                          current_processing_date,
+                                          output_charts_dir, henry_hub_name=HENRY_HUB_NAME_REGIONAL):
+    """Generates and saves the daily regional overlay chart with corrected date axis."""
     print(f"Generating Daily Matplotlib chart for region: {region_name}")
     fig, ax = plt.subplots(figsize=(18, 7))
 
-    ts_chart_start = pd.to_datetime(chart_start_dt)
-    ts_chart_end = pd.to_datetime(chart_end_dt)
+    today = pd.to_datetime(current_processing_date)
+    chart_start_dt = (today.replace(day=1) - relativedelta(months=1))
+    chart_end_dt = (today.replace(day=1) + relativedelta(months=1) - timedelta(days=1))
+    fwd_mark_dt = today.replace(day=1) + relativedelta(months=1)
 
     prices_chart_period = prices_df_dt_indexed[
-        (prices_df_dt_indexed.index >= ts_chart_start) &
-        (prices_df_dt_indexed.index <= ts_chart_end)
+        (prices_df_dt_indexed.index >= chart_start_dt) &
+        (prices_df_dt_indexed.index <= chart_end_dt)
     ].copy()
 
     if prices_chart_period.empty:
@@ -281,16 +302,8 @@ def generate_regional_daily_overlay_chart(region_name, components_in_region, pri
         line, = ax.plot(prices_chart_period.index, basis_series, label=comp_name, linewidth=1.5)
 
         if pd.notna(forward_val):
-            plot_fwd_mark_dt = pd.to_datetime(fwd_mark_dt)
-            
-            if ts_chart_start <= plot_fwd_mark_dt <= ts_chart_end:
-                ax.plot([plot_fwd_mark_dt], [forward_val], marker='*', markersize=12, color=line.get_color(), linestyle='None', label=f'_nolegend_')
-                ax.text(plot_fwd_mark_dt + timedelta(days=1), forward_val, f'{forward_val:.3f}', va='center', fontsize=9, color=line.get_color())
-            else:
-                last_valid_date = basis_series.dropna().index.max()
-                if pd.notna(last_valid_date):
-                    ax.plot([last_valid_date], [forward_val], marker='*', markersize=10, color=line.get_color(), linestyle='None', label=f'_nolegend_')
-                    ax.text(last_valid_date + timedelta(days=1), forward_val, f'{forward_val:.3f}', va='bottom', ha='left', fontsize=8, color=line.get_color())
+            ax.plot([fwd_mark_dt], [forward_val], marker='*', markersize=12, color=line.get_color(), linestyle='None', label=f'_nolegend_')
+            ax.text(fwd_mark_dt + timedelta(days=1), forward_val, f'{forward_val:.3f}', va='center', fontsize=9, color=line.get_color())
 
     if not has_data_for_chart:
         print(f"  No valid basis data for daily chart in region '{region_name}'. Skipping.")
@@ -305,6 +318,7 @@ def generate_regional_daily_overlay_chart(region_name, components_in_region, pri
     fig.autofmt_xdate(rotation=30, ha='right')
     ax.grid(True, linestyle='--', alpha=0.7)
     ax.axhline(0, color='black', linewidth=0.5, linestyle='--')
+    ax.set_xlim(chart_start_dt, fwd_mark_dt + timedelta(days=3))
 
     if len(components_in_region) > 7:
         ax.legend(title='Market Components', title_fontsize=10, bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=9)
@@ -329,8 +343,8 @@ def generate_regional_daily_overlay_chart(region_name, components_in_region, pri
     return chart_file_path.name if chart_file_path else None
 
 def generate_regional_avg_spread_grid_heatmaps(region_name, components_in_region_details, prices_df_dt_indexed,
-                                              current_processing_date, output_charts_dir,
-                                              num_periods=3, period_days=15, henry_hub_name=HENRY_HUB_NAME_REGIONAL):
+                                               current_processing_date, output_charts_dir,
+                                               num_periods=3, period_days=15, henry_hub_name=HENRY_HUB_NAME_REGIONAL):
     """Generates and saves average spread grid heatmaps for different periods."""
     component_names = [comp['prices_csv_name'] for comp in components_in_region_details]
     if len(component_names) < 2:
@@ -402,8 +416,8 @@ def generate_regional_avg_spread_grid_heatmaps(region_name, components_in_region
     return generated_grid_paths
 
 def generate_regional_historical_monthly_basis(region_name, components_in_region_details, prices_df_dt_indexed,
-                                                prior_years, month_indices, output_charts_dir,
-                                                henry_hub_name=HENRY_HUB_NAME_REGIONAL):
+                                               prior_years, month_indices, output_charts_dir,
+                                               henry_hub_name=HENRY_HUB_NAME_REGIONAL):
     """Generates and saves historical monthly average basis charts for given years."""
     generated_chart_paths = []
     if henry_hub_name not in prices_df_dt_indexed.columns:
@@ -537,7 +551,8 @@ def generate_individual_fom_vs_cash_table(monthly_cash_basis_df, df_fom_historic
         if cash_gas_years_end:
             max_cash_calendar_year = max(cash_gas_years_end)
 
-    latest_year_to_display = max(max_fom_year_with_data, max_cash_calendar_year, min_year_to_display)
+    latest_year_to_display = min(max(max_fom_year_with_data, max_cash_calendar_year, min_year_to_display), current_actual_year)
+
 
     table_data_list = []
     calendar_months_ordered = [calendar_month_names[i] for i in range(1, 13)]
@@ -616,7 +631,6 @@ def generate_individual_basis_history_chart(prices_df_dt_indexed, component_name
                                             henry_name=HENRY_HUB_NAME_INDIVIDUAL):
     """
     Generates and saves the daily basis vs. history chart (as a base64 image string for HTML).
-    This corrected version ensures historical data is properly aligned on a shared date axis.
     """
     try:
         if component_name not in prices_df_dt_indexed.columns or henry_name not in prices_df_dt_indexed.columns:
@@ -698,7 +712,6 @@ def generate_individual_temp_scatter_plot(prices_df_dt_indexed, df_weather, comp
                                           weather_forecast_file_path=None):
     """
     Generates and saves the basis vs. temp scatter plot and a formatted forecast table.
-    This version manually builds the HTML table to ensure correct formatting and structure.
     """
     try:
         if component_name not in prices_df_dt_indexed.columns or henry_name not in prices_df_dt_indexed.columns:
@@ -790,9 +803,7 @@ def generate_individual_temp_scatter_plot(prices_df_dt_indexed, df_weather, comp
 
         try:
             forecast_df = pd.read_csv(weather_forecast_file_path)
-            # Ensure 'Avg Temp' is numeric, coercing errors
             forecast_df['Avg Temp'] = pd.to_numeric(forecast_df['Avg Temp'], errors='coerce')
-            # Drop rows where temperature is not a valid number
             forecast_df.dropna(subset=['Avg Temp'], inplace=True)
 
             city_forecast_df = forecast_df[forecast_df['City Symbol'] == city_symbol].copy()
@@ -806,20 +817,16 @@ def generate_individual_temp_scatter_plot(prices_df_dt_indexed, df_weather, comp
             avg_temp = city_forecast_df['Avg Temp'].mean()
             avg_basis = city_forecast_df['Predicted Basis'].mean()
 
-            # --- Start building the HTML string ---
             html = ['<div style="overflow-x: auto; width: 100%;">']
             html.append('<table style="font-size: 9px; border-collapse: collapse; white-space: nowrap;">')
             
-            # 1. Header Row
             html.append('<tr style="background-color: #f2f2f2;">')
             html.append('<th style="padding: 4px; border: 1px solid #ccc; text-align: left; font-weight: bold;">Date</th>')
             html.append(f'<th style="padding: 4px; border: 1px solid #ccc; font-weight: bold;">Avg</th>')
             for date_val in city_forecast_df['Date']:
-                # --- THIS IS THE CORRECTED LINE ---
                 html.append(f'<th style="padding: 4px; border: 1px solid #ccc; font-weight: bold;">{date_val.strftime("%#m/%#d")}</th>')
             html.append('</tr>')
 
-            # 2. Temperature Row
             html.append('<tr>')
             html.append('<td style="padding: 4px; border: 1px solid #ccc; text-align: left; font-weight: bold;">Temp</td>')
             avg_temp_str = f"{avg_temp:.0f}" if pd.notna(avg_temp) else "N/A"
@@ -829,7 +836,6 @@ def generate_individual_temp_scatter_plot(prices_df_dt_indexed, df_weather, comp
                 html.append(f'<td style="padding: 4px; border: 1px solid #ccc; text-align: center;">{cell_val}</td>')
             html.append('</tr>')
             
-            # 3. Basis Row
             html.append('<tr>')
             html.append('<td style="padding: 4px; border: 1px solid #ccc; text-align: left; font-weight: bold;">Basis</td>')
             avg_basis_str = f"{avg_basis:.3f}" if pd.notna(avg_basis) else "N/A"
@@ -854,3 +860,283 @@ def generate_individual_temp_scatter_plot(prices_df_dt_indexed, df_weather, comp
         print(f"FATAL Error in generate_individual_temp_scatter_plot for {component_name}: {e}")
         traceback.print_exc()
         return f"<p>Error generating basis vs. temp scatter for {component_name}: {e}</p>"
+
+# =======================================================================================
+# --- FORWARD-LOOKING ANALYSIS FUNCTIONS ---
+# =======================================================================================
+
+def generate_forward_looking_charts(df_price_admin, component_name, current_processing_date):
+    """
+    Generates and returns HTML for the three forward-looking charts for a given component,
+    based on dynamic date ranges and contracts.
+    """
+    html_outputs = []
+    
+    # Find the 'Fin Basis' and 'Fin Basis Name' for the current component
+    component_info = df_price_admin[df_price_admin['Market Component'] == component_name]
+    
+    if component_info.empty:
+        return ["<p>Component not found in PriceAdmin.csv.</p>"] * 3
+        
+    fin_basis_symbol = component_info['Fin Basis'].iloc[0]
+    # --- EDIT: Get the full name for the title ---
+    fin_basis_name = component_info['Fin Basis Name'].iloc[0]
+
+    if pd.isna(fin_basis_symbol):
+        return [f"<p>No 'Fin Basis' symbol found for {component_name}.</p>"] * 3
+    if pd.isna(fin_basis_name):
+        fin_basis_name = component_name # Fallback to component name if Fin Basis Name is missing
+
+    # --- Define the three target contracts based on the current processing date ---
+    chart_targets = [
+        current_processing_date + relativedelta(months=1),  # M+1
+        current_processing_date,                           # M
+        current_processing_date - relativedelta(months=11) # M-11
+    ]
+
+    for target_date in chart_targets:
+        # Determine the chart's date range based on the target month
+        start_date = (target_date.replace(day=1) - relativedelta(months=3))
+        end_date = target_date.replace(day=1)
+
+        month_code = MONTH_CODES[target_date.month]
+        year_code = str(target_date.year)[-2:]
+        
+        # --- EDIT: Construct the full, direct symbol ---
+        full_symbol = f"{fin_basis_symbol} {month_code}{year_code}-IUS"
+        
+        # --- EDIT: Create a descriptive title ---
+        chart_title = f"{fin_basis_name} ({month_code}{year_code})"
+        
+        # Call the plotting logic with the direct symbol and dynamic dates
+        chart_html = plot_historical_contract_chart(
+            full_symbol=full_symbol,
+            chart_title=chart_title, 
+            start_date_str=start_date.strftime('%Y-%m-%d'),
+            end_date_str=end_date.strftime('%Y-%m-%d')
+        )
+        html_outputs.append(chart_html)
+        
+    return html_outputs
+
+def plot_historical_contract_chart(full_symbol, chart_title, start_date_str, end_date_str):
+    """
+    Fetches data for a single, direct symbol and returns an HTML img tag.
+    This version removes the unreliable `get_search` and uses a direct data fetch.
+    """
+    try:
+        # --- EDIT: Direct Data Fetching (No Search) ---
+        print(f"Fetching data for '{full_symbol}' from {start_date_str} to {end_date_str}")
+        fields_to_request = ['Open', 'High', 'Low', 'Settle']
+        ts_data = ice.get_timeseries(
+            symbols=full_symbol,
+            fields=fields_to_request,
+            granularity='D',
+            start_date=start_date_str,
+            end_date=end_date_str
+        )
+
+        if not ts_data or len(ts_data) < 2:
+            return f"<p>No time series data for '{full_symbol}' in the period.</p>"
+
+        # --- Data Processing and Cleaning ---
+        header = [h.split('.')[-1].strip() for h in ts_data[0]]
+        df = pd.DataFrame(list(ts_data[1:]), columns=header)
+        df.rename(columns={'Settle': 'Close'}, inplace=True)
+        df['Time'] = pd.to_datetime(df['Time'])
+        df.set_index('Time', inplace=True)
+
+        for col in ['Open', 'High', 'Low', 'Close']:
+             if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+
+        # Impute missing OHLC data from the 'Close' price
+        if 'Close' in df.columns:
+            for col in ['Open', 'High', 'Low']:
+                if col not in df.columns:
+                    df[col] = np.nan
+                df[col] = df[col].fillna(df['Close'])
+
+        # --- Determine Plot Type ---
+        plot_type = None
+        data_to_plot = None
+        candle_cols = ['Open', 'High', 'Low', 'Close']
+        
+        if all(col in df.columns for col in candle_cols):
+            df_candle = df.dropna(subset=candle_cols)
+            if not df_candle.empty:
+                plot_type = 'candle'
+                data_to_plot = df_candle[candle_cols]
+        
+        if plot_type is None and 'Close' in df.columns and df['Close'].notna().any():
+            plot_type = 'line'
+            data_to_plot = pd.DataFrame(df['Close'].dropna())
+
+        if data_to_plot is None or data_to_plot.empty:
+            return f"<p>No usable data to plot for '{chart_title}'.</p>"
+
+        # --- Plotting ---
+        img_buffer = io.BytesIO()
+        start_date = pd.to_datetime(start_date_str)
+        end_date = pd.to_datetime(end_date_str)
+
+        if plot_type == 'candle':
+            full_date_range = pd.date_range(start=start_date, end=end_date, freq='D')
+            data_to_plot = data_to_plot.reindex(full_date_range)
+            
+            fig, axlist = mpf.plot(data_to_plot,
+                                   type='candle', style='yahoo',
+                                   title=f'\n{chart_title}',
+                                   ylabel='Price (USD/MMBtu)',
+                                   figratio=(16,9), datetime_format='%Y-%m-%d',
+                                   xrotation=30, show_nontrading=True,
+                                   returnfig=True)
+            
+            flat_days = data_to_plot[data_to_plot['High'] == data_to_plot['Low']].dropna()
+            if not flat_days.empty:
+                axlist[0].scatter(flat_days.index, flat_days['Close'], color='black', s=15, zorder=10, marker='_')
+            
+            fig.savefig(img_buffer, format='png', bbox_inches='tight')
+
+        elif plot_type == 'line':
+            fig, ax = plt.subplots(figsize=(10, 5.5), dpi=100)
+            ax.plot(data_to_plot.index, data_to_plot['Close'], color='#0057b8', linewidth=1.5)
+            ax.set_title(f'\n{chart_title}', fontsize=12)
+            ax.set_ylabel('Price (USD/MMBtu)')
+            ax.grid(True, linestyle='--', alpha=0.6)
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+            ax.set_xlim(start_date, end_date)
+            plt.xticks(rotation=30, ha='right')
+            plt.tight_layout()
+            fig.savefig(img_buffer, format='png', bbox_inches='tight')
+
+        plt.close(fig)
+        img_buffer.seek(0)
+        img_base64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+        return f'<img src="data:image/png;base64,{img_base64}" alt="{chart_title} Chart"/>'
+
+    except Exception as e:
+        traceback.print_exc()
+        return f"<p>A critical error occurred generating chart for '{full_symbol}': {e}</p>"
+
+
+def generate_forward_symbols(base_code, start_date, num_months, api_suffix='-IUS'):
+    """
+    Constructs a list of valid ICE futures symbols and corresponding column headers.
+    """
+    symbols, column_headers = [], []
+    for i in range(num_months):
+        contract_date = start_date + relativedelta(months=i)
+        month_char = MONTH_CODES[contract_date.month]
+        symbol_year = str(contract_date.year)[-2:]
+        symbol = f"{base_code} {month_char}{symbol_year}{api_suffix}"
+        header = contract_date.strftime('%b-%y')
+        symbols.append(symbol)
+        column_headers.append(header)
+    return symbols, column_headers
+
+def get_settlements_on_date(symbols, date_str):
+    """
+    Fetches settlement prices for a list of symbols on a specific date.
+    """
+    print(f"--- Fetching live settlements for date: {date_str} ---")
+    try:
+        ts_data = ice.get_timeseries(
+            symbols=symbols, fields=['Settle'], granularity='D',
+            start_date=date_str, end_date=date_str
+        )
+        if not ts_data or len(ts_data) < 2:
+            print(f"--> WARNING: No data returned for {date_str}.")
+            return {}
+
+        header, data_row = ts_data[0], ts_data[1]
+        settlements = {}
+        for i, column_name in enumerate(header):
+            if "Settle" in column_name:
+                symbol_key = column_name.replace('.Settle', '')
+                price = pd.to_numeric(data_row[i], errors='coerce')
+                settlements[symbol_key] = price
+        print(f"--> SUCCESS: Parsed {len(settlements)} prices.")
+        return settlements
+    except Exception as e:
+        print(f"--> FATAL ERROR during API call: {e}")
+        return {}
+
+def generate_forward_curve_chart(fin_basis_symbol, point_name, current_processing_date):
+    """
+    Generates a forward curve chart for a given financial basis symbol.
+    """
+    try:
+        print(f"\n--- Generating Forward Curve Chart for: {point_name} ({fin_basis_symbol}) ---")
+        
+        # --- Configuration ---
+        API_SUFFIX = '-IUS'
+        NUM_FORWARD_MONTHS = 12
+        # --- EDIT: Start the curve from the next calendar month ---
+        START_CONTRACT_DATE = (current_processing_date.replace(day=1) + relativedelta(months=1))
+
+        # --- Dynamic Date Generation ---
+        today = pd.to_datetime(current_processing_date)
+        HISTORICAL_DATE_NAMES = {
+            (today - relativedelta(days=1)).strftime('%Y-%m-%d'): 'Yesterday',
+            (today - relativedelta(days=7)).strftime('%Y-%m-%d'): 'Today -7d',
+            (today - relativedelta(days=14)).strftime('%Y-%m-%d'): 'Today -14d',
+            (today - relativedelta(days=28)).strftime('%Y-%m-%d'): 'Today -28d',
+            (today - relativedelta(days=56)).strftime('%Y-%m-%d'): 'Today -56d',
+        }
+
+        # --- Data Fetching and Processing ---
+        symbols, column_headers = generate_forward_symbols(fin_basis_symbol, START_CONTRACT_DATE, NUM_FORWARD_MONTHS)
+        
+        all_data = []
+        symbol_to_header = dict(zip(symbols, column_headers))
+
+        for date_str_key, date_name in HISTORICAL_DATE_NAMES.items():
+            settlements = get_settlements_on_date(symbols, date_str_key)
+            row_data = {'Historical Date': date_name}
+            for symbol, header in symbol_to_header.items():
+                row_data[header] = settlements.get(symbol)
+            all_data.append(row_data)
+
+        df = pd.DataFrame(all_data).set_index('Historical Date')
+        
+        if df.isnull().all().all():
+            return f"<p>No historical curve data could be retrieved for {point_name}.</p>"
+
+        # --- Plotting Logic ---
+        df_numeric = df.apply(pd.to_numeric, errors='coerce')
+        df_transposed = df_numeric.T
+
+        fig, ax = plt.subplots(figsize=(12, 6), dpi=100)
+        colors = ['#00441b', '#1b7837', '#5aae61', '#a6dba0', '#d9f0d3']
+        
+        for i, date_label in enumerate(df_transposed.columns):
+            linewidth = 3.5 if date_label == 'Yesterday' else 1.5
+            zorder = 10 if date_label == 'Yesterday' else 5
+            ax.plot(df_transposed.index, df_transposed[date_label], 
+                    color=colors[i], linewidth=linewidth, label=date_label, 
+                    marker='o', markersize=4, zorder=zorder)
+
+        # --- Chart Formatting ---
+        # --- EDIT: Use the full point_name in the title ---
+        ax.set_title(f'Historical Forward Curves for {point_name}', fontsize=15, pad=15, weight='bold')
+        ax.set_ylabel('Settlement Price ($/MMBtu)', fontsize=11)
+        ax.set_xlabel('Contract Month', fontsize=11)
+        ax.grid(True, which='both', linestyle='--', alpha=0.6)
+        ax.legend(title='Historical Date', fontsize=10)
+        ax.tick_params(axis='x', labelrotation=30)
+        ax.yaxis.set_major_formatter(mticker.FormatStrFormatter('%.2f'))
+        plt.tight_layout()
+
+        # --- Convert plot to base64 for HTML embedding ---
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='png', bbox_inches='tight')
+        plt.close(fig)
+        img_buffer.seek(0)
+        img_base64 = base64.b64encode(img_buffer.read()).decode('utf-8')
+        
+        return f'<img src="data:image/png;base64,{img_base64}" alt="{point_name} Forward Curve Chart" style="width:100%; max-width:900px; display:block; margin:auto;"/>'
+
+    except Exception as e:
+        traceback.print_exc()
+        return f"<p>A critical error occurred generating the forward curve chart for '{point_name}': {e}</p>"

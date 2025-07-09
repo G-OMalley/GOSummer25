@@ -5,7 +5,8 @@ import os
 from pathlib import Path
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
-import market_analyzer
+import market_analyzer as market_analyzer
+import pandas as pd
 
 # --- Configuration ---
 # PLEASE UPDATE THESE PATHS AND SETTINGS AS NEEDED
@@ -68,12 +69,12 @@ def main():
         print("CRITICAL: No active market components found or error loading prices. Exiting.")
         return
 
-    regional_groups, unregioned_details = market_analyzer.load_ice_data_and_group_by_region(
-        ICE_FILE, active_market_components, component_name_map=MARKET_COMPONENT_NAME_MAP_ICE_TO_PRICES
-    )
-
     df_fom_historical = market_analyzer.load_historical_fom(HISTORICAL_FOM_FILE)
-    component_to_city_symbol_map, city_symbol_to_title_map, df_weather = market_analyzer.load_key_and_weather_data(PRICE_ADMIN_FILE, WEATHER_FILE)
+    component_to_city_symbol_map, city_symbol_to_title_map, df_weather, df_price_admin = market_analyzer.load_key_and_weather_data(PRICE_ADMIN_FILE, WEATHER_FILE)
+
+    regional_groups, unregioned_details = market_analyzer.load_ice_data_and_group_by_region(
+        df_price_admin, ICE_FILE, active_market_components, component_name_map=MARKET_COMPONENT_NAME_MAP_ICE_TO_PRICES
+    )
 
     # --- Validation Step ---
     print("\n--- Validating Component Mapping ---")
@@ -109,12 +110,13 @@ def main():
         ".flex-item { flex: 1 1 45%; min-width: 300px; box-sizing: border-box; padding: 5px; }",
         ".spread-grid-layout, .monthly-charts-layout { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 15px; margin-top:15px; }",
         ".spread-grid-item, .monthly-chart-item { flex: 1 1 30%; min-width: 300px; }",
+        ".forward-charts-layout { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 15px; margin-top:15px; }",
+        ".forward-chart-item { flex: 1 1 30%; min-width: 300px; }",
         "hr { border: 0; height: 1px; background: #bdc3c7; margin: 40px 0; }",
         "</style></head><body>",
         f"<h1>Consolidated Market Analysis Report - {TODAY.strftime('%B %d, %Y')}</h1>"
     ]
     
-    # Consolidate regional and unregioned components into a single list to process
     all_sections = []
     processed_regions = set()
     for region_name in SPECIFIC_REGION_ORDER:
@@ -137,7 +139,7 @@ def main():
 
         if not is_unregioned:
             html_parts.append("<h3>Regional Overview</h3>")
-            daily_overlay_img = market_analyzer.generate_regional_daily_overlay_chart(section_name, components_in_section, prices_df, REGIONAL_CHART_START_DATE, REGIONAL_CHART_END_DATE, REGIONAL_FORWARD_MARK_DATE, output_charts_path)
+            daily_overlay_img = market_analyzer.generate_regional_daily_overlay_chart(section_name, components_in_section, prices_df, TODAY, output_charts_path)
             if daily_overlay_img: html_parts.append(f"<div class='chart-container'><img src='{OUTPUT_CHARTS_SUBDIR}/{daily_overlay_img}' alt='Daily Overlay for {section_name}'></div>")
             
             spread_grids = market_analyzer.generate_regional_avg_spread_grid_heatmaps(section_name, components_in_section, prices_df, TODAY, output_charts_path, SPREAD_GRID_NUM_PERIODS, SPREAD_GRID_PERIOD_DAYS)
@@ -182,7 +184,33 @@ def main():
             else:
                 html_parts.append(f"<div class='flex-item chart-container'><p>Temperature scatter plot not available for {comp_name} (no city mapping in PriceAdmin.csv).</p></div>")
             
-            html_parts.append("</div>") 
+            html_parts.append("</div>")
+
+            # --- Generate and Add the Forward-Looking Charts ---
+            forward_charts_html = market_analyzer.generate_forward_looking_charts(df_price_admin, comp_name, TODAY)
+            if forward_charts_html:
+                html_parts.append("<h4>Forward-Looking Analysis</h4>")
+                html_parts.append("<div class='forward-charts-layout'>")
+                for chart_html in forward_charts_html:
+                    html_parts.append(f"<div class='forward-chart-item'>{chart_html}</div>")
+                html_parts.append("</div>")
+
+            # --- Generate and Add the NEW Forward-Looking Curve Chart ---
+            component_info = df_price_admin[df_price_admin['Market Component'] == comp_name]
+            if not component_info.empty:
+                fin_basis_symbol = component_info['Fin Basis'].iloc[0]
+                # --- EDIT: Get the descriptive name for the title ---
+                point_name = component_info['Fin Basis Name'].iloc[0]
+                
+                # Use the descriptive name if available, otherwise fallback to the component name
+                if pd.isna(point_name):
+                    point_name = comp_name
+                
+                if pd.notna(fin_basis_symbol):
+                    # --- EDIT: Pass the point_name to the chart function ---
+                    curve_chart_html = market_analyzer.generate_forward_curve_chart(fin_basis_symbol, point_name, TODAY)
+                    html_parts.append(f"<div class='chart-container'>{curve_chart_html}</div>")
+
             html_parts.append("</div>") 
         html_parts.append("</div><hr>") 
 

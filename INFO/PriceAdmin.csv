@@ -27,7 +27,7 @@ Carthage,Carthage,YKF,YKK,HXS,HSC-HPL POOL,,South Central,,KMSY,Carthage Hub FDt
 CG-Mainline,CG-Mainline,XLA,XLE,CGB,CG-MAINLINE,CGR,South Central,,KMSY,Col Gulf Mnline FDt Com,,SouthCentral - Perryville,"Columbia Gulf, mainline",
 CG-Onshore,CG-Onshore,XLG,XLK,CON,CG-ONSHORE,CVH,South Central,,KMSY,Col Gulf LA FDt Com,,SouthCentral - Henry,"Columbia Gulf, La",
 Cheyenne,Cheyenne,XNS,XNX,CRI,CIG,CVQ,Rockies,Upper,KDEN,Cheyenne Hub FDt Com,,,Cheyenne Hub,
-Chicago,,,,,Chicago,CSS,Midwest,,KORD,Chicago CG FDt Com,,Midwest - Chicago,Chicago city-gates,
+Chicago,,,,DGD,Chicago,CSS,Midwest,,KORD,Chicago CG FDt Com,,Midwest - Chicago,Chicago city-gates,
 CIG-Mainline,CIG-Mainline,YKL,YKQ,CRI,CIG,CRS,Rockies,,KDEN,CIG Rocky Mtns FDt Com,,,"CIG, Rockies",
 CIG-Mainline Pool,CIG-Mainline Pool,YKR,YKW,CRI,CIG,,Rockies,,,,ICE CIG - Mainline (sellers' choice non-lateral ) FDt Com,,,
 CIG-Mainline South,CIG-Mainline South,YKX,YL2,CRI,CIG,,Rockies,,,,ICE CIG - Mainline South (sellers' choice) FDt Com,,,
@@ -35,9 +35,9 @@ Clarington,Clarington,YL3,YL8,,,,Northeast,,,,,,,
 Clarington-Tenn,Clarington-Tenn,YL9,YLE,,,,Northeast,,,,,,,
 Consumers,Consumers,XNL,XNQ,,,CVR,Midwest,,KDTW,Cons Energy CG FDt Com,,Midwest - Demand,Consumers city-gate,
 Cove Point,Cove Point,YD7,YD9,,,,Northeast,,,,ICE Dominion Energy Cove Point on system delivery FDt Com,Northeast - Demand,,Transco-Z5 North
-Dracut,Dracut,YLF,YLK,TMT,TETCO-M3,,Northeast,,,,,,,TETCO-M3
+Dracut,Dracut,YLF,YLK,TMT,TETCO-M3,,Northeast,,KJFK,,,,,TETCO-M3
 Eastern Gas-North,Eastern Gas-North,XAX,XX3,,,,Northeast,,,Eastern Gas North FDt Com,,Northeast - Appalachia,,
-Eastern Gas-South,Eastern Gas-South,XJL,XJP,DOM,,DSS,Northeast,,KPIT,Eastern Gas South FDt Com,,Northeast - Appalachia,"Eastern Gas, Appalachia",
+Eastern Gas-South,Eastern Gas-South,XJL,XJP,DOM,Eastern Gas-South,DSS,Northeast,,KPIT,Eastern Gas South FDt Com,,Northeast - Appalachia,"Eastern Gas, Appalachia",
 Egan Inter,Egan Inter,YLL,YLN,,,,South Central,,,,,,,
 Egan Stor,Egan Stor,YLO,YLQ,,,,South Central,,,,,,,
 EGT-Flex,EGT-Flex,XXJ,XXN,CTP,Enable Gas,,South Central,,,,ICE Enable Gas Flex Pool only FDt Com,SouthCentral - Midcon,,Enable East Pool
@@ -46,7 +46,7 @@ EGT-Perryville Hub,EGT-Perryville Hub,YLX,YM2,CGB,CG-MAINLINE,,South Central,,,,
 EGT-South,EGT-South,YM3,YM8,CTP,Enable Gas,,South Central,,,,,,,Enable East Pool
 EGT-West,EGT-West,YM9,YME,CTP,Enable Gas,,South Central,,,,,,,Enable East Pool
 Enable East Pool,Enable East Pool,YMF,YMK,CTP,Enable Gas,,South Central,,,,,,,
-Enable West Pool ,Enable West Pool ,YML,YMQ,,ENABLE WEST POOL ,,South Central,,,,,,,Panhandle
+Enable West Pool ,Enable West Pool ,YML,YMQ,,,,South Central,,,,,,,Panhandle
 ENT-STX Map,ENT-STX Map,Z5Z,Z64,,,,South Central,,,,ICE ENT STX Map FDt Com,SouthCentral - TexCoast,,HSC-HPL Pool
 EP-Anadarko,EP-Anadarko,DR8,DRD,,,,South Central,,,,,,,Panhandle
 EP-Keystone,EP-Keystone,XST,XSX,PER,,,South Central,,,,ICE El Paso Keystone Pool FDt Com,SouthCentral - WesTex,,
@@ -88,7 +88,7 @@ Katy-Oasis,Katy-Oasis,XU2,XU4,,,,South Central,,,,ICE Katy Oasis Pipeline FDt Co
 KRGT-Del Pool,KRGT-Del Pool,YEK,DR3,SCL,,KSS,Rockies,,KLAX,Kern River Dlvd FDt Com,,,"Kern River, delivered",
 KRGT-Rec Pool,KRGT-Rec Pool,YEP,DR4,,,,Rockies,Upper,,Kern River Opal FDt Com,ICE Kern River receipt FDt Com,,,
 Lebanon,Lebanon,YQ2,YQ7,,,,Northeast,,,Lebanon Hub-Ohio FDt Com,,Northeast - Appalachia,Lebanon Hub,
-Leidy,Leidy,YQ8,YQD,,,,Northeast,,,,,,,
+Leidy,Leidy,YQ8,YQD,,,,Northeast,,,,,0,,
 Leidy-Transco,Leidy-Transco,YQE,YQJ,YQB,LEIDY-TRANSCO,,Northeast,0,KPIT,Transco Leidy Line receipts FDt Com,,Northeast - Appalachia,"Transco, Leidy Line receipts",
 M&N US,M&N US,YQK,YQM,,,,,,,,,,,
 MEP-Lamar,MEP-Lamar,XA2,XA7,,,,South Central,,,,,,,NGPL-TXOK East
@@ -99,18 +99,18 @@ Millennium East Pool,Millennium East Pool,YAY,YBA,MRB,MILLENNIUM EAST POOL,MRC,N
 Millennium-Ramapo,Millennium-Ramapo,YQQ,YQV,TMT,,,Northeast,,,,,,,TETCO-M3
 Moss Bluff Inter,Moss Bluff Inter,XDS,XDX,,,,South Central,,,,,,,
 Moss Bluff Stor,Moss Bluff Stor,YQW,YQY,,,,South Central,,,,,,,
-MountainWest-North,MountainWest-North,YVI,DQK,,,,Rockies,,,Questar Rky Mtn FDt Com,ICE Questar North Pool FDt Com,,,
-MountainWest-South,MountainWest-South,YVM,DQL,,,,,,,,,,,
+MountainWest-North,MountainWest-North,YVI,DQK,,,,Rockies,,,Questar Rky Mtn FDt Com,ICE Questar North Pool FDt Com,#N/A,,
+MountainWest-South,MountainWest-South,YVM,DQL,,,,,,,,,#N/A,,
 MS Hub,MS Hub,YQZ,YR4,SON,,,South Central,,KMSY,,,,,Sonat-Z South
 NBPL-Bakken (receipt),NBPL-Bakken (receipt),X7O,X7Q,,,,Midwest,,,,,,,NBPL-Ventura
-NBPL-Harper,NBPL-Harper,YR5,DQD,MCO,,,Midwest,,,,,,,NGPL-Midcont Pool
+NBPL-Harper,NBPL-Harper,YR5,DQD,MCO,NGPL-MIDCONT POOL,,Midwest,,,,,,,NGPL-Midcont Pool
 NBPL-Nicor,NBPL-Nicor,YRA,YRE,DGD,,,Midwest,,,,,,Chicago-Nicor,Chicago
-NBPL-Vector,NBPL-Vector,YRG,DQE,DGD,,,Midwest,,,,,,,Chicago
-NBPL-Ventura,NBPL-Ventura,XTZ,XUZ,NVE,,,Midwest,,KDTW,No Border VentTP FDt Com,,,"Northern Bdr., Ventura TP",
-NBPL-Will County,NBPL-Will County,YRL,YRP,,,,Midwest,,,,,,,Chicago
-NGPL-AM Pool,NGPL-AM Pool,YRR,YRW,MCO,,,South Central,,,NGPL Amarillo Rcpt FDt Com,ICE NGPL Amarillo Pooling PIN FDt Com,Midwest - Chicago,,
-NGPL-AM Stor,NGPL-AM Stor,YRX,YS2,MCO,,,,,,,,,,
-NGPL-GC Mainline,NGPL-GC Mainline,YS3,YS8,NTO,,,Midwest,,,,,SouthCentral - Midcon,,NGPL-TXOK East
+NBPL-Vector,NBPL-Vector,YRG,DQE,DGD,,,Midwest,,KORD,,,,,Chicago
+NBPL-Ventura,NBPL-Ventura,XTZ,XUZ,NVE,,,Midwest,,KDTW,No Border VentTP FDt Com,,Midwest - Chicago,"Northern Bdr., Ventura TP",
+NBPL-Will County,NBPL-Will County,YRL,YRP,DGD,,,Midwest,,,,,,,Chicago
+NGPL-AM Pool,NGPL-AM Pool,YRR,YRW,MCO,NGPL-MIDCONT POOL,,South Central,,,NGPL Amarillo Rcpt FDt Com,ICE NGPL Amarillo Pooling PIN FDt Com,SouthCentral - Midcon,,
+NGPL-AM Stor,NGPL-AM Stor,YRX,YS2,MCO,NGPL-MIDCONT POOL,,,,,,,,,
+NGPL-GC Mainline,NGPL-GC Mainline,YS3,YS8,NTO,NGPL-TXOK EAST,,Midwest,,,,,,,NGPL-TXOK East
 NGPL-IA/IL AM Pool,NGPL-IA/IL AM Pool,Z6H,Z6M,,,,,,,,,,,
 NGPL-IA/IL AM Stor,NGPL-IA/IL AM Stor,Z65,Z6A,,,,,,,,,,,
 NGPL-IA/IL GC Pool,NGPL-IA/IL GC Pool,Z6N,Z6S,,,,,,,,,,,REX-Z3 Del Pool
@@ -118,48 +118,48 @@ NGPL-IA/IL GC Stor,NGPL-IA/IL GC Stor,Z6B,Z6G,,,,,,,,,,,REX-Z3 Del Pool
 NGPL-LA Pool,NGPL-LA Pool,YSH,YSJ,,,,South Central,,KMSY,,,,,
 NGPL-LA Stor,NGPL-LA Stor,YSK,YSM,,,,,,,,,,,
 NGPL-MidAm,NGPL-MidAm,YSN,YSR,DGD,,,South Central,,,,,,,Chicago
-NGPL-Midcont Pool,NGPL-Midcont Pool,XJR,XJV,MCO,NGPL-MIDCONT POOL,MTS,South Central,,KOKC,NGPL Midcont FDt Com,,,"NGPL, Midcontinent",
-NGPL-Midcont Stor,NGPL-Midcont Stor,YST,YSY,MCO,,,,,,,,,,NGPL-Midcont Pool
-NGPL-Nicor,NGPL-Nicor,YHF,YHK,DGD,,,Midwest,,,Chicago Nicor FDt Com,,SouthCentral - Midcon,Chicago-Nicor,Chicago
-NGPL-Nipsco,NGPL-Nipsco,YHP,YHU,DGD,,,Midwest,,,Chicago NIPSCO FDt Com,,,Chicago-NIPSCO,Chicago
-NGPL-STX,NGPL-STX,XVS,XVW,NSX,NGPL-STX,NXS,South Central,,KIAH,NGPL S TX FDt Com,,Midwest - Chicago,"NGPL, STX",
-NGPL-TXOK East,NGPL-TXOK East,XIT,XIX,NTO,NGPL-TXOK EAST,NTS,South Central,,KIAH,NGPL Texok Zn FDt Com,ICE NGPL TXOK East Pool FDt Com,Midwest - Chicago,"NGPL, Texok zone",
-NGPL-TXOK East Stor,NGPL-TXOK East Stor,X8T,X8X,,,,South Central,,,,,SouthCentral - TexCoast,"NGPL, Texok zone",
-NGPL-TXOK West,NGPL-TXOK West,YT5,DQF,NTO,NGPL-TXOK EAST,,South Central,,,,,SouthCentral - TexCoast,"NGPL, Texok zone",
-NNG-Demarc,NNG-Demarc,XIN,XIR,DEM,NNG-DEMARC,DES,Midwest,Upper,KOKC,Northern Demarc FDt Com,,,"Northern, demarc",
+NGPL-Midcont Pool,NGPL-Midcont Pool,XJR,XJV,MCO,NGPL-MIDCONT POOL,MTS,South Central,,KOKC,NGPL Midcont FDt Com,,SouthCentral - Midcon,"NGPL, Midcontinent",
+NGPL-Midcont Stor,NGPL-Midcont Stor,YST,YSY,MCO,NGPL-MIDCONT POOL,,,,,,,,,NGPL-Midcont Pool
+NGPL-Nicor,NGPL-Nicor,YHF,YHK,DGD,Chicago,,Midwest,,,Chicago Nicor FDt Com,,Midwest - Chicago,Chicago-Nicor,Chicago
+NGPL-Nipsco,NGPL-Nipsco,YHP,YHU,DGD,Chicago,,Midwest,,,Chicago NIPSCO FDt Com,,Midwest - Chicago,Chicago-NIPSCO,Chicago
+NGPL-STX,NGPL-STX,XVS,XVW,NSX,NGPL-STX,NXS,South Central,,KIAH,NGPL S TX FDt Com,,SouthCentral - TexCoast,"NGPL, STX",
+NGPL-TXOK East,NGPL-TXOK East,XIT,XIX,NTO,NGPL-TXOK EAST,NTS,South Central,,KIAH,NGPL Texok Zn FDt Com,ICE NGPL TXOK East Pool FDt Com,SouthCentral - TexCoast,"NGPL, Texok zone",
+NGPL-TXOK East Stor,NGPL-TXOK East Stor,X8T,X8X,,,,South Central,,,,,,"NGPL, Texok zone",
+NGPL-TXOK West,NGPL-TXOK West,YT5,DQF,NTO,NGPL-TXOK EAST,,South Central,,,,,,"NGPL, Texok zone",
+NNG-Demarc,NNG-Demarc,XIN,XIR,DEM,NNG-DEMARC,DES,Midwest,Upper,KOKC,Northern Demarc FDt Com,,Midwest - Chicago,"Northern, demarc",
 NNG-Mid 13-16A,NNG-Mid 13-16A,YTA,YTF,PAN,,,South Central,,KOKC,,,,,Panhandle
-NNG-Mid 1-7,NNG-Mid 1-7,YTG,YTL,PER,,,South Central,,KOKC,,ICE Northern Natural Mid 1-7 Pool FDt Com,Midwest - Chicago,,
+NNG-Mid 1-7,NNG-Mid 1-7,YTG,YTL,PER,,,South Central,,KOKC,,ICE Northern Natural Mid 1-7 Pool FDt Com,,,
 NNG-Mid 8-12,NNG-Mid 8-12,YTM,YTR,PAN,,,South Central,,KOKC,,,,,Panhandle
-NNG-Ventura,NNG-Ventura,XTG,XTK,NVE,NNG-VENTURA,NNS,Midwest,,KOKC,Nrthrn Ventura FDt Com,,,"Northern, Ventura",
-Nortex-Tolar Hub,Nortex-Tolar Hub,YTS,YTX,,,,South Central,,,,ICE NorTex Tolar Hub FDt Com,,,NGPL-TXOK East
-NWP-Rocky Mtn,NWP-Rocky Mtn,YTY,YU3,NWR,NWP-ROCKY MTN,RSS,Rockies,,,Northwest Rocky Mountain Pool FDt Com,,Midwest - Chicago,"Northwest, Rocky Mountains",
-NWP-Sumas,NWP-Sumas,YU4,YU9,NSU,NWP-SUMAS,NSS,West,Pacific Northwest,KSEA,NW Can Bd Sumas FDt Com,,SouthCentral - Midcon,"Northwest, Canadian border (Sumas",
+NNG-Ventura,NNG-Ventura,XTG,XTK,NVE,NNG-VENTURA,NNS,Midwest,,KOKC,Nrthrn Ventura FDt Com,,Midwest - Chicago,"Northern, Ventura",
+Nortex-Tolar Hub,Nortex-Tolar Hub,YTS,YTX,,,,South Central,,,,ICE NorTex Tolar Hub FDt Com,SouthCentral - Midcon,,NGPL-TXOK East
+NWP-Rocky Mtn,NWP-Rocky Mtn,YTY,YU3,NWR,NWP-ROCKY MTN,RSS,Rockies,,,Northwest Rocky Mountain Pool FDt Com,,,"Northwest, Rocky Mountains",
+NWP-Sumas,NWP-Sumas,YU4,YU9,NSU,NWP-SUMAS,NSS,West,Pacific Northwest,KSEA,NW Can Bd Sumas FDt Com,,,"Northwest, Canadian border (Sumas",
 NWP-Wyoming,NWP-Wyoming,YUA,YUF,NWR,,,Rockies,,,NW S of Grn Rvr FDt Com,,,"Northwest, Wyoming Pool",
-NYM Front Month,,,,,,,,,,,,,,
+NYM Front Month,,,,,,,,,,,,0,,
 Oasis - Waha Pool,Oasis - Waha Pool,XYT,XYX,WAH,,,South Central,,,,,,,Waha
-OGT,OGT,XWX,XXB,ONE,,ONS,South Central,,KOKC,,,,,
-ONEOK Westex,ONEOK Westex,YUG,YUL,WAH,ONEOK WESTEX,,South Central,,,Oneok OK FDt Com,ICE ONEOK Westex Pool FDt Com,,"Oneok, Okla.",Waha
-Opal,Opal,XXP,XXT,NWR,,,Rockies,,,,ICE Opal Plant Tailgate FDt Com,SouthCentral - Midcon,,
+OGT,OGT,XWX,XXB,ONE,,ONS,South Central,,KOKC,,,SouthCentral - Midcon,,
+ONEOK Westex,ONEOK Westex,YUG,YUL,WAH,ONEOK WESTEX,,South Central,,,Oneok OK FDt Com,ICE ONEOK Westex Pool FDt Com,SouthCentral - Midcon,"Oneok, Okla.",Waha
+Opal,Opal,XXP,XXT,NWR,,,Rockies,,,,ICE Opal Plant Tailgate FDt Com,,,
 Panhandle,Panhandle,XIH,XIL,PAN,PANHANDLE,PSS,South Central,,KOKC,Panhandle TX-OK FDt Com,,SouthCentral - Midcon,"Panhandle, Tx.-Okla",
 PG&E-Citygate,PG&E-Citygate,XGV,XGQ,PGE,PG&E-CITYGATE,PIG,West,,KSFO,PG&E CG FDt Com,,,PG&E city-gate,
-PG&E-Daggett,PG&E-Daggett,YUM,DQG,SCL,,,West,,,,,SouthCentral - Midcon,,
+PG&E-Daggett,PG&E-Daggett,YUM,DQG,SCL,,,West,,,,,,,
 PG&E-KRS,PG&E-KRS,YUR,DQH,SCL,,,West,,,,,,,
 PG&E-Topock,PG&E-Topock,YUW,DQI,SCL,,,Rockies,Lower/SW,,,ICE PG&E Topock FDt Com,,,
-PGLC,PGLC,YV1,YV5,DGD,,,Midwest,,,Chicago Peoples FDt Com,,,Chicago-Peoples,Chicago
-Pine Prairie,Pine Prairie,YV7,YV9,CVI,PINE PRAIRIE,CVK,South Central,,KATL,Pine Prairie Hub FDt Com,,,Pine Prairie Hub,
-Pioneer,Pioneer,YVA,DQJ,NWR,,,,,,,,Midwest - Demand,,
-PNGTS,PNGTS,YVF,YVH,,,,Northeast,,,PNGTS delivered FDt Com,ICE PNGTS FDt Com,SouthCentral - Henry,,
+PGLC,PGLC,YV1,YV5,DGD,,,Midwest,,,Chicago Peoples FDt Com,,Midwest - Demand,Chicago-Peoples,Chicago
+Pine Prairie,Pine Prairie,YV7,YV9,CVI,PINE PRAIRIE,CVK,South Central,,KATL,Pine Prairie Hub FDt Com,,SouthCentral - Henry,Pine Prairie Hub,
+Pioneer,Pioneer,YVA,DQJ,NWR,,,,,,,,,,
+PNGTS,PNGTS,YVF,YVH,,,,Northeast,,,PNGTS delivered FDt Com,ICE PNGTS FDt Com,,,
 REX Cheyenne Comp Pool,REX Cheyenne Comp Pool,ZAB,ZAC,,,,Rockies,,,,ICE REX Cheyenne Comp Pool FDt Com,,,
-REX E-ANR,REX E-ANR,YAS,YAU,REX,,,Midwest,,,,ICE REX (East) delivered into ANR FDt Com,,,REX-Z3 Del Pool
-REX E-MidW,REX E-MidW,YVQ,YVV,REX,,,Midwest,,,,ICE REX (East) delivered into Midwestern Gas FDt Com,,,REX-Z3 Del Pool
-REX E-NGPL,REX E-NGPL,YVW,YW1,REX,,,Midwest,,KOKC,,ICE REX (East) delivered into NGPL FDt Com,Midwest - Demand,,REX-Z3 Del Pool
-REX E-PEPL,REX E-PEPL,YW2,YW7,REX,,,Midwest,,,,,Midwest - Chicago,,REX-Z3 Del Pool
-REX E-Trunk,REX E-Trunk,YW8,YWD,REX,,,Midwest,,,,,Midwest - Chicago,,REX-Z3 Del Pool
-REX W-ANR,REX W-ANR,YWE,YWJ,PAN,,,South Central,,,,,,,Panhandle
+REX E-ANR,REX E-ANR,YAS,YAU,REX,,,Midwest,,,,ICE REX (East) delivered into ANR FDt Com,Midwest - Demand,,REX-Z3 Del Pool
+REX E-MidW,REX E-MidW,YVQ,YVV,REX,,,Midwest,,,,ICE REX (East) delivered into Midwestern Gas FDt Com,Midwest - Chicago,,REX-Z3 Del Pool
+REX E-NGPL,REX E-NGPL,YVW,YW1,REX,,,Midwest,,KOKC,,ICE REX (East) delivered into NGPL FDt Com,Midwest - Chicago,,REX-Z3 Del Pool
+REX E-PEPL,REX E-PEPL,YW2,YW7,REX,,,Midwest,,,,,,,REX-Z3 Del Pool
+REX E-Trunk,REX E-Trunk,YW8,YWD,REX,,,Midwest,,,,,,,REX-Z3 Del Pool
+REX W-ANR,REX W-ANR,YWE,YWJ,PAN,PANHANDLE,,South Central,,,,,,,Panhandle
 REX W-NGPL,REX W-NGPL,X8B,X8C,,,,Rockies,Upper,,,,,,Panhandle
-REX W-NNG,REX W-NNG,YWK,YWP,PAN,,,Rockies,Upper,,,,,,Panhandle
-REX W-PEPL,REX W-PEPL,YWQ,YWV,PAN,,,Midwest,,,,,,,Panhandle
-REX-Z3 (receipt) ,REX-Z3 (receipt) ,Z5N,Z5S,,REX-Z3 (RECEIPT) ,,,,,,,,,TETCO-M2 (receipt)
+REX W-NNG,REX W-NNG,YWK,YWP,PAN,PANHANDLE,,Rockies,Upper,,,,,,Panhandle
+REX W-PEPL,REX W-PEPL,YWQ,YWV,PAN,PANHANDLE,,Midwest,,,,,,,Panhandle
+REX-Z3 (receipt) ,REX-Z3 (receipt) ,Z5N,Z5S,,,,,,KPIT,,,,,TETCO-M2 (receipt)
 REX-Z3 Del Pool,REX-Z3 Del Pool,X8H,X8I,,,,Midwest,,,REX Zone 3 delivered FDt Com,,Midwest - Chicago,"REX, zone 3 delivered",
 Rover (receipt),Rover (receipt),Z5T,Z5Y,,,,Northeast,,KPIT,,,,,TETCO-M2 (receipt)
 Rover-ANR,Rover-ANR,Z4F,Z4K,REX,,,Northeast,,,Rover delivered FDt Com,ICE Rover delivered into ANR FDt Com,,"Rover, delivered",REX-Z3 Del Pool
@@ -210,13 +210,13 @@ TGP-Niagara,TGP-Niagara,Z1A,Z1F,,,,Northeast,,KJFK,Niagara FDt Com,,Northeast - 
 TGP-Z0 Border Pool,TGP-Z0 Border Pool,YA7,YA9,,,,South Central,,,Tenn Zn0 FDt Com,,,"Tennessee, zone 0",TGP-Z0 South
 TGP-Z0 North,TGP-Z0 North,XXD,XXH,TZZ,TGP-Z0,TZR,South Central,,KIAH,,ICE Tennessee zone 0 North FDt Com,,"Tennessee, zone 0",TGP-Z0 South
 TGP-Z0 South,TGP-Z0 South,XZF,XZJ,TZZ,TGP-Z0,TZR,South Central,,KIAH,,ICE Tennessee zone 0 South FDt Com,SouthCentral - TexCoast,"Tennessee, zone 0",
-TGP-Z1 100L,TGP-Z1 100L,Z1G,Z1K,TCV,,,South Central,,,Tennessee Zone 1 FDt Com,ICE Tennessee zone 1 100 Leg Pool FDt Com,,"Tennessee, zone 1",
+TGP-Z1 100L,TGP-Z1 100L,Z1G,Z1K,TCV,,,South Central,,KMSY,Tennessee Zone 1 FDt Com,ICE Tennessee zone 1 100 Leg Pool FDt Com,SouthCentral - Perryville,"Tennessee, zone 1",
 TGP-Z1 800L Pool,TGP-Z1 800L Pool,Z7I,Z7K,TCV,,,South Central,,,,,,,
-TGP-Z1 Sta-87,TGP-Z1 Sta-87,Z1L,Z1P,TCV,,,South Central,,,,ICE Tennessee zone 1 Station 87 Pool FDt Com,SouthCentral - Perryville,"Tennessee, zone 1",
+TGP-Z1 Sta-87,TGP-Z1 Sta-87,Z1L,Z1P,TCV,,,South Central,,KMSY,,ICE Tennessee zone 1 Station 87 Pool FDt Com,SouthCentral - Perryville,"Tennessee, zone 1",
 TGP-Z4 300L,,,,,,,Northeast,,,Tennessee zone 4-300 leg FDt Com,,,"Tennessee, zone 4-300 leg",
-TGP-Z4 Marcellus,TGP-Z4 Marcellus,Z1Q,Z1V,DMR,,,Northeast,,,Tennessee zone 4-300 leg FDt Com,,Northeast - Appalachia,"Tennessee, zone 4-300 leg",
-TGP-Z4 Sta-219,TGP-Z4 Sta-219,Z1W,Z21,TNC,,,Northeast,,,Tennessee Gas Pipeline Zone 4-200 leg FDt Com,ICE Tennessee zone 4 station 219 Pool FDt Com,Northeast - Appalachia,,
-TGP-Z4 Sta-313,TGP-Z4 Sta-313,Z22,Z27,,,,Northeast,,,Tennessee Zone 4-313 Pool FDt Com,,Northeast - Appalachia,"Tennessee, zone 4-313 Pool",
+TGP-Z4 Marcellus,TGP-Z4 Marcellus,Z1Q,Z1V,DMR,,,Northeast,,KPIT,Tennessee zone 4-300 leg FDt Com,,Northeast - Appalachia,"Tennessee, zone 4-300 leg",
+TGP-Z4 Sta-219,TGP-Z4 Sta-219,Z1W,Z21,TNC,,,Northeast,,KPIT,Tennessee Gas Pipeline Zone 4-200 leg FDt Com,ICE Tennessee zone 4 station 219 Pool FDt Com,Northeast - Appalachia,,
+TGP-Z4 Sta-313,TGP-Z4 Sta-313,Z22,Z27,,,,Northeast,,KPIT,Tennessee Zone 4-313 Pool FDt Com,,Northeast - Appalachia,"Tennessee, zone 4-313 Pool",
 TGP-Z5 200L,TGP-Z5 200L,Z28,Z2A,,,,Northeast,,KBOS,Tennessee zone 5-200 leg delivered FDt Com,,Northeast - Demand,"Tennessee, zone 4-200 leg",
 TGP-Z6 200L,TGP-Z6 200L,Z2G,Z2L,,TGP-Z6 200L,,Northeast,,KBOS,,,,"Tennessee, zone 6 del.",
 TGP-Z6 200L North,TGP-Z6 200L North,Z76,Z7B,TNJ,TGP-Z6 200L NORTH,TNL,Northeast,,KBOS,Tennessee Zone 6 delivered North FDt Com,,,"Tennessee, zone 6, del. North",
@@ -225,10 +225,10 @@ TGP-Z6 300L,TGP-Z6 300L,Z2B,Z2F,,,,Northeast,,KBOS,Tenn Zn6 Dlvd FDt Com,,Northe
 TGT-Mainline,TGT-Mainline,XWE,XWI,TGB,,TGS,South Central,,KLIT,Texas Gas Zn 1 FDt Com,ICE Texas Gas Mainline Pool FDt Com,SouthCentral - Perryville,"Texas Gas, zone 1",
 TGT-North LA,TGT-North LA,XU8,XV0,TGB,,,South Central,,,,,,,
 TGT-SL,TGT-SL,XVY,XWC,,,,South Central,,,,,,"Texas Gas, zone SL",
-Transco Zn3,,,,,,,South Central,,,Transco Zn3 FDt Com,,,"Transco, zone 3",
+Transco Zn3,,,,,,,South Central,,KMSY,Transco Zn3 FDt Com,,Southeast,"Transco, zone 3",
 Transco-165,Transco-165,X7H,X7J,TSD,,,Northeast,,KRDU,Transco Station 165 FDt Com,,Northeast - Demand,"Transco, station 165",
 Transco-30,Transco-30,XMT,XMX,TTB,TRANSCO-30,CVT,South Central,,KIAH,Transco Zn1 FDt Com,,SouthCentral - TexCoast,"Transco, zone 1",
-Transco-45,Transco-45,Z2M,Z2R,,,,South Central,,,Transco Zn2 FDt Com,,SouthCentral - Henry,"Transco, zone 2",
+Transco-45,Transco-45,Z2M,Z2R,,,,South Central,,KIAH,Transco Zn2 FDt Com,,SouthCentral - Henry,"Transco, zone 2",
 Transco-65,Transco-65,XJF,XJJ,STA,TRANSCO-65,SSA,South Central,,KMSY,Transco Station 65 FDt Com,,Southeast,"Transco, station 65",
 Transco-85,Transco-85,XVA,XVE,TRZ,TRANSCO-85,TRW,Southeast,Other,KATL,Transco Zn4 FDt Com,,Southeast,"Transco, zone 4",
 Transco-River Road,Transco-River Road,X9U,X9Z,,,,Northeast,,,,,,,
@@ -250,7 +250,7 @@ TW-Blanco,TW-Blanco,Z3F,Z3K,SNJ,,,South Central,,,Transwestern-SJ FDt Com,,South
 TW-Central,TW-Central,Z3L,Z3Q,,,,South Central,,,,,,,
 TW-Panhandle,TW-Panhandle,Z3R,Z3W,,,,South Central,,,Transwestn Perm FDt Com,,,"Transwestern, Permian Basin",
 TW-WTX,TW-WTX,Z3X,Z42,,,,South Central,,,,ICE Transwestern West Texas Pool FDt Com,SouthCentral - WesTex,,
-Union-Dawn,Union-Dawn,Z4S,,DWN,,,Northeast,,,Dawn Ontario FDt Com,,Northeast - Appalachia,"Dawn, Ontario",
+Union-Dawn,Union-Dawn,Z4S,,DWN,,,Northeast,,KPIT,Dawn Ontario FDt Com,,Northeast - Appalachia,"Dawn, Ontario",
 Waha,Waha,XT6,XT8,WAH,WAHA,WAS,South Central,,KIAH,Waha FDt Com,,SouthCentral - WesTex,Waha,
 White River Hub,White River Hub,Z43,Z48,,,,South Central,,,White River Hub FDt Com,ICE Waha Hub West Texas FDt Com,,White River Hub,
-WIC,WIC,Z49,Z4E,,,,Rockies,,,,,,,
+WIC,WIC,Z49,Z4E,,,,Rockies,,,,,0,,
