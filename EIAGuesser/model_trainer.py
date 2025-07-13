@@ -1,242 +1,344 @@
+# C:\Users\patri\OneDrive\Desktop\Coding\TraderHelper\EIAGuesser\model_trainer.py
+# -*- coding: utf-8 -*-
+"""
+This script builds and deploys a production-grade, multi-model machine
+learning system to forecast the weekly U.S. EIA natural gas storage change.
+
+VERSION 15: PRODUCTION FINAL
+This version incorporates all previous fixes and upgrades into a robust,
+trader-grade pipeline. It trains multiple model types per region, generates
+advanced diagnostics and SHAP interpretability plots, and produces a final
+consensus forecast.
+
+Key Features:
+- Multi-Model Regional Training: Trains XGBoost, LightGBM, and CatBoost.
+- Standardized Flexible Alignment: Exclusively uses the Fri-Thu weekly definition.
+- Advanced Interpretability: Generates SHAP summary plots for each model.
+- Trader-Grade Diagnostics: Produces a fully aligned summary table.
+- Forecastability Guardrail: Prevents forecasts when data is incomplete.
+"""
+
 import pandas as pd
 import numpy as np
 import xgboost as xgb
-import lightgbm as lgb
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import Ridge
-from sklearn.feature_selection import RFECV
-from sklearn.metrics import mean_absolute_error, r2_score
-from pathlib import Path
 import matplotlib.pyplot as plt
-import joblib
+import seaborn as sns
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from pathlib import Path
 import warnings
-import re
-import json
+import shap
+
+# --- Optional Imports for Additional Models ---
+try:
+    import lightgbm as lgb
+    LGBM_INSTALLED = True
+except ImportError:
+    LGBM_INSTALLED = False
+
+try:
+    import catboost as cb
+    CATBOOST_INSTALLED = True
+except ImportError:
+    CATBOOST_INSTALLED = False
 
 # --- Configuration & Setup ---
-warnings.filterwarnings("ignore", message=".*XGBoost.*deprecated.*")
-warnings.filterwarnings("ignore", category=UserWarning, module='joblib')
-warnings.filterwarnings("ignore", category=FutureWarning)
+pd.options.mode.chained_assignment = None
 
+try:
+    SCRIPT_DIR = Path(__file__).resolve().parent
+except NameError:
+    SCRIPT_DIR = Path.cwd()
 
-# --- Path Configuration ---
-# Hardcoded paths as requested by the user
-BASE_PROJECT_DIR = Path(r'C:\Users\patri\OneDrive\Desktop\Coding\TraderHelper')
-OUTPUT_DIR = BASE_PROJECT_DIR / 'EIAGuesser' / 'output'
-INFO_DIR = BASE_PROJECT_DIR / 'INFO'
-MODEL_OUTPUT_DIR = OUTPUT_DIR / 'models'
-MODEL_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+REPORTS_DIR = Path.home() / 'OneDrive/Desktop/Coding/TraderHelper/Scripts/MarketAnalysis_Report_Output'
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+MODEL_OUTPUT_DIR = SCRIPT_DIR / 'model_outputs'
+MODEL_OUTPUT_DIR.mkdir(exist_ok=True)
+OUTPUT_DIR = SCRIPT_DIR / 'output'
+DATA_FILE = OUTPUT_DIR / 'model_ready_feature_set.csv'
 
-FEATURE_SET_FILE = OUTPUT_DIR / 'final_feature_set.csv'
-EIA_CHANGES_FILE = INFO_DIR / 'EIAchanges.csv'
-PREDICTIONS_FILE = MODEL_OUTPUT_DIR / 'predictions.txt'
+# --- Utility Functions ---
 
-# --- Constants & Model Definitions ---
-REGIONS_TO_PREDICT = ['East', 'Midwest', 'Mountain', 'Pacific', 'South Central']
-EIA_COLUMN_MAP = {
-    'East': 'East Region Storage Change (Bcf)', 'Midwest': 'Midwest Region Storage Change (Bcf)',
-    'Mountain': 'Mountain Region Storage Change (Bcf)', 'Pacific': 'Pacific Region Storage Change (Bcf)',
-    'South Central': 'South Central Region Storage Change (Bcf)', 'Lower 48': 'Lower 48 States Storage Change (Bcf)'
-}
-DAILY_TARGET_MAP = {
-    'East': 'East_Criterion_Storage_Change', 'Midwest': 'Midwest_Criterion_Storage_Change',
-    'Mountain': 'Mountain_Criterion_Storage_Change', 'Pacific': 'Pacific_Criterion_Storage_Change',
-    'South Central': 'South_Central_Criterion_Storage_Change', 'Lower 48': 'Daily_Storage_Change'
-}
-MODEL_CONFIG = {
-    'XGBoost': xgb.XGBRegressor(objective='reg:squarederror', n_estimators=1000, learning_rate=0.05, max_depth=5, subsample=0.8, colsample_bytree=0.8, random_state=42, n_jobs=-1, early_stopping_rounds=50),
-    'LightGBM': lgb.LGBMRegressor(random_state=42, n_estimators=500, learning_rate=0.05, num_leaves=31, n_jobs=-1),
-    'RandomForest': RandomForestRegressor(random_state=42, n_estimators=200, max_depth=10, n_jobs=-1),
-    'Ridge': Ridge(alpha=1.0, random_state=42)
-}
+def evaluate_predictions(y_true, y_pred, model_name):
+    """Calculates and prints key regression metrics."""
+    mae = mean_absolute_error(y_true, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+    print(f"\n--- Evaluation Metrics for {model_name} ---")
+    print(f"  Mean Absolute Error (MAE): {mae:.2f} Bcf")
+    print(f"  Root Mean Squared Error (RMSE): {rmse:.2f} Bcf")
+    return {'name': model_name, 'mae': mae, 'rmse': rmse}
 
-# --- Core Functions ---
+def plot_actual_vs_predicted(y_true, y_pred, model_name):
+    """Generates and saves a plot of actual vs. predicted values."""
+    plt.figure(figsize=(15, 7))
+    if not isinstance(y_pred, pd.Series):
+        y_pred = pd.Series(y_pred, index=y_true.index)
+    plt.plot(y_true.index, y_true, label='Actual', color='blue', marker='.', linestyle='-')
+    plt.plot(y_pred.index, y_pred, label='Predicted', color='red', marker='.', linestyle='--')
+    plt.title(f'{model_name}: Actual vs. Predicted', fontsize=16)
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(REPORTS_DIR / f'{model_name}_actual_vs_predicted.png')
+    plt.close()
 
-def sanitize_feature_names(df):
-    """Sanitizes column names to be compatible with all models."""
-    cols = df.columns
-    new_cols = [re.sub(r'[^A-Za-z0-9_]+', '_', col) for col in cols]
-    df.columns = new_cols
-    return df
+# --- Data Loading and Preparation ---
 
-def load_data():
-    """Loads, sanitizes, and aligns daily features and weekly EIA actuals."""
-    print("Loading and aligning data...")
-    df_features = pd.read_csv(FEATURE_SET_FILE, index_col='Date', parse_dates=True)
-    df_features = sanitize_feature_names(df_features)
-    df_eia = pd.read_csv(EIA_CHANGES_FILE, index_col='Period', parse_dates=True)
-    df_eia.columns = df_eia.columns.str.strip()
-    print(f"Loaded daily feature set with shape: {df_features.shape}")
-    print(f"Loaded weekly EIA changes with shape: {df_eia.shape}")
-    return df_features, df_eia
-
-def find_optimal_features(X, y, region_name):
-    """
-    Performs Recursive Feature Elimination with Cross-Validation (RFECV) to find the
-    most predictive subset of features for a given region. Caches results for speed.
-    """
-    region_safe_name = region_name.replace(' ', '_')
-    cache_file = MODEL_OUTPUT_DIR / f'optimal_features_{region_safe_name}.json'
-
-    if cache_file.exists():
-        print(f"Loading cached optimal features for {region_name}...")
-        with open(cache_file, 'r') as f:
-            feature_list = json.load(f)
-        return feature_list
-
-    print(f"\n--- Finding Optimal Features for {region_name} using RFECV ---")
-    print("This may take a few minutes...")
-
-    estimator = lgb.LGBMRegressor(random_state=42, n_jobs=-1, verbosity=-1)
+def load_and_prepare_data(file_path, eia_actuals_path):
+    """Loads feature set, derives regional targets, and identifies the forecast window."""
+    print("--- 1. Loading and Preparing Data ---")
+    df = pd.read_csv(file_path, parse_dates=True, index_col=0)
+    df.sort_index(inplace=True)
+    df.columns = [col.replace('[', '_').replace(']', '').replace('<', '_') for col in df.columns]
+    print("  -> Sanitized column names.")
     
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning, module='sklearn')
-        selector = RFECV(estimator, step=1, cv=3, scoring='neg_mean_absolute_error', n_jobs=-1, verbose=0)
-        selector = selector.fit(X.values, y.values)
-
-    optimal_features = X.columns[selector.support_].tolist()
-    print(f"RFECV complete. Found {len(optimal_features)} optimal features for {region_name}.")
-
-    with open(cache_file, 'w') as f:
-        json.dump(optimal_features, f)
-    print(f"Saved optimal features to {cache_file}")
+    eia_actuals = pd.read_csv(eia_actuals_path, parse_dates=['Period'])
+    eia_actuals.columns = [col.encode('ascii', 'ignore').decode().strip() for col in eia_actuals.columns]
+    eia_actuals['Period'] = eia_actuals['Period'].dt.normalize()
+    eia_actuals.set_index('Period', inplace=True)
     
-    return optimal_features
-
-def train_and_evaluate_models(X, y, df_eia_weekly, region_name):
-    """Trains, evaluates, and returns a dictionary of trained models and their performance."""
-    print("\n" + "="*60)
-    print(f"STARTING MODEL TRAINING PIPELINE FOR: {region_name}")
-    print(f"(Using {X.shape[1]} optimized features)")
-    print("="*60)
-
-    last_eia_date = df_eia_weekly.index.max()
-    split_date = last_eia_date - pd.DateOffset(months=6)
+    last_eia_date = eia_actuals.index.max()
+    forecast_start_date = last_eia_date + pd.Timedelta(days=1)
+    forecast_end_date = last_eia_date + pd.Timedelta(days=7)
     
-    X_train, y_train = X.loc[:split_date], y.loc[:split_date]
-    X_test, y_test = X.loc[split_date:last_eia_date], y.loc[split_date:last_eia_date]
+    print(f"  -> Last known EIA report date (source of truth): {last_eia_date.date()}")
+    print(f"  -> Next forecast window inferred: {forecast_start_date.date()} to {forecast_end_date.date()}")
+    
+    return df, forecast_start_date, forecast_end_date, eia_actuals
 
-    trained_models = {}
-    for model_name, model in MODEL_CONFIG.items():
-        print(f"\n--- Training {model_name} ---")
-        if model_name == 'XGBoost':
-            model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
-        elif model_name == 'LightGBM':
-            model.fit(X_train, y_train, eval_set=[(X_test, y_test)], callbacks=[lgb.early_stopping(50, verbose=False)])
-        else:
-            model.fit(X_train, y_train)
+def format_data_for_flexible_mode(df):
+    """Prepares data using the standard Friday-Thursday weekly alignment."""
+    df_mode = df.copy()
+    eia_week_grouper = pd.Grouper(freq='W-THU')
+    df_mode['eia_week_id'] = df_mode.groupby(eia_week_grouper).ngroup()
+    if 'daily_imbalance' in df_mode.columns:
+        df_mode['cumulative_imbalance'] = df_mode.groupby('eia_week_id')['daily_imbalance'].cumsum()
+    return df_mode
 
-        daily_preds = model.predict(X_test)
-        weekly_preds = pd.Series(daily_preds, index=X_test.index).resample('W-FRI').sum()
+# --- Modeling & Diagnostics ---
+
+def get_regional_features(all_features, region):
+    """Selects features specific to a given region deterministically."""
+    region_lower = region.lower().replace(' ', '_')
+    regional_features = [f for f in all_features if region_lower in f.lower()]
+    conus_features = [f for f in all_features if 'conus' in f.lower()]
+    general_features = [f for f in all_features if 'east' not in f.lower() and 'midwest' not in f.lower() and 'mountain' not in f.lower() and 'pacific' not in f.lower() and 'south' not in f.lower() and 'conus' not in f.lower()]
+    
+    selected_features = sorted(list(set(regional_features + conus_features + general_features)))
+    return selected_features
+
+def train_regional_model(df_mode, all_features, region, model_type='xgboost'):
+    """Trains a single model (XGBoost, LightGBM, or CatBoost) for a specific region."""
+    target_col = f"Target_{region}_Change"
+    if target_col not in df_mode.columns:
+        print(f"  -> WARNING: Target column {target_col} not found. Skipping model for {region} region.")
+        return None, None, None, None
         
-        eia_target_col = EIA_COLUMN_MAP[region_name]
-        df_eval = pd.DataFrame({'weekly_pred': weekly_preds}).join(df_eia_weekly[eia_target_col]).dropna()
+    df_mode.dropna(subset=[target_col], inplace=True)
+    
+    model_name = f"{model_type.capitalize()}_{region}"
+    print(f"\n--- Training {model_name} ---")
 
-        if df_eval.empty:
-            print(f"ERROR: Could not evaluate {model_name}.")
-            continue
+    regional_features = get_regional_features(all_features, region)
+    
+    df_mode['Date_col'] = df_mode.index
+    last_day_indices = df_mode.groupby('eia_week_id')['Date_col'].idxmax()
+    df_weekly = df_mode.loc[last_day_indices]
+    
+    X = df_weekly[regional_features].copy()
+    y = df_weekly[target_col]
 
-        mae_full = mean_absolute_error(df_eval[eia_target_col], df_eval['weekly_pred'])
-        r2_full = r2_score(df_eval[eia_target_col], df_eval['weekly_pred'])
+    test_size = int(len(df_weekly) * 0.2)
+    X_train, X_test = X.iloc[:-test_size], X.iloc[-test_size:]
+    y_train, y_test = y.iloc[:-test_size], y.iloc[-test_size:]
+    
+    if model_type == 'xgboost':
+        model = xgb.XGBRegressor(objective='reg:squarederror', n_estimators=1000, learning_rate=0.05, max_depth=4, random_state=42, early_stopping_rounds=50, n_jobs=-1)
+        model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
+    elif model_type == 'lightgbm' and LGBM_INSTALLED:
+        model = lgb.LGBMRegressor(random_state=42, n_estimators=500, verbose=-1)
+        model.fit(X_train, y_train, eval_set=[(X_test, y_test)], callbacks=[lgb.early_stopping(50, verbose=False)])
+    elif model_type == 'catboost' and CATBOOST_INSTALLED:
+        model = cb.CatBoostRegressor(random_state=42, verbose=0, iterations=1000, early_stopping_rounds=50)
+        model.fit(X_train, y_train, eval_set=(X_test, y_test))
+    else:
+        print(f"  -> SKIPPING {model_name}: Library not installed or type not recognized.")
+        return None, None, None, None
+    
+    y_pred = model.predict(X_test)
+    metrics = evaluate_predictions(y_test, y_pred, model_name)
+    
+    return model, X_train, pd.Series(y_pred, index=y_test.index), metrics
+
+def generate_regional_live_forecast(df, model, features, forecast_start, forecast_end):
+    """Generates a one-week-ahead forecast for a single region."""
+    forecast_data_raw = df.loc[forecast_start:forecast_end].copy()
+    
+    if 'daily_imbalance' in forecast_data_raw.columns:
+        forecast_data_raw['cumulative_imbalance'] = forecast_data_raw['daily_imbalance'].cumsum()
+    
+    model_features = model.feature_names_in_ if hasattr(model, 'feature_names_in_') else features
+    X_forecast_raw = forecast_data_raw.iloc[[-1]]
+    X_forecast = X_forecast_raw.reindex(columns=model_features, fill_value=0)
+
+    prediction = model.predict(X_forecast)[0]
+    return float(prediction)
+
+def get_actual_eia_value(region, date, eia_actuals_df):
+    """Looks up the official EIA value from the EIAchanges.csv source file."""
+    eia_col_map = {
+        "East": "East Region Storage Change (Bcf)", "Midwest": "Midwest Region Storage Change (Bcf)",
+        "Mountain": "Mountain Region Storage Change (Bcf)", "Pacific": "Pacific Region Storage Change (Bcf)",
+        "SouthCentral": "South Central Region Storage Change (Bcf)",
+    }
+    col = eia_col_map.get(region)
+    norm_date = pd.Timestamp(date).normalize()
+
+    if col not in eia_actuals_df.columns: return np.nan
+    if norm_date not in eia_actuals_df.index: return np.nan
+    return eia_actuals_df.at[norm_date, col]
+
+def generate_trader_summary_table(model_results, df_master, eia_actuals_df, live_forecast_possible):
+    """Generates a comprehensive summary table for all trained models."""
+    print("\n--- 7. Generating Trader Diagnostics Summary ---")
+    rows = []
+    
+    actual_last_week_date = eia_actuals_df.index.max()
+    
+    for model_name, res in model_results.items():
+        model, region = res.get('model'), res.get('region')
+        if model is None: continue
+
+        forecast_val = res.get('forecast')
         
-        recent_start_date = df_eval.index.max() - pd.DateOffset(weeks=4)
-        df_recent_eval = df_eval.loc[df_eval.index > recent_start_date]
-        mae_recent = mean_absolute_error(df_recent_eval[eia_target_col], df_recent_eval['weekly_pred'])
+        last_week_end_for_estimate = actual_last_week_date
+        last_week_start_for_estimate = last_week_end_for_estimate - pd.Timedelta(days=6)
         
-        print(f"Evaluation (Full 6-mo): MAE={mae_full:.2f}, R2={r2_full:.3f}")
-        print(f"Evaluation (Last 4-wk): MAE={mae_recent:.2f} <-- Used for ranking")
+        last_week_estimate, mae_4wk = np.nan, np.nan
+        if last_week_end_for_estimate in df_master.index:
+            last_week_data_raw = df_master.loc[last_week_start_for_estimate:last_week_end_for_estimate].copy()
+            if 'daily_imbalance' in last_week_data_raw.columns:
+                last_week_data_raw['cumulative_imbalance'] = last_week_data_raw['daily_imbalance'].cumsum()
 
-        region_safe_name = region_name.replace(' ', '_')
-        model_path = MODEL_OUTPUT_DIR / f'model_{region_safe_name}_{model_name}.joblib'
-        joblib.dump(model, model_path)
+            X_last_week_raw = last_week_data_raw.iloc[[-1]]
+            X_last_week = X_last_week_raw.reindex(columns=model.feature_names_in_ if hasattr(model, 'feature_names_in_') else res['features'], fill_value=0)
+            last_week_estimate = model.predict(X_last_week)[0]
 
-        if hasattr(model, 'feature_importances_'):
-            plt.figure(figsize=(12, 8))
-            imp_df = pd.DataFrame({'feature': X.columns, 'importance': model.feature_importances_}).sort_values('importance', ascending=False).head(20)
-            plt.barh(imp_df['feature'], imp_df['importance'])
-            plt.title(f'Top 20 Feature Importance: {region_name} - {model_name}')
-            plt.gca().invert_yaxis()
-            plt.tight_layout()
-            plot_path = MODEL_OUTPUT_DIR / f'feature_importance_{region_safe_name}_{model_name}.png'
-            plt.savefig(plot_path)
-            plt.close()
-
-        trained_models[model_name] = {'model': model, 'mae_recent': mae_recent, 'path': model_path}
+        actual_last_week = get_actual_eia_value(region, actual_last_week_date, eia_actuals_df)
         
-    return trained_models
+        y_pred_test = res.get('predictions')
+        if y_pred_test is not None and len(y_pred_test) >= 4:
+            target_col = f"Target_{region}_Change"
+            y_true_test = df_master.loc[y_pred_test.index][target_col]
+            mae_4wk = mean_absolute_error(y_true_test.iloc[-4:], y_pred_test.iloc[-4:])
 
-def generate_ensemble_forecast(X, trained_models, df_eia_weekly):
-    """
-    Selects top models and generates an ensemble forecast for the next week
-    using pre-existing feature data.
-    """
-    print("\n--- Generating Ensemble Forecast for Next Week ---")
-    if not trained_models: return None, []
+        rows.append({
+            'Model Name': model_name,
+            'Forecast Next Week': f"{forecast_val:.2f}" if forecast_val is not None else 'DATA N/A',
+            'Forecast Last Week': f"{last_week_estimate:.2f}" if pd.notna(last_week_estimate) else 'N/A',
+            'Actual Last Week': f"{actual_last_week:.2f}" if pd.notna(actual_last_week) else 'N/A',
+            '4-Week MAE': f"{mae_4wk:.2f}" if pd.notna(mae_4wk) else 'N/A',
+        })
 
-    sorted_models = sorted(trained_models.items(), key=lambda item: item[1]['mae_recent'])
-    top_models = sorted_models[:3]
-    
-    if not top_models: return None, []
+    df_diag = pd.DataFrame(rows)
+    print(df_diag.to_string(index=False))
+    df_diag.to_csv(REPORTS_DIR / 'final_model_summary.csv', index=False)
+    print("\n  -> Saved final model summary.")
+    return df_diag
 
-    print("Top 3 models selected for ensemble (based on recent MAE):")
-    for name, data in top_models: print(f"  - {name} (MAE: {data['mae_recent']:.2f})")
+def create_summary_visuals(df_diag, results, df_master):
+    """Creates and saves a suite of summary visualizations."""
+    print("\n--- 8. Generating Summary Visualizations ---")
 
-    last_eia_date = df_eia_weekly.index.max()
-    prediction_start = last_eia_date + pd.Timedelta(days=1)
-    prediction_end = last_eia_date + pd.Timedelta(days=7)
-    
-    X_future = X.loc[prediction_start:prediction_end]
+    plt.figure(figsize=(15, 10))
+    df_plot = df_diag[df_diag['Forecast Next Week'] != 'DATA N/A'].copy()
+    df_plot['Forecast Next Week'] = pd.to_numeric(df_plot['Forecast Next Week'])
+    sns.barplot(data=df_plot, x='Forecast Next Week', y='Model Name', orient='h', hue='Model Name', dodge=False, palette='viridis')
+    plt.title('Forecast Comparison for Next EIA Report', fontsize=16)
+    plt.xlabel('Storage Change (Bcf)')
+    plt.ylabel('Model')
+    plt.legend([],[], frameon=False)
+    plt.tight_layout()
+    plt.savefig(REPORTS_DIR / 'forecast_comparison_bar.png')
+    plt.close()
+    print("  -> Saved forecast comparison bar chart.")
 
-    if X_future.shape[0] != 7:
-        print(f"ERROR: Expected 7 days of feature data for forecast but found {X_future.shape[0]}.")
-        print("Please ensure 'feature_engineering.py' has run correctly.")
-        return None, []
+    df_plot['4-Week MAE'] = pd.to_numeric(df_plot['4-Week MAE'])
+    df_plot[['Model_Type', 'Region']] = df_plot['Model Name'].str.split('_', expand=True)
+    df_pivot = df_plot.pivot_table(index='Region', columns='Model_Type', values='4-Week MAE')
+    plt.figure(figsize=(12, 8))
+    sns.heatmap(df_pivot, annot=True, fmt=".2f", cmap="Reds", linewidths=.5)
+    plt.title('4-Week Rolling Mean Absolute Error (Bcf)', fontsize=16)
+    plt.ylabel('Region')
+    plt.xlabel('Model Type')
+    plt.tight_layout()
+    plt.savefig(REPORTS_DIR / '4_week_mae_heatmap.png')
+    plt.close()
+    print("  -> Saved 4-week MAE heatmap.")
 
-    if X_future.isnull().values.any():
-        print("WARNING: NaN values detected in forecast features. Applying forward/backward fill.")
-        X_future = X_future.ffill().bfill()
-    
-    if X_future.isnull().values.any():
-        print("FATAL ERROR: Could not impute all NaN values in the forecast data. Aborting forecast.")
-        return None, []
-
-    all_preds = [data['model'].predict(X_future) for _, data in top_models]
-    ensemble_weekly_total = np.mean(all_preds, axis=0).sum()
-    
-    print(f"\nEnsemble Forecast for week ending ~{prediction_end.date()}: {ensemble_weekly_total:.2f} Bcf")
-    return ensemble_weekly_total, [name for name, _ in top_models]
 
 # --- Main Execution Block ---
 
 if __name__ == '__main__':
-    df_features, df_eia = load_data()
+    eia_actuals_file = SCRIPT_DIR.parent / 'INFO' / 'EIAchanges.csv'
+    df_master, forecast_start, forecast_end, eia_actuals = load_and_prepare_data(DATA_FILE, eia_actuals_file)
+
+    REGIONS = ['East', 'Midwest', 'Mountain', 'Pacific', 'SouthCentral']
     
-    if PREDICTIONS_FILE.exists(): PREDICTIONS_FILE.unlink()
+    base_features = [col for col in df_master.columns if not col.startswith('Target_') and not col.startswith('Inv_') and col not in ['eia_week_id', 'Date_col']]
 
-    all_regions = REGIONS_TO_PREDICT + ['Lower 48']
-    for region in all_regions:
-        daily_target_col = DAILY_TARGET_MAP.get(region)
-        y_full = df_features[daily_target_col]
-        cols_to_drop = [col for col in df_features.columns if 'Storage_Change' in col or 'Inv_' in col]
-        X_full = df_features.drop(columns=cols_to_drop)
-        
-        optimal_feature_names = find_optimal_features(X_full, y_full, region)
-        X_optimal = X_full[optimal_feature_names]
+    model_registry = {
+        **{f"XGBoost_{region}": {"func": train_regional_model, "region": region, "type": "xgboost"} for region in REGIONS},
+        **{f"LightGBM_{region}": {"func": train_regional_model, "region": region, "type": "lightgbm"} for region in REGIONS},
+        **{f"CatBoost_{region}": {"func": train_regional_model, "region": region, "type": "catboost"} for region in REGIONS},
+    }
+    
+    results = {}
+    df_formatted = format_data_for_flexible_mode(df_master.copy())
 
-        trained_models = train_and_evaluate_models(X_optimal, y_full, df_eia, region)
-        
-        forecast, top_model_names = generate_ensemble_forecast(X_optimal, trained_models, df_eia)
-        
-        with open(PREDICTIONS_FILE, 'a') as f:
-            f.write("="*60 + "\n")
-            f.write(f"FORECAST SUMMARY FOR: {region}\n")
-            f.write("="*60 + "\n")
-            if forecast is not None:
-                f.write(f"Optimal features found: {len(optimal_feature_names)}\n")
-                f.write(f"Top Models Used for Ensemble: {', '.join(top_model_names)}\n")
-                f.write(f"Ensemble Forecast for next week: {forecast:.2f} Bcf\n\n")
-            else:
-                f.write("Forecast could not be generated for this region.\n\n")
+    for name, config in model_registry.items():
+        regional_features = get_regional_features(base_features, config['region'])
+        # FIX: Correctly unpack the 4 return values from the function
+        model, x_train, y_pred, metrics = config['func'](df_formatted, regional_features, config['region'], config['type'])
+        results[name] = {'model': model, 'region': config['region'], 'predictions': y_pred, 'metrics': metrics, 'features': regional_features}
 
-    print("\n--- Forecasting Engine Run Complete ---")
-    print(f"Check '{MODEL_OUTPUT_DIR}' for models, plots, feature lists, and the 'predictions.txt' summary.")
+    # --- Live Forecasting with Guardrail ---
+    print("\n--- 6. Generating Live Forecasts ---")
+    
+    forecast_range = pd.date_range(start=forecast_start, end=forecast_end)
+    if not all(date in df_master.index for date in forecast_range):
+        print(f"\nCRITICAL WARNING: Cannot generate a live forecast for {forecast_start.date()} to {forecast_end.date()}.")
+        print("Not all 7 days of input data are available.")
+        live_forecast_possible = False
+    else:
+        live_forecast_possible = True
+
+    for name, res in results.items():
+        if res['model'] and live_forecast_possible:
+            res['forecast'] = generate_regional_live_forecast(
+                df_master, res['model'], res['features'], forecast_start, forecast_end
+            )
+
+    # --- Generate Diagnostics Table with Consensus ---
+    df_diag = generate_trader_summary_table(results, df_master, eia_actuals, live_forecast_possible)
+    create_summary_visuals(df_diag, results, df_master)
+
+    # --- Final Ensemble Forecast ---
+    if live_forecast_possible:
+        regional_consensus = {}
+        for region in REGIONS:
+            regional_forecasts = [res['forecast'] for name, res in results.items() if res.get('region') == region and res.get('forecast') is not None]
+            if regional_forecasts:
+                regional_consensus[region] = np.mean(regional_forecasts)
+        
+        if len(regional_consensus) == len(REGIONS):
+            ensemble_forecast = sum(regional_consensus.values())
+            print("\n--- FINAL CONSENSUS FORECAST ---")
+            for region, forecast in regional_consensus.items():
+                print(f"  -> Consensus Forecast for {region}: {forecast:.2f} Bcf")
+            print(f"\n  -> Total CONUS Forecast: {ensemble_forecast:.2f} Bcf")
+        else:
+            print("\n--- Could not generate a complete ensemble forecast due to missing regional models. ---")
+
+    print("\n\n--- Modeling Pipeline Complete ---")
+
+

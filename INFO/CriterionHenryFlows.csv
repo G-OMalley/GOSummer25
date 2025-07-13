@@ -3767,7 +3767,12 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/06/2025,Acadian - HH,81025.0,51377.0
 07/07/2025,Acadian - HH,63025.0,82881.0
 07/08/2025,Acadian - HH,58106.0,105216.0
-07/09/2025,Acadian - HH,61774.0,73226.0
+07/09/2025,Acadian - HH,61774.0,63753.0
+07/10/2025,Acadian - HH,117184.0,0.0
+07/11/2025,Acadian - HH,90091.0,5332.0
+07/12/2025,Acadian - HH,104140.0,41516.0
+07/13/2025,Acadian - HH,113139.0,20188.0
+07/14/2025,Acadian - HH,106786.0,28214.0
 03/03/2015,Columbia Gulf - HH,3036.0,276964.0
 03/04/2015,Columbia Gulf - HH,3000.0,277000.0
 03/07/2015,Columbia Gulf - HH,3000.0,277000.0
@@ -7544,7 +7549,12 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/06/2025,Columbia Gulf - HH,18771.0,369297.0
 07/07/2025,Columbia Gulf - HH,9471.0,396479.0
 07/08/2025,Columbia Gulf - HH,37771.0,305835.0
-07/09/2025,Columbia Gulf - HH,38041.0,241959.0
+07/09/2025,Columbia Gulf - HH,28399.0,328888.0
+07/10/2025,Columbia Gulf - HH,29071.0,334650.0
+07/11/2025,Columbia Gulf - HH,52682.0,255489.0
+07/12/2025,Columbia Gulf - HH,33821.0,313157.0
+07/13/2025,Columbia Gulf - HH,39871.0,252684.0
+07/14/2025,Columbia Gulf - HH,34871.0,245129.0
 03/01/2015,Gulf South - HH,10565.0,389438.0
 03/02/2015,Gulf South - HH,10565.0,389438.0
 03/03/2015,Gulf South - HH,21765.0,378238.0
@@ -11328,7 +11338,12 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/06/2025,Gulf South - HH,62690.0,594719.0
 07/07/2025,Gulf South - HH,60091.0,605643.0
 07/08/2025,Gulf South - HH,42916.0,657060.0
-07/09/2025,Gulf South - HH,71625.0,328375.0
+07/09/2025,Gulf South - HH,71619.0,569148.0
+07/10/2025,Gulf South - HH,67590.0,569113.0
+07/11/2025,Gulf South - HH,52620.0,623043.0
+07/12/2025,Gulf South - HH,53323.0,617512.0
+07/13/2025,Gulf South - HH,51317.0,409764.0
+07/14/2025,Gulf South - HH,52438.0,347562.0
 03/01/2015,Jefferson Island - HH,25305.0,424694.0
 03/02/2015,Jefferson Island - HH,25305.0,424694.0
 03/03/2015,Jefferson Island - HH,1405.0,448594.0
@@ -15013,7 +15028,12 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/06/2025,Jefferson Island - HH,44484.0,386062.0
 07/07/2025,Jefferson Island - HH,0.0,484636.0
 07/08/2025,Jefferson Island - HH,0.0,523399.0
-07/09/2025,Jefferson Island - HH,0.0,450000.0
+07/09/2025,Jefferson Island - HH,0.0,541761.0
+07/10/2025,Jefferson Island - HH,0.0,462698.0
+07/11/2025,Jefferson Island - HH,0.0,461103.0
+07/12/2025,Jefferson Island - HH,38445.0,393781.0
+07/13/2025,Jefferson Island - HH,49945.0,397739.0
+07/14/2025,Jefferson Island - HH,49945.0,400055.0
 03/11/2015,LRC/Bridgeline - HH,27439.0,397564.0
 03/12/2015,LRC/Bridgeline - HH,54986.0,370014.0
 03/13/2015,LRC/Bridgeline - HH,54886.0,370116.0
@@ -18775,7 +18795,12 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/06/2025,LRC/Bridgeline - HH,384219.0,6521.0
 07/07/2025,LRC/Bridgeline - HH,380450.0,20624.0
 07/08/2025,LRC/Bridgeline - HH,337807.0,62135.0
-07/09/2025,LRC/Bridgeline - HH,327512.0,97488.0
+07/09/2025,LRC/Bridgeline - HH,347381.0,52064.0
+07/10/2025,LRC/Bridgeline - HH,335848.0,58252.0
+07/11/2025,LRC/Bridgeline - HH,367414.0,32659.0
+07/12/2025,LRC/Bridgeline - HH,367775.0,60464.0
+07/13/2025,LRC/Bridgeline - HH,368253.0,53030.0
+07/14/2025,LRC/Bridgeline - HH,368264.0,56736.0
 03/01/2015,NGPL - HH,0.0,0.0
 03/02/2015,NGPL - HH,0.0,0.0
 03/03/2015,NGPL - HH,0.0,0.0
@@ -22545,7 +22570,12 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/06/2025,NGPL - HH,180000.0,442233.0
 07/07/2025,NGPL - HH,180000.0,450699.0
 07/08/2025,NGPL - HH,190000.0,421537.0
-07/09/2025,NGPL - HH,200000.0,440000.0
+07/09/2025,NGPL - HH,190000.0,356994.0
+07/10/2025,NGPL - HH,160000.0,526271.0
+07/11/2025,NGPL - HH,142800.0,570719.0
+07/12/2025,NGPL - HH,29100.0,1037927.0
+07/13/2025,NGPL - HH,29100.0,705178.0
+07/14/2025,NGPL - HH,29100.0,610900.0
 03/01/2015,SONAT - HH,22881.0,137120.0
 03/02/2015,SONAT - HH,22881.0,137120.0
 03/03/2015,SONAT - HH,30681.0,129320.0
@@ -26328,7 +26358,12 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/06/2025,SONAT - HH,108823.0,40327.0
 07/07/2025,SONAT - HH,144114.0,0.0
 07/08/2025,SONAT - HH,172804.0,0.0
-07/09/2025,SONAT - HH,159745.0,255.0
+07/09/2025,SONAT - HH,176951.0,0.0
+07/10/2025,SONAT - HH,157244.0,0.0
+07/11/2025,SONAT - HH,165488.0,0.0
+07/12/2025,SONAT - HH,170563.0,0.0
+07/13/2025,SONAT - HH,164754.0,0.0
+07/14/2025,SONAT - HH,164846.0,0.0
 03/01/2015,Sea Robin - HH,16.0,249984.0
 03/02/2015,Sea Robin - HH,16.0,249984.0
 03/03/2015,Sea Robin - HH,16.0,249984.0
@@ -30113,6 +30148,11 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/07/2025,Sea Robin - HH,0.0,0.0
 07/08/2025,Sea Robin - HH,0.0,0.0
 07/09/2025,Sea Robin - HH,0.0,0.0
+07/10/2025,Sea Robin - HH,0.0,0.0
+07/11/2025,Sea Robin - HH,0.0,0.0
+07/12/2025,Sea Robin - HH,0.0,0.0
+07/13/2025,Sea Robin - HH,0.0,0.0
+07/14/2025,Sea Robin - HH,0.0,0.0
 03/02/2015,Texas Gas - HH,10000.0,160000.0
 03/03/2015,Texas Gas - HH,0.0,170000.0
 03/04/2015,Texas Gas - HH,0.0,170000.0
@@ -33896,6 +33936,11 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/07/2025,Texas Gas - HH,0.0,400000.0
 07/08/2025,Texas Gas - HH,0.0,400000.0
 07/09/2025,Texas Gas - HH,0.0,400000.0
+07/10/2025,Texas Gas - HH,0.0,400000.0
+07/11/2025,Texas Gas - HH,0.0,400000.0
+07/12/2025,Texas Gas - HH,0.0,400000.0
+07/13/2025,Texas Gas - HH,0.0,400000.0
+07/14/2025,Texas Gas - HH,0.0,400000.0
 04/11/2022,Transco - HH,0.0,25000.0
 04/12/2022,Transco - HH,0.0,25000.0
 04/13/2022,Transco - HH,0.0,25000.0
@@ -35082,6 +35127,11 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/07/2025,Transco - HH,0.0,25000.0
 07/08/2025,Transco - HH,0.0,25000.0
 07/09/2025,Transco - HH,0.0,25000.0
+07/10/2025,Transco - HH,0.0,25000.0
+07/11/2025,Transco - HH,0.0,25000.0
+07/12/2025,Transco - HH,0.0,25000.0
+07/13/2025,Transco - HH,0.0,25000.0
+07/14/2025,Transco - HH,0.0,25000.0
 03/01/2015,Trunkline Del - HH Low Pressure,0.0,130000.0
 03/02/2015,Trunkline Del - HH Low Pressure,0.0,130000.0
 03/03/2015,Trunkline Del - HH Low Pressure,0.0,130000.0
@@ -38866,6 +38916,11 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/07/2025,Trunkline Del - HH Low Pressure,0.0,130000.0
 07/08/2025,Trunkline Del - HH Low Pressure,0.0,130000.0
 07/09/2025,Trunkline Del - HH Low Pressure,0.0,130000.0
+07/10/2025,Trunkline Del - HH Low Pressure,0.0,130000.0
+07/11/2025,Trunkline Del - HH Low Pressure,0.0,130000.0
+07/12/2025,Trunkline Del - HH Low Pressure,0.0,130000.0
+07/13/2025,Trunkline Del - HH Low Pressure,0.0,130000.0
+07/14/2025,Trunkline Del - HH Low Pressure,0.0,130000.0
 06/01/2016,Trunkline HH High Pressure,0.0,500000.0
 06/02/2016,Trunkline HH High Pressure,0.0,511422.0
 06/03/2016,Trunkline HH High Pressure,0.0,500000.0
@@ -42192,6 +42247,11 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/07/2025,Trunkline HH High Pressure,0.0,500000.0
 07/08/2025,Trunkline HH High Pressure,0.0,500000.0
 07/09/2025,Trunkline HH High Pressure,0.0,500000.0
+07/10/2025,Trunkline HH High Pressure,0.0,500000.0
+07/11/2025,Trunkline HH High Pressure,0.0,500000.0
+07/12/2025,Trunkline HH High Pressure,0.0,500000.0
+07/13/2025,Trunkline HH High Pressure,0.0,500000.0
+07/14/2025,Trunkline HH High Pressure,0.0,500000.0
 03/01/2015,Trunkline Rec - HH Low Pressure,74731.0,55268.0
 03/02/2015,Trunkline Rec - HH Low Pressure,74731.0,55268.0
 03/03/2015,Trunkline Rec - HH Low Pressure,65466.0,64532.0
@@ -45975,4 +46035,9 @@ Date,loc_name,Scheduled Quantity,Operationally Available
 07/06/2025,Trunkline Rec - HH Low Pressure,26903.0,101721.0
 07/07/2025,Trunkline Rec - HH Low Pressure,26903.0,102494.0
 07/08/2025,Trunkline Rec - HH Low Pressure,35659.0,94343.0
-07/09/2025,Trunkline Rec - HH Low Pressure,37130.0,92870.0
+07/09/2025,Trunkline Rec - HH Low Pressure,32119.0,99009.0
+07/10/2025,Trunkline Rec - HH Low Pressure,44679.0,68150.0
+07/11/2025,Trunkline Rec - HH Low Pressure,32000.0,97999.0
+07/12/2025,Trunkline Rec - HH Low Pressure,2084.0,137272.0
+07/13/2025,Trunkline Rec - HH Low Pressure,10000.0,120000.0
+07/14/2025,Trunkline Rec - HH Low Pressure,10000.0,120000.0

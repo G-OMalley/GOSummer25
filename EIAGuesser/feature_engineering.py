@@ -1,191 +1,171 @@
+# C:\Users\patri\OneDrive\Desktop\Coding\TraderHelper\EIAGuesser\Feature_engineering.py
+# -*- coding: utf-8 -*-
+"""
+This script performs feature engineering for the EIA Guesser project.
+It reads raw data from multiple sources, cleans and transforms the data,
+creates a rich feature set based on regional and granular metrics,
+and saves the final collated dataset for model training.
+
+VERSION 5: LAGGED & CALENDAR FEATURES
+This version introduces critical lagged features to prevent data leakage and
+ensure the model only trains on information that would be available at the
+time of a real-world forecast. It also adds calendar-aware features.
+"""
+
 import pandas as pd
 import numpy as np
-import os
 from pathlib import Path
+from pandas.tseries.holiday import USFederalHolidayCalendar
 
-# --- Configuration & Mappings ---
-SCRIPT_DIR = Path(__file__).resolve().parent
+# --- Configuration & Path Setup ---
+try:
+    SCRIPT_DIR = Path(__file__).resolve().parent
+except NameError:
+    SCRIPT_DIR = Path.cwd()
+
 INFO_DIR = SCRIPT_DIR.parent / 'INFO'
+OUTPUT_DIR = SCRIPT_DIR / 'output'
+OUTPUT_DIR.mkdir(exist_ok=True)
+
+# --- Mappings & Constants ---
 REGIONS = ['East', 'Midwest', 'Mountain', 'Pacific', 'South Central']
 
 CITY_TO_REGION_MAP = {
-    'Atlanta GA': 'East', 'Boston MA': 'East', 'Buffalo NY': 'East',
-    'Washington National DC': 'East', 'John F. Kennedy NY': 'East',
-    'Philadelphia PA': 'East', 'Pittsburgh PA': 'East',
-    'Raleigh/Durham NC': 'East', 'Tampa FL': 'East',
-    'Chicago IL': 'Midwest', 'Detroit MI': 'Midwest',
-    'Denver CO': 'Mountain',
-    'Los Angeles CA': 'Pacific', 'Seattle WA': 'Pacific', 'San Francisco CA': 'Pacific',
-    'Houston TX': 'South Central', 'Little Rock AR': 'South Central',
-    'New Orleans LA': 'South Central', 'Oklahoma City OK': 'South Central'
+    'Atlanta': 'East', 'Boston': 'East', 'Buffalo': 'East',
+    'Washington': 'East', 'JFK': 'East', 'Pittsburgh': 'East',
+    'Ral-Durham': 'East', 'Tampa': 'East',
+    'Chicago OHare': 'Midwest', 'Detroit': 'Midwest',
+    'Denver': 'Mountain',
+    'Los Angeles': 'Pacific', 'Seattle': 'Pacific', 'San Francisco': 'Pacific',
+    'Houston IAH': 'South Central', 'Little Rock': 'South Central',
+    'New Orleans': 'South Central', 'Ok. City': 'South Central'
 }
+
 LNG_ITEM_TO_REGION_MAP = {
-    'Calcasieu Pass LNG Feed Gas': 'South Central', 'Cameron LNG Feed Gas': 'South Central',
-    'Corpus Christi LNG Feed Gas': 'South Central', 'Cove Point LNG Feed Gas': 'East',
-    'Elba Island LNG Feed Gas': 'South Central', 'Freeport LNG Feed Gas': 'South Central',
-    'Sabine Pass LNG Feed Gas': 'South Central', 'US LNG Exports - Plaquemines LNG': 'South Central'
+    'Calcasieu Pass LNG Feed Gas': 'South Central',
+    'Cameron LNG Feed Gas': 'South Central',
+    'Corpus Christi LNG Feed Gas': 'South Central',
+    'Cove Point LNG Feed Gas': 'East',
+    'Elba Island LNG Feed Gas': 'South Central',
+    'Freeport LNG Feed Gas': 'South Central',
+    'Sabine Pass LNG Feed Gas': 'South Central',
+    'US LNG Exports - Plaquemines LNG': 'South Central'
 }
-CRITERION_EXTRA_MAP = {
-    'CONUS - STORAGE': 'CONUS_Criterion_Storage', 'Total Demand - California': 'Pacific_Criterion_Demand_CA',
-    'Total Demand - Lower 48': 'CONUS_Criterion_Total_Demand', 'Total Demand - Midwest': 'Midwest_Criterion_Total_Demand',
-    'Total Demand - Northeast': 'East_Criterion_Total_Demand', 'Total Demand - Pacific Northwest': 'Pacific_Criterion_Demand_PNW',
-    'Total Demand - Rockies': 'Mountain_Criterion_Total_Demand', 'Total Demand - Rockies - SW': 'Mountain_Criterion_Demand_SW',
-    'Total Demand - Rockies - Upper': 'Mountain_Criterion_Demand_Upper', 'Total Demand - South Central': 'South_Central_Criterion_Total_Demand',
-    'Total Demand - Southeast - Florida': 'East_Criterion_Demand_SE_FL', 'Total Demand - Southeast - Other': 'East_Criterion_Demand_SE_Other'
-}
-STORAGE_TO_REGION_MAP = {
-    'ANR Pipeline Company': 'South Central', 'ANR Storage Company': 'Midwest', 'Arcadia Gas Storage': 'South Central',
-    'Avon Storage': 'Midwest', 'Bay Gas Storage Company': 'South Central', 'Bear Creek Storage Company': 'South Central',
-    'Beckman': 'Midwest', 'Bethel': 'South Central', 'Bistineau': 'South Central', 'Black-Sulphur': 'South Central',
-    'Blue Lake': 'Midwest', 'Bobcat Gas Storage': 'South Central', 'Boling': 'South Central', 'Bonanza': 'Mountain',
-    'Cadeville Gas Storage': 'South Central', 'Caledonia Gas Storage': 'East', 'Cameron': 'South Central',
-    'Carlton Gas Storage': 'Midwest', 'Carson': 'South Central', 'Cashion': 'South Central', 'Cayuta': 'East',
-    'Central New York Oil and Gas': 'East', 'Central Valley Gas Storage': 'Pacific', 'Ceres': 'Midwest',
-    'Clay Basin': 'Mountain', 'Clear Creek Storage': 'Mountain', 'Columbus Gas Transmission': 'East',
-    'Como': 'Midwest', 'Consolidated Gas Supply': 'East', 'Consumers Energy': 'Midwest', 'Copiah': 'South Central',
-    'Cunningham': 'Midwest', 'DTE Gas Company': 'Midwest', 'DeSoto': 'South Central',
-    'Dominion Energy Questar Pipeline': 'Mountain', 'Dominion Energy Transmission': 'East', 'Duck Lake': 'South Central',
-    'East Ohio Gas Company': 'East', 'Egan Hub Partners': 'South Central', 'Equitrans': 'East',
-    'Fair-p-t': 'South Central', 'Fidelity': 'Midwest', 'Freebird Gas Storage': 'South Central', 'GTI-Dawn': 'Midwest',
-    'Gas T-D': 'East', 'Gibson': 'South Central', 'Gill Ranch Gas': 'Pacific', 'Glenarm': 'Midwest',
-    'Golden Triangle Storage': 'South Central', 'Gram-p-t': 'South Central', 'Green River': 'Mountain',
-    'Greenbrier': 'East', 'Grom-p-t': 'South Central', 'Guardian': 'Midwest', 'Gulf South Pipeline Company': 'South Central',
-    'Gulf-p-t': 'South Central', 'HIOS': 'South Central', 'Hattiesburg': 'South Central', 'Hav-p-t': 'South Central',
-    'Henry': 'South Central', 'Hillman': 'Midwest', 'Honeoye Storage Corporation': 'East',
-    'Iroquois Gas/TransCanada': 'East', 'Jackson': 'South Central', 'James-p-t': 'South Central', 'Jena': 'South Central',
-    'K-p-t': 'South Central', 'Kankakee': 'Midwest', 'Kansas-Nebraska Big Well': 'Midwest', 'Katy': 'South Central',
-    'KINDER MORGAN LA PIPELINE': 'South Central', 'Kirby Hills Natural Gas Storage': 'Pacific', 'L-p-t': 'South Central',
-    'Lakeside': 'Midwest', 'Lauber': 'Midwest', 'Lea-p-t': 'South Central', 'Leroy': 'Mountain', 'Lincoln': 'Midwest',
-    'Lodi Gas Services': 'Pacific', 'Loudon': 'Midwest', 'Lov-p-t': 'South Central', 'Lowry': 'Mountain',
-    'M-p-t': 'South Central', 'MGS': 'South Central', 'Manc-p-t': 'South Central', 'Manlove': 'Midwest',
-    'Markham': 'South Central', 'Meeker': 'Mountain', 'Michigan Gas Utilities': 'Midwest', 'Mid-p-t': 'South Central',
-    'Midcontinent Express': 'South Central', 'Midla': 'Midwest', 'Mississippi Hub': 'South Central',
-    'Missouri Gas Energy': 'Midwest', 'Moss Bluff': 'South Central', 'Mul-p-t': 'South Central', 'N-p-t': 'South Central',
-    'NATIONAL FUEL GAS SUPPLY': 'East', 'NGPL-Midcon': 'South Central', 'NGPL-Texoma': 'South Central',
-    'NY-p-t': 'East', 'Napoleonville': 'South Central', 'Natural Gas Pipeline Co of America': 'Midwest',
-    'Nautilus': 'South Central', 'Nelson': 'Midwest', 'Nicor Gas': 'Midwest', 'North Lansing': 'East',
-    'Northern Illinois Gas Company': 'Midwest', 'Northern Indiana Public Service Co': 'Midwest',
-    'Northern Natural Gas Company': 'Midwest', 'Northwest Pipeline Corporation': 'Mountain', 'O-p-t': 'South Central',
-    'Oak Grove': 'South Central', 'Oakford': 'East', 'Oneok Gas Storage': 'Midwest',
-    'Oneok Westex Transmission': 'South Central', 'PG&E Gas Transmission': 'Pacific',
-    'Panhandle Eastern Pipe Line': 'Midwest', 'Peoples Gas Light & Coke Co': 'Midwest', 'Perryville': 'South Central',
-    'Petal Gas Storage': 'South Central', 'Piceance': 'Mountain', 'Pine Prairie Energy Center': 'South Central',
-    'Piv-p-t': 'South Central', 'Port Barre Investments': 'South Central', 'Portland Natural Gas': 'East',
-    'Putnam': 'Midwest', 'Quest': 'Mountain', 'R-p-t': 'South Central', 'Red-p-t': 'South Central',
-    'Rendezvous': 'Mountain', 'Riner': 'Mountain', 'Rockies Express Pipeline': 'Mountain', 'Ryckman': 'Mountain',
-    'S-p-t': 'South Central', 'SEMCO Energy Gas Company': 'Midwest', 'SENECA GAS STORAGE': 'East',
-    'Sab-p-t': 'South Central', 'Sayre': 'Midwest', 'Sharon': 'South Central', 'Sher-p-t': 'South Central',
-    'Silo': 'South Central', 'So-p-t': 'South Central', 'Sonat': 'South Central', 'Southern Natural Gas Company': 'South Central',
-    'Southern Pines Energy Center': 'South Central', 'Southwest Gas Corporation': 'Pacific', 'Spearman': 'South Central',
-    'Spire Storage': 'Mountain', 'St. Clair': 'Midwest', 'Stagecoach Gas Services': 'East', 'Starks': 'South Central',
-    'Steuben Gas Storage': 'East', 'Sulphur': 'South Central', 'T-p-t': 'South Central', 'Tall-p-t': 'South Central',
-    'Tennessee Gas Pipeline Co': 'East', 'Terre-p-t': 'South Central', 'Tex-p-t': 'South Central',
-    'Texas Gas Transmission': 'South Central', 'Texasok': 'South Central', 'Trans-p-t': 'East', 'Transco': 'East',
-    'Tres Palacios Gas Storage': 'South Central', 'Triumph': 'East', 'Tropic': 'South Central',
-    'Trunkline Gas Company': 'Midwest', 'U-p-t': 'South Central', 'V-p-t': 'South Central', 'Vector Pipeline': 'Midwest',
-    'W-p-t': 'South Central', 'WBI Energy Transmission': 'Mountain', 'WE Energies': 'Midwest', 'Waha': 'South Central',
-    'Washington': 'Midwest', 'Waverly': 'Midwest', 'Wel-p-t': 'South Central', 'Western Gas Interstate': 'Mountain',
-    'Wheeler Gas Storage': 'East', 'White-p-t': 'South Central', 'Wilson': 'East', 'Woolfolk': 'Midwest'
-}
+
 POWER_ITEM_TO_REGION_MAP = {
-    'AESO': ['Mountain'],
-    'BPA': ['Pacific'],
-    'CAISO': ['Pacific'],
-    'ERCOT': ['South Central'],
-    'IESO': ['Midwest', 'East'],
-    'ISONE': ['East'],
-    'MISO': ['Midwest', 'South Central'],
-    'NYISO': ['East'],
-    'PJM': ['East'],
-    'SPP': ['Midwest', 'South Central']
+    'AESO': ['Mountain'], 'BPA': ['Pacific'], 'CAISO': ['Pacific'],
+    'ERCOT': ['South Central'], 'IESO': ['Midwest', 'East'],
+    'ISONE': ['East'], 'MISO': ['Midwest', 'South Central'],
+    'NYISO': ['East'], 'PJM': ['East'], 'SPP': ['Midwest', 'South Central']
 }
 
+CRITERION_EXTRA_MAP = {
+    'CONUS - STORAGE': 'CONUS_Criterion_Storage',
+    'Total Demand - California': 'Pacific_Criterion_Demand_CA',
+    'Total Demand - Lower 48': 'CONUS_Criterion_Total_Demand',
+    'Total Demand - Midwest': 'Midwest_Criterion_Total_Demand',
+    'Total Demand - Northeast': 'East_Criterion_Total_Demand',
+    'Total Demand - Pacific Northwest': 'Pacific_Criterion_Demand_PNW',
+    'Total Demand - Rockies': 'Mountain_Criterion_Total_Demand',
+    'Total Demand - Rockies - SW': 'Mountain_Criterion_Demand_SW',
+    'Total Demand - Rockies - Upper': 'Mountain_Criterion_Demand_Upper',
+    'Total Demand - South Central': 'South_Central_Criterion_Total_Demand',
+    'Total Demand - Southeast - Florida': 'East_Criterion_Demand_SE_FL',
+    'Total Demand - Southeast - Other': 'East_Criterion_Demand_SE_Other'
+}
 
-# --- Feature Engineering Functions ---
+# --- Helper Functions ---
 
-def create_time_features(df):
-    """Creates time-series features from the datetime index."""
-    df['day_of_week'] = df.index.dayofweek
-    df['day_of_year'] = df.index.dayofyear
-    df['month'] = df.index.month
-    df['quarter'] = df.index.quarter
-    df['week_of_year'] = df.index.isocalendar().week.astype(int)
-    return df
+def sanitize_name(name):
+    """Cleans a string to be used as a DataFrame column name."""
+    return name.strip().replace(' ', '_').replace('-', '_').replace('.', '').replace('(', '').replace(')', '')
 
-def process_weather_data(info_dir_path):
-    """
-    Loads weather data, creates regional aggregates AND granular city-level features
-    with region names prepended for clarity and easier filtering.
-    """
+# --- Data Processing Functions ---
+
+def process_weather_data(info_dir):
     print("Processing Weather Data...")
-    weather_file = info_dir_path / 'WEATHER.csv'
+    weather_file = info_dir / 'WEATHER.csv'
     if not weather_file.exists(): return pd.DataFrame()
     df_weather = pd.read_csv(weather_file)
     df_weather['Date'] = pd.to_datetime(df_weather['Date'])
-    
-    # Map regions to each city
     df_weather['Region'] = df_weather['City Title'].map(CITY_TO_REGION_MAP)
     df_weather.dropna(subset=['Region'], inplace=True)
-
-    # --- Regional Aggregates (e.g., East_HDD) ---
-    agg_dict = {'CDD':'sum', 'HDD':'sum'}
+    agg_dict = {'CDD': 'sum', 'HDD': 'sum'}
     df_regional_agg = df_weather.groupby(['Date', 'Region']).agg(agg_dict).reset_index()
     df_regional_pivot = df_regional_agg.pivot(index='Date', columns='Region', values=list(agg_dict.keys()))
-    df_regional_pivot.columns = [f'{region}_{stat.replace(" ", "_")}' for stat, region in df_regional_pivot.columns]
-    
-    # --- Granular City-Level Features (e.g., Midwest_City_Detroit_MI_Avg_Temp) ---
-    # FIX: Prepend the region to each granular feature name
+    df_regional_pivot.columns = [f'{region}_Weather_{stat}' for stat, region in df_regional_pivot.columns]
     df_city_pivots = []
     for region, df_group in df_weather.groupby('Region'):
         df_pivot = df_group.pivot(index='Date', columns='City Title', values=['Avg Temp', 'CDD', 'HDD'])
-        df_pivot.columns = [f"{region}_City_{city.replace(' ', '_')}_{stat}" for stat, city in df_pivot.columns]
+        df_pivot.columns = [f"{region}_Weather_City_{sanitize_name(city)}_{stat}" for stat, city in df_pivot.columns]
         df_city_pivots.append(df_pivot)
     df_city_granular = pd.concat(df_city_pivots, axis=1)
-
-    # --- Combine aggregate and granular features ---
     df_final = df_regional_pivot.join(df_city_granular, how='outer')
-    print("Weather data processing complete.")
+    print("  - Weather data processing complete.")
     return df_final
 
-def process_fundy_data(info_dir_path):
-    print("\nProcessing Fundamental Data (Fundy)...")
-    fundy_file = info_dir_path / 'Fundy.csv'
-    if not fundy_file.exists(): return pd.DataFrame()
-    df_fundy_long = pd.read_csv(fundy_file)
-    df_fundy_long['Date'] = pd.to_datetime(df_fundy_long['Date'])
-    df_fundy_wide = df_fundy_long.pivot_table(index='Date', columns='item', values='value', aggfunc='mean')
-    df_fundy_wide.columns = [f"Fundy_{col.strip().replace(' ', '_').replace('-', '_')}" for col in df_fundy_wide.columns]
-    print("Fundamental data processing complete.")
-    return df_fundy_wide
+def process_platts_conus_data(info_dir):
+    print("Processing Platts CONUS Data...")
+    conus_file = info_dir / 'PlattsCONUSFundamentalsHIST.csv'
+    if not conus_file.exists(): return pd.DataFrame()
+    df_conus = pd.read_csv(conus_file)
+    df_conus['GasDate'] = pd.to_datetime(df_conus['GasDate'])
+    df_conus.set_index('GasDate', inplace=True)
+    df_conus.columns = [f"CONUS_Platts_{sanitize_name(col)}" for col in df_conus.columns]
+    print("  - Platts CONUS data processing complete.")
+    return df_conus
 
-def process_lng_data(info_dir_path):
-    print("\nProcessing LNG Data...")
-    lng_file = info_dir_path / 'CriterionLNGHist.csv'
+def process_power_data(info_dir):
+    print("Processing Platts Power Data...")
+    power_file = info_dir / 'PlattsPowerFundy.csv'
+    if not power_file.exists(): return pd.DataFrame()
+    df_power_long = pd.read_csv(power_file)
+    df_power_long['Date'] = pd.to_datetime(df_power_long['Date'])
+    df_power_long.dropna(subset=['Item', 'Value'], inplace=True)
+    def get_iso_prefix(item_name):
+        return item_name.strip().split(' - ')[0]
+    df_power_long['ISO'] = df_power_long['Item'].apply(get_iso_prefix)
+    df_power_long['Region'] = df_power_long['ISO'].map(POWER_ITEM_TO_REGION_MAP)
+    df_power_long.dropna(subset=['Region'], inplace=True)
+    df_exploded = df_power_long.explode('Region')
+    df_exploded['Feature_Name'] = df_exploded.apply(lambda row: f"{row['Region']}_Power_{sanitize_name(row['Item'])}", axis=1)
+    df_power_wide = df_exploded.pivot_table(index='Date', columns='Feature_Name', values='Value', aggfunc='mean')
+    print("  - Platts Power data processing complete.")
+    return df_power_wide
+
+def process_nuclear_data(info_dir):
+    print("Processing Nuclear Data...")
+    nuclear_file = info_dir / 'CriterionNuclearHist.csv'
+    if not nuclear_file.exists(): return pd.DataFrame()
+    df_nuclear = pd.read_csv(nuclear_file)
+    df_nuclear['Date'] = pd.to_datetime(df_nuclear['Date'])
+    df_nuclear.dropna(subset=['EIA Region', 'Value'], inplace=True)
+    df_regional = df_nuclear.groupby(['Date', 'EIA Region'])['Value'].sum().reset_index()
+    df_pivot = df_regional.pivot(index='Date', columns='EIA Region', values='Value')
+    df_pivot.columns = [f"{sanitize_name(col)}_Nuclear_Total" for col in df_pivot.columns]
+    print("  - Nuclear data processing complete.")
+    return df_pivot.fillna(0)
+
+def process_lng_data(info_dir):
+    print("Processing LNG Data...")
+    lng_file = info_dir / 'CriterionLNGHist.csv'
     if not lng_file.exists(): return pd.DataFrame()
     df_lng_long = pd.read_csv(lng_file)
     df_lng_long['Date'] = pd.to_datetime(df_lng_long['Date'])
-    
-    # FIX: Prepend region to granular features
     df_lng_long['Region'] = df_lng_long['Item'].map(LNG_ITEM_TO_REGION_MAP)
     df_lng_long.dropna(subset=['Region'], inplace=True)
-    
-    # Granular (e.g., South_Central_LNG_Cameron_LNG_Feed_Gas)
-    df_lng_long['Feature_Name'] = df_lng_long.apply(
-        lambda row: f"{row['Region']}_LNG_{row['Item'].replace(' ', '_').replace('-', '_')}", axis=1)
+    df_lng_long['Feature_Name'] = df_lng_long.apply(lambda row: f"{row['Region']}_LNG_{sanitize_name(row['Item'])}", axis=1)
     df_lng_granular = df_lng_long.pivot_table(index='Date', columns='Feature_Name', values='Value', aggfunc='mean')
-
-    # Regional (e.g., South_Central_LNG_Feedgas_Total)
     df_regional_lng = df_lng_long.groupby(['Date', 'Region'])['Value'].sum().reset_index()
     df_lng_regional = df_regional_lng.pivot(index='Date', columns='Region', values='Value')
-    df_lng_regional.columns = [f'{col.replace(" ", "_")}_LNG_Feedgas_Total' for col in df_lng_regional.columns]
-    
+    df_lng_regional.columns = [f'{sanitize_name(col)}_LNG_Feedgas_Total' for col in df_lng_regional.columns]
     df_final = df_lng_regional.join(df_lng_granular, how='outer').fillna(0)
-    print("LNG data processing complete.")
+    print("  - LNG data processing complete.")
     return df_final
 
-def process_criterion_extra_data(info_dir_path):
-    print("\nProcessing Criterion Extra Data...")
-    extra_file = info_dir_path / 'CriterionExtra.csv'
+def process_criterion_extra_data(info_dir):
+    print("Processing Criterion Extra Data...")
+    extra_file = info_dir / 'CriterionExtra.csv'
     if not extra_file.exists(): return pd.DataFrame()
     df_extra_long = pd.read_csv(extra_file)
     df_extra_long['Date'] = pd.to_datetime(df_extra_long['Date'])
@@ -193,180 +173,179 @@ def process_criterion_extra_data(info_dir_path):
     if df_filtered.empty: return pd.DataFrame()
     df_filtered['Feature_Name'] = df_filtered['item'].map(CRITERION_EXTRA_MAP)
     df_extra_wide = df_filtered.pivot_table(index='Date', columns='Feature_Name', values='value', aggfunc='mean')
-    print("Criterion Extra data processing complete.")
+    print("  - Criterion Extra data processing complete.")
     return df_extra_wide
 
-def process_criterion_storage_change(info_dir_path):
-    print("\nProcessing Criterion Storage Change Data...")
-    storage_file = info_dir_path / 'CriterionStorageChange.csv'
-    if not storage_file.exists(): return pd.DataFrame()
-    df_storage_long = pd.read_csv(storage_file)
-    
-    # FIX: Prepend region to granular features
-    df_storage_long['Region'] = df_storage_long['storage_name'].map(STORAGE_TO_REGION_MAP)
-    df_storage_long.dropna(subset=['Region'], inplace=True)
-    
-    # Granular (e.g., Midwest_Storage_ANR_Storage_Company)
-    df_storage_long['Feature_Name'] = df_storage_long.apply(
-        lambda row: f"{row['Region']}_Storage_{row['storage_name'].replace(' ', '_').replace('-', '_')}", axis=1)
-    df_storage_granular = df_storage_long.pivot_table(index='eff_gas_day', columns='Feature_Name', values='daily_storage_change', aggfunc='mean')
-    df_storage_granular.index = pd.to_datetime(df_storage_granular.index)
+def process_fundy_data(info_dir):
+    print("Processing Fundy Data...")
+    fundy_file = info_dir / 'Fundy.csv'
+    if not fundy_file.exists(): return pd.DataFrame()
+    df_fundy_long = pd.read_csv(fundy_file)
+    df_fundy_long['Date'] = pd.to_datetime(df_fundy_long['Date'])
+    df_fundy_wide = df_fundy_long.pivot_table(index='Date', columns='item', values='value', aggfunc='mean')
+    df_fundy_wide.columns = [f"Fundy_{sanitize_name(col)}" for col in df_fundy_wide.columns]
+    print("  - Fundy data processing complete.")
+    return df_fundy_wide
 
-    # Regional (e.g., Midwest_Criterion_Storage_Change)
+def get_storage_to_region_map():
+    print("  - Using curated, hardcoded storage-to-region map for reliability.")
+    storage_map = {
+        'ANR Pipeline': 'South Central', 'ANR Storage': 'Midwest', 'Arcadia Gas Storage': 'South Central', 'Avon Storage': 'Midwest',
+        'Bay Gas Storage Company': 'South Central', 'Bear Creek Storage Company': 'South Central', 'Bistineau': 'South Central',
+        'Blue Lake': 'Midwest', 'Bobcat Gas Storage': 'South Central', 'Cadeville Gas Storage': 'South Central', 'Caledonia Gas Storage': 'East',
+        'Central Valley Gas Storage': 'Pacific', 'Clay Basin': 'Mountain', 'Clear Creek Storage': 'Mountain', 'Consumers Energy': 'Midwest',
+        'DTE Gas Company': 'Midwest', 'Dominion Energy Questar Pipeline': 'Mountain', 'Dominion Energy Transmission': 'East',
+        'Egan Hub Partners': 'South Central', 'Equitrans': 'East', 'Freebird Gas Storage': 'South Central', 'Gill Ranch Gas': 'Pacific',
+        'Golden Triangle Storage': 'South Central', 'Gulf South Pipeline Company': 'South Central', 'Honeoye Storage Corporation': 'East',
+        'Iroquois Gas/TransCanada': 'East', 'KINDER MORGAN LA PIPELINE': 'South Central', 'Kirby Hills Natural Gas Storage': 'Pacific',
+        'Lodi Gas Services': 'Pacific', 'Midcontinent Express': 'South Central', 'Mississippi Hub': 'South Central',
+        'Moss Bluff': 'South Central', 'NATIONAL FUEL GAS SUPPLY': 'East', 'NGPL-Midcon': 'South Central',
+        'Natural Gas Pipeline Co of America': 'Midwest', 'Nicor Gas': 'Midwest', 'Northern Natural Gas Company': 'Midwest',
+        'Northwest Pipeline Corporation': 'Mountain', 'Oneok Gas Storage': 'Midwest', 'Oneok Westex Transmission': 'South Central',
+        'PG&E Gas Transmission': 'Pacific', 'Panhandle Eastern Pipe Line': 'Midwest', 'Peoples Gas Light & Coke Co': 'Midwest',
+        'Perryville': 'South Central', 'Petal Gas Storage': 'South Central', 'Pine Prairie Energy Center': 'South Central',
+        'Rockies Express Pipeline': 'Mountain', 'SENECA GAS STORAGE': 'East', 'Sonat': 'South Central',
+        'Southern Natural Gas Company': 'South Central', 'Southern Pines Energy Center': 'South Central', 'Southwest Gas Corporation': 'Pacific',
+        'Spire Storage': 'Mountain', 'Stagecoach Gas Services': 'East', 'Steuben Gas Storage': 'East',
+        'Tennessee Gas Pipeline Co': 'East', 'Texas Gas Transmission': 'South Central', 'Transco': 'East',
+        'Tres Palacios Gas Storage': 'South Central', 'Trunkline Gas Company': 'Midwest', 'WBI Energy Transmission': 'Mountain'
+    }
+    return storage_map
+
+def process_storage_change_data(info_dir):
+    print("Processing Criterion Storage Change Data...")
+    storage_file = info_dir / 'CriterionStorageChange.csv'
+    if not storage_file.exists(): return pd.DataFrame()
+    storage_to_region_map = get_storage_to_region_map()
+    if storage_to_region_map is None: return pd.DataFrame()
+    df_storage_long = pd.read_csv(storage_file)
     df_storage_long.rename(columns={'eff_gas_day': 'Date', 'daily_storage_change': 'Value'}, inplace=True)
     df_storage_long['Date'] = pd.to_datetime(df_storage_long['Date'])
-    df_regional_storage = df_storage_long.groupby(['Date', 'Region'])['Value'].sum().reset_index()
-    df_storage_regional = df_regional_storage.pivot(index='Date', columns='Region', values='Value')
-    df_storage_regional.columns = [f'{col.replace(" ", "_")}_Criterion_Storage_Change' for col in df_storage_regional.columns]
-    
+    df_storage_long['Region'] = df_storage_long['storage_name'].map(storage_to_region_map)
+    df_storage_long.dropna(subset=['Region'], inplace=True)
+    df_storage_long['Feature_Name'] = df_storage_long.apply(lambda row: f"{row['Region']}_Storage_{sanitize_name(row['storage_name'])}", axis=1)
+    df_storage_granular = df_storage_long.pivot_table(index='Date', columns='Feature_Name', values='Value', aggfunc='mean')
+    df_storage_regional = df_storage_long.pivot_table(index='Date', columns='Region', values='Value', aggfunc='sum')
+    df_storage_regional.columns = [f'{sanitize_name(col)}_Criterion_Storage_Change' for col in df_storage_regional.columns]
     df_final = df_storage_regional.join(df_storage_granular, how='outer').fillna(0)
-    print("Criterion Storage Change data processing complete.")
+    print("  - Criterion Storage Change data processing complete.")
     return df_final
 
-def process_power_data(info_dir_path):
-    """
-    Loads and processes Platts Power Fundamentals data, mapping items to regions.
-    """
-    print("\nProcessing Platts Power Data...")
-    power_file = info_dir_path / 'PlattsPowerFundy.csv'
-    if not power_file.exists():
-        print("PlattsPowerFundy.csv not found. Skipping.")
-        return pd.DataFrame()
+def process_eia_ground_truth(info_dir, full_date_index):
+    print("Processing EIA Ground Truth Data (Target and Inventory)...")
+    changes_file = info_dir / 'EIAchanges.csv'
+    totals_file = info_dir / 'EIAtotals.csv'
+    if not changes_file.exists() or not totals_file.exists(): return pd.DataFrame(), None
+    df_changes = pd.read_csv(changes_file)
+    df_changes['Date'] = pd.to_datetime(df_changes['Period'])
+    df_changes = df_changes.set_index('Date')[['Lower 48 States Storage Change (Bcf)']].rename(columns={'Lower 48 States Storage Change (Bcf)': 'Target_Weekly_Storage_Change'})
+    last_eia_date = df_changes.index.max()
+    df_totals = pd.read_csv(totals_file)
+    df_totals['Date'] = pd.to_datetime(df_totals['Period'])
+    df_totals = df_totals.set_index('Date')
+    inventory_columns = ['Lower 48 States Storage (Bcf)', 'East Region Storage (Bcf)', 'Midwest Region Storage (Bcf)', 'South Central Region Storage (Bcf)', 'Mountain Region Storage (Bcf)', 'Pacific Region Storage (Bcf)']
+    df_totals_subset = df_totals[inventory_columns].copy()
+    df_totals_subset.columns = ['Inv_' + sanitize_name(col) for col in df_totals_subset.columns]
+    for col in df_totals_subset.columns:
+        if col.startswith('Inv_'):
+            df_totals_subset[f'end_of_prior_week_{col}'] = df_totals_subset[col].shift(1)
+    df_totals_subset['prior_week_actual_change'] = df_changes['Target_Weekly_Storage_Change'].shift(1)
 
-    df_power_long = pd.read_csv(power_file)
+    df_region_changes = pd.DataFrame(index=df_totals_subset.index)
+    region_map = {
+        'East': 'Inv_East_Region_Storage_Bcf', 'Midwest': 'Inv_Midwest_Region_Storage_Bcf',
+        'Mountain': 'Inv_Mountain_Region_Storage_Bcf', 'Pacific': 'Inv_Pacific_Region_Storage_Bcf',
+        'SouthCentral': 'Inv_South_Central_Region_Storage_Bcf',
+    }
+    for region, col in region_map.items():
+        if col in df_totals_subset.columns:
+            df_region_changes[f'Target_{region}_Change'] = df_totals_subset[col].diff()
 
-    if 'Value' not in df_power_long.columns:
-        print("ERROR: 'Value' column not found in PlattsPowerFundy.csv. Skipping.")
-        return pd.DataFrame()
+    df_weekly = df_changes.join(df_totals_subset, how='outer')
+    df_weekly = df_weekly.join(df_region_changes, how='outer')
+    df_daily_aligned = df_weekly.reindex(full_date_index, method='bfill')
+    print("  - EIA Ground Truth processing complete.")
+    return df_daily_aligned, last_eia_date
 
-    df_power_long['Date'] = pd.to_datetime(df_power_long['Date'])
-    df_power_long.dropna(subset=['Item', 'Value'], inplace=True)
+def create_intra_week_features(df):
+    print("Engineering Intra-Week Features...")
+    df_out = df.copy()
+    eia_week_grouper = pd.Grouper(freq='W-FRI')
+    if 'CONUS_Platts_DryGasProduction' in df_out.columns and 'CONUS_Platts_USDemand' in df_out.columns:
+        df_out['daily_imbalance'] = df_out['CONUS_Platts_DryGasProduction'] - df_out['CONUS_Platts_USDemand']
+        df_out['cumulative_imbalance'] = df_out.groupby(eia_week_grouper)['daily_imbalance'].cumsum()
+    day_map = {5: 1, 6: 2, 0: 3, 1: 4, 2: 5, 3: 6, 4: 7}
+    df_out['day_of_eia_week'] = df_out.index.dayofweek.map(day_map)
+    df_out['days_until_report'] = 7 - df_out['day_of_eia_week']
+    print("  - Intra-Week feature engineering complete.")
+    return df_out
 
-    def get_regions(item_name):
-        for prefix, regions in POWER_ITEM_TO_REGION_MAP.items():
-            if item_name.strip().startswith(prefix):
-                return regions
-        return None
-
-    df_power_long['Region'] = df_power_long['Item'].apply(get_regions)
-    df_power_long.dropna(subset=['Region'], inplace=True)
-
-    df_exploded = df_power_long.explode('Region')
-
-    df_exploded['Feature_Name'] = df_exploded.apply(
-        lambda row: f"{row['Region']}_Power_{row['Item'].strip().replace(' ', '_').replace('-', '_')}",
-        axis=1
-    )
-
-    df_power_wide = df_exploded.pivot_table(
-        index='Date',
-        columns='Feature_Name',
-        values='Value',
-        aggfunc='mean'
-    )
+def add_calendar_and_lagged_features(df):
+    """Engineers holiday, seasonal, and lagged features to prevent data leakage."""
+    print("Engineering Calendar & Lagged Features...")
+    df_out = df.copy()
     
-    print("Platts Power data processing complete.")
-    return df_power_wide
+    # Calendar Features
+    cal = USFederalHolidayCalendar()
+    holidays = cal.holidays(start=df_out.index.min(), end=df_out.index.max())
+    df_out['is_holiday'] = df_out.index.normalize().isin(holidays)
+    df_out['is_holiday_week'] = df_out['is_holiday'].rolling(window='7D', min_periods=1).max().astype(int)
+    df_out['is_injection_season'] = df_out.index.month.isin(range(4, 11)).astype(int)
 
+    # Lagged Features
+    # Identify key dynamic columns to lag
+    cols_to_lag = [col for col in df_out.columns if 'CONUS_Platts' in col or '_Weather_' in col]
+    for col in cols_to_lag:
+        df_out[f'{col}_lag1'] = df_out[col].shift(1)
 
-def process_target_and_inventory(info_dir_path):
-    print("\nProcessing Target and Inventory Data...")
-    target_file = info_dir_path / 'PlattsCONUSFundamentalsHIST.csv'
-    inventory_file = info_dir_path / 'EIAtotals.csv'
-    if not target_file.exists() or not inventory_file.exists():
-        print("CRITICAL ERROR: Target or Inventory file not found.")
-        return pd.DataFrame()
-        
-    df_target = pd.read_csv(target_file)[['GasDate', 'ImpliedStorageChange']]
-    df_target.rename(columns={'GasDate': 'Date', 'ImpliedStorageChange': 'Daily_Storage_Change'}, inplace=True)
-    df_target['Date'] = pd.to_datetime(df_target['Date'])
-    df_target.set_index('Date', inplace=True)
-    
-    df_inventory = pd.read_csv(inventory_file)
-    df_inventory.rename(columns={'Period': 'Date'}, inplace=True)
-    df_inventory['Date'] = pd.to_datetime(df_inventory['Date'])
-    df_inventory.set_index('Date', inplace=True)
-    df_inventory_daily = df_inventory.resample('D').ffill()
-    df_inventory_daily.columns = ['Inv_' + col.replace(' ', '_').replace('(Bcf)', '').strip() for col in df_inventory_daily.columns]
-    
-    df_final = df_target.join(df_inventory_daily, how='left')
-    print("Target and Inventory data processing complete.")
-    return df_final
+    print("  - Calendar & Lagged feature engineering complete.")
+    return df_out
 
-def handle_missing_data(df):
-    """
-    Handles missing data by dropping columns with too many NaNs and interpolating the rest.
-    """
-    print("\n--- Cleaning Missing Data ---")
-    
-    percent_missing = df.isnull().sum() / len(df) * 100
-    cols_to_drop = percent_missing[percent_missing > 2].index.tolist()
-        
-    if cols_to_drop:
-        df.drop(columns=cols_to_drop, inplace=True)
-        print(f"Dropped {len(cols_to_drop)} columns with >2% missing data:")
-        for col in cols_to_drop:
-            print(f"  - {col}")
-    else:
-        print("No columns had more than 2% missing data.")
+# --- Main Execution Pipeline ---
 
-    print("\nInterpolating remaining missing values...")
-    df.interpolate(method='linear', limit_direction='both', inplace=True)
-
-    remaining_nans = df.isnull().sum().sum()
-    if remaining_nans == 0:
-        print("Successfully cleaned all missing values from feature columns.")
-    else:
-        print(f"WARNING: {remaining_nans} missing values still remain. Please review.")
-        
-    return df
-
-
-# --- Main execution block ---
 if __name__ == '__main__':
     print("--- Running Full Feature Engineering Pipeline ---")
-    
+
     feature_processors = [
         process_weather_data,
-        process_fundy_data,
+        process_platts_conus_data,
+        process_power_data,
+        process_nuclear_data,
         process_lng_data,
         process_criterion_extra_data,
-        process_criterion_storage_change,
-        process_power_data,
-        process_target_and_inventory
+        process_fundy_data,
+        process_storage_change_data,
     ]
-    
-    df_master = pd.DataFrame()
-    for func in feature_processors:
-        df_new = func(INFO_DIR)
-        if df_new is not None and not df_new.empty:
-            df_master = df_master.join(df_new, how='outer') if not df_master.empty else df_new
-            
-    df_master = create_time_features(df_master)
+
+    all_dfs = [func(INFO_DIR) for func in feature_processors]
+    df_master = pd.concat(all_dfs, axis=1)
     df_master.sort_index(inplace=True)
+
+    print("\n--- Joining Ground Truth and Engineering Final Features ---")
+    df_eia_data, last_eia_date = process_eia_ground_truth(INFO_DIR, df_master.index)
+    df_master = df_master.join(df_eia_data, how='left')
+
+    df_master = create_intra_week_features(df_master)
+    df_master = add_calendar_and_lagged_features(df_master)
+
+    print("Cleaning and saving final dataset...")
     
-    print("\n--- Trimming Data and Analyzing Gaps ---")
     start_date = pd.to_datetime('2018-01-06')
-    eia_changes_file = INFO_DIR / 'EIAchanges.csv'
-    if not eia_changes_file.exists():
-        raise FileNotFoundError(f"Required file for trimming not found: {eia_changes_file}")
-    df_eia_dates = pd.read_csv(eia_changes_file)
-    df_eia_dates['Period'] = pd.to_datetime(df_eia_dates['Period'])
-    last_eia_date = df_eia_dates['Period'].max()
-    cut_off_date = last_eia_date + pd.Timedelta(days=7)
+    df_master = df_master.loc[start_date:].copy()
+    
+    df_master.ffill(inplace=True)
+    df_master.bfill(inplace=True)
+    
+    remaining_nans = df_master.isnull().sum().sum()
+    if remaining_nans == 0:
+        print("Successfully cleaned all missing values.")
+    else:
+        print(f"WARNING: {remaining_nans} missing values still remain. Please review.")
 
-    print(f"Original data runs from {df_master.index.min().date()} to {df_master.index.max().date()}.")
-    print(f"Trimming data from {start_date.date()} to {cut_off_date.date()}.")
-    
-    df_trimmed = df_master.loc[start_date:cut_off_date].copy()
-    print(f"Data trimmed. Shape after trimming: {df_trimmed.shape}")
-    
-    df_clean = handle_missing_data(df_trimmed)
+    export_path = OUTPUT_DIR / 'model_ready_feature_set.csv'
+    df_master.to_csv(export_path)
 
-    OUTPUT_DIR = SCRIPT_DIR / 'output'
-    OUTPUT_DIR.mkdir(exist_ok=True)
-    export_path = OUTPUT_DIR / 'final_feature_set.csv'
-    df_clean.to_csv(export_path)
-    print(f"\nFinal feature set saved to: {export_path}")
-    
+    print(f"\nFinal model-ready feature set shape: {df_master.shape}")
+    print(f"Data runs from {df_master.index.min().date()} to {df_master.index.max().date()}")
+    print(f"Successfully saved final feature set to: {export_path}")
     print("\n--- Feature Engineering Complete ---")
