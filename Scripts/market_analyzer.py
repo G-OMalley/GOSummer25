@@ -1035,32 +1035,53 @@ def generate_forward_symbols(base_code, start_date, num_months, api_suffix='-IUS
         column_headers.append(header)
     return symbols, column_headers
 
-def get_settlements_on_date(symbols, date_str):
+def get_settlements_on_date(symbols, date_str, max_lookback_days=5):
     """
     Fetches settlement prices for a list of symbols on a specific date.
+    If no data is found, it looks back day-by-day up to max_lookback_days.
     """
-    print(f"--- Fetching live settlements for date: {date_str} ---")
-    try:
-        ts_data = ice.get_timeseries(
-            symbols=symbols, fields=['Settle'], granularity='D',
-            start_date=date_str, end_date=date_str
-        )
-        if not ts_data or len(ts_data) < 2:
-            print(f"--> WARNING: No data returned for {date_str}.")
+    target_date = pd.to_datetime(date_str)
+    print(f"--- Fetching settlements for target date: {target_date.strftime('%Y-%m-%d')} ---")
+
+    for i in range(max_lookback_days):
+        current_date_to_check = target_date - pd.Timedelta(days=i)
+        current_date_str = current_date_to_check.strftime('%Y-%m-%d')
+        
+        if i > 0:
+            print(f"--> No data for previous date, trying lookback day {i}: {current_date_str}")
+
+        try:
+            ts_data = ice.get_timeseries(
+                symbols=symbols, fields=['Settle'], granularity='D',
+                start_date=current_date_str, end_date=current_date_str
+            )
+
+            # If there's no data, continue to the next lookback day
+            if not ts_data or len(ts_data) < 2:
+                continue
+
+            # Data found, process and return it
+            header, data_row = ts_data[0], ts_data[1]
+            settlements = {}
+            for j, column_name in enumerate(header):
+                if "Settle" in column_name:
+                    symbol_key = column_name.replace('.Settle', '')
+                    price = pd.to_numeric(data_row[j], errors='coerce')
+                    settlements[symbol_key] = price
+            
+            # Check if we actually parsed something
+            if settlements:
+                 print(f"--> SUCCESS: Found and parsed {len(settlements)} prices for date {current_date_str}.")
+                 return settlements
+
+        except Exception as e:
+            print(f"--> FATAL ERROR during API call for date {current_date_str}: {e}")
+            # On API error, stop trying for this date group
             return {}
 
-        header, data_row = ts_data[0], ts_data[1]
-        settlements = {}
-        for i, column_name in enumerate(header):
-            if "Settle" in column_name:
-                symbol_key = column_name.replace('.Settle', '')
-                price = pd.to_numeric(data_row[i], errors='coerce')
-                settlements[symbol_key] = price
-        print(f"--> SUCCESS: Parsed {len(settlements)} prices.")
-        return settlements
-    except Exception as e:
-        print(f"--> FATAL ERROR during API call: {e}")
-        return {}
+    # If loop finishes without returning, no data was found in the lookback window
+    print(f"--> WARNING: No data found for target date {date_str} within the {max_lookback_days}-day lookback window.")
+    return {}
 
 def generate_forward_curve_chart(fin_basis_symbol, point_name, current_processing_date):
     """

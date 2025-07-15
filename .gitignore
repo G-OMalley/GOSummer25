@@ -4,7 +4,7 @@ EIAGuesser/models_v3_hybrid/
 
 # Python virtual environment
 # This is machine-specific and should always be ignored.
-.venv/
+.venv*/
 
 # Python cache files
 # These are auto-generated and should always be ignored.

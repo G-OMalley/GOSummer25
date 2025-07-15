@@ -1,22 +1,28 @@
-import cot_reports as cot # Alias as cot as per example
+import cot_reports as cot
 import pandas as pd
 import os
 from datetime import datetime
 
-# Define the directory where you want to save the data
-# (Consistent with your INFO folder setup from the strategy script)
-# This assumes your 'test' script is in the GOScripts folder, and INFO is a subfolder of GOScripts.
-script_dir = os.path.dirname(os.path.abspath(__file__))
-info_folder = os.path.join(script_dir, 'INFO')
+# Get the directory of the current script (e.g., /path/to/your/GOScripts)
+current_script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Define the 'root' directory as the parent of GOScripts
+# This assumes GOScripts is directly under your desired root project folder.
+# So, if your script is in /my_project/GOScripts/, root_dir will be /my_project/.
+root_dir = os.path.dirname(current_script_dir)
+
+# Define the directory where you want to save the INFO data.
+# This will now be /my_project/INFO/
+info_folder = os.path.join(root_dir, 'INFO')
 os.makedirs(info_folder, exist_ok=True) # Ensure INFO folder exists
 
-# Define the output folder for the strategy's final output
-output_strategy_folder = os.path.join(script_dir, 'GOScripts', 'GOutput')
+# Define the output folder for the strategy's final GOutput data.
+# This will remain /my_project/GOScripts/GOutput/
+output_strategy_folder = os.path.join(current_script_dir, 'GOutput')
 os.makedirs(output_strategy_folder, exist_ok=True) # Ensure GOutput folder exists
 
-output_file_info = os.path.join(info_folder, 'Natural_Gas_Data positioning.csv') # Original INFO folder output
-output_file_goutput = os.path.join(output_strategy_folder, 'Natural_Gas_Data positioning.csv') # New GOutput folder output
-
+output_file_info = os.path.join(info_folder, 'Natural_Gas_Data positioning.csv')
+output_file_goutput = os.path.join(output_strategy_folder, 'Natural_Gas_Data positioning.csv')
 
 print("--- Attempting to Fetch Historical COT Data for Natural Gas ---")
 

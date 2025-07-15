@@ -1,417 +1,201 @@
 #!/usr/bin/env python3
 """
-analog_basis_reaction.py
-
-Goal
-----
-For each pipeline component and its EIA region:
-1. Take 'current' early‑June storage (latest Period in EIAtotals.csv).
-2. Find past years whose early‑June storage is within ±tolerance_bcf.
-3. Compute basis (component − Henry Hub) move +N weeks later.
-4. Aggregate analog years → mean $/MMBtu and % change.
-
-Outputs
--------
-- Prints summary dataframe.
-- Saves AnalogBasisReaction.csv in script directory.
-- Prints a region-level aggregate summary.
-
-Inputs
-------
-INFO/EIAtotals.csv      : region storage levels
-INFO/PRICES.csv         : daily spot prices by component
+StorageReactions.py  –  storage + weather analog, console‑only
+Prints:
+  • Back‑test hit‑rate (8 wks)
+  • Henry Hub flat‑price analog
+  • BUY/SELL trade blotter (+1 wk)
+No CSVs produced.
 """
-import pandas as pd
-import numpy as np
+
+import pandas as pd, numpy as np, sys
 from pathlib import Path
 from datetime import timedelta
 
-# ---------- USER SETTINGS ----------
-TOLERANCE_BCF = 40          # ± Bcf window for storage analogs (Increased to 40)
-WEEKS_AHEAD   = [2, 3, 4]   # Weeks after analog date to measure price move
-EARLY_JUNE_ISO_WEEK = 23    # ISO week number for "early June"
-HENRY_COL = "Henry"         # Column name of Henry Hub in PRICES.csv (Confirmed from your CSV)
-FFILL_LIMIT_DAYS = 7        # Max days to forward/backward fill for prices (Increased to 7)
-# -----------------------------------
+# ===== USER SETTINGS =====
+MIN_ABS_MOVE  = 0.025   # 2.5 ¢ move threshold
+MIN_ANALOGS   = 1       # ≥1 analog year
+BACKTEST_WKS  = 8
+HENRY_COL     = "Henry"
+FFILL_DAYS    = 7
+# ==========================
 
-# ---- EIA regions available in EIAtotals.csv -----------------
-REGION_INFO = {
-    "East":          "East Region Storage (Bcf)",
-    "Midwest":       "Midwest Region Storage (Bcf)",
-    "Mountain":      "Mountain Region Storage (Bcf)",
-    "Pacific":       "Pacific Region Storage (Bcf)",
-    "South Central": "South Central Region Storage (Bcf)",
-    # -- OPTIONAL catch‑all —
-    # "Lower 48":   "Total Lower 48 Storage (Bcf)",
-}
+# ---------- Load core data ----------
+root     = Path(__file__).resolve().parent.parent / "INFO"
+eia      = pd.read_csv(root / "EIAtotals.csv", parse_dates=["Period"])
+prices   = pd.read_csv(root / "PRICES.csv").rename(columns=str.strip)
+weather  = pd.read_csv(root / "WEATHER.csv")
+city_map = pd.read_csv(root / "CITY_EIA_MAPPING.csv")
 
-# ----- HARD‑CODED COMPONENT→REGION MAP -----
-# This map links each pipeline component to its corresponding EIA region.
-# It is essential for comparing component prices with regional storage levels.
-def _k(x):        # quick trim helper
-    return x.strip()
-
-COMPONENT_TO_REGION = {
-    # ------------- East (14) -------------
-    _k("AGT-CG (non-G)"):        "East",
-    _k("Dracut"):                "East",
-    _k("Eastern Gas-South"):     "East",
-    _k("Iroquois (into)"):       "East",
-    _k("Iroquois-Z2"):           "East",
-    _k("Leidy-Transco"):         "East",
-    _k("TETCO-M3"):              "East",
-    _k("TGP-Z4 Marcellus"):      "East",
-    _k("TGP-Z4 Sta-219"):        "East",
-    _k("TGP-Z4 Sta-313"):        "East",
-    _k("Transco-Z6 (NY)"):               "East",
-    _k("Transco-Z6 (non-NY north)"):     "East",
-    _k("Transco-Z6 (non-NY)"):           "East",
-    _k("Transco-Z6 Sta-210"):            "East",
-
-    # ------------- Midwest (10) ----------
-    _k("Chicago"):              "Midwest",
-    _k("Michcon"):              "Midwest",
-    _k("NBPL-Vector"):          "Midwest",
-    _k("Panhandle"):            "Midwest",
-    _k("REX E-NGPL"):           "Midwest",
-    _k("REX-Z3 (receipt)"):     "Midwest",
-    _k("TCO"):                  "Midwest",
-    _k("TETCO-M2 (receipt)"):   "Midwest",
-    _k("NNG-Ventura"):          "Midwest",
-    _k("NNG-Demarc"):           "Midwest",
-
-    # ------------- Mountain (4) ----------
-    _k("Opal"):                 "Mountain",
-    _k("CIG Mainline"):         "Mountain",
-    _k("Cheyenne Hub"):         "Mountain",
-    _k("White River Hub"):      "Mountain",
-
-    # ------------- Pacific (4) -----------
-    _k("Malin"):            "Pacific",
-    _k("PG&E Citygate"):    "Pacific",
-    _k("Sumas"):            "Pacific",
-    _k("SoCal Border"):     "Pacific",
-
-    # ------------- South Central (29) ----
-    _k("ANR-SE-T"):         "South Central",
-    _k("ANR-SW"):           "South Central",
-    _k("APC-ACE"):          "South Central",
-    _k("Carthage"):         "South Central",
-    _k("FGT-Z3"):           "South Central",
-    _k("HSC-HPL Pool"):     "South Central",
-    _k("Henry"):            "South Central",
-    _k("NGPL-STX"):         "South Central",
-    _k("NGPL-TXOK East"):   "South Central",
-    _k("Pine Prairie"):     "South Central",
-    _k("Sonat-Z0 South"):   "South Central",
-    _k("TETCO-ELA"):        "South Central",
-    _k("TETCO-STX"):        "South Central",
-    _k("TETCO-WLA"):        "South Central",
-    _k("TGP-500L"):         "South Central",
-    _k("TGP-800L"):         "South Central",
-    _k("TGP-Z0 South"):     "South Central",
-    _k("TGP-Z1 100L"):      "South Central",
-    _k("TGP-Z1 Sta-87"):    "South Central",
-    _k("TGT-Mainline"):     "South Central",
-    _k("Transco Zn3"):      "South Central",
-    _k("Transco-165"):      "South Central",
-    _k("Transco-30"):       "South Central",
-    _k("Transco-45"):       "South Central",
-    _k("Transco-65"):       "South Central",
-    _k("Transco-85"):       "South Central",
-    _k("Transco-Z5 South"): "South Central",
-    _k("Trunkline-Z1A"):    "South Central",
-    _k("Waha"):             "South Central",
-
-    # ------------- Canada / Other --------
-    _k("Union-Dawn"): "Other",
-}
-# ------------------------------------------
-
-# ----- LOAD DATA -----
-# Determine the script's directory and then the INFO directory relative to it.
-script_dir = Path(__file__).resolve().parent
-info_dir = script_dir.parent / "INFO"
-
-# Load EIA totals data from the CSV file.
-eia_totals = pd.read_csv(info_dir / "EIAtotals.csv", parse_dates=["Period"])
-
-# Load prices data from the CSV file.
-# Clean column names immediately to handle any trailing spaces.
-prices = pd.read_csv(info_dir / "PRICES.csv", sep=',').rename(columns=str.strip)
-
-# Drop any unnamed columns that might result from malformed CSVs
-prices = prices.loc[:, ~prices.columns.str.contains('^Unnamed', na=False)]
-
-# Robustly convert 'Date' column to datetime, coercing errors to NaT
-prices["Date"] = pd.to_datetime(prices["Date"], errors='coerce', dayfirst=False)
-
-# Drop rows where Date conversion failed
-prices.dropna(subset=["Date"], inplace=True)
-
-# Check if Henry Hub column exists *before* attempting basis calculation
+# --- sanity checks
 if HENRY_COL not in prices.columns:
-    raise ValueError(f"CRITICAL ERROR: Henry Hub column '{HENRY_COL}' not found in PRICES.csv. Please check the column name in your CSV and the HENRY_COL variable in the script.")
+    sys.exit(f"Henry column '{HENRY_COL}' missing in PRICES.csv")
 
-# Convert all price columns to numeric, coercing errors to NaN
-for col in prices.columns:
-    if col != "Date":
-        prices[col] = pd.to_numeric(prices[col], errors='coerce')
+# ---------- Pre‑process prices ----------
+prices["Date"] = pd.to_datetime(prices["Date"], errors="coerce")
+prices = prices.dropna(subset=["Date"])
+for c in prices.columns:
+    if c != "Date":
+        prices[c] = pd.to_numeric(prices[c], errors="coerce")
 
-# --- HELPER: BASIS ---
-def compute_basis(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Computes the basis for each component by subtracting the Henry Hub price.
-    Basis is defined as (Component Price - Henry Hub Price).
+def make_basis(df: pd.DataFrame) -> pd.DataFrame:
+    b = df.set_index("Date").sort_index()
+    b = b.ffill(limit=FFILL_DAYS).bfill(limit=FFILL_DAYS)
+    for col in b.columns:
+        if col != HENRY_COL:
+            b[col] = b[col] - b[HENRY_COL]
+    return b.drop(columns=[HENRY_COL])
 
-    Args:
-        df (pd.DataFrame): DataFrame containing daily hub prices, including Henry Hub.
+basis = make_basis(prices)
 
-    Returns:
-        pd.DataFrame: DataFrame with basis values for each component.
-    """
-    basis_df = df.set_index("Date").copy()
+# ---------- Pre‑process weather ----------
+weather["Date"] = pd.to_datetime(weather["Date"], errors="coerce")
+weather = weather.merge(city_map,
+                        left_on="City Title",
+                        right_on="City Title",
+                        how="left")
+weather = weather.dropna(subset=["EIA Region", "Date"])
+weather["Week"]  = weather["Date"].dt.isocalendar().week
+weather["Year"]  = weather["Date"].dt.year
+weather["NetDD"] = weather["CDD"] - weather["HDD"]
+weekly_wx = (weather.groupby(["EIA Region","Year","Week"])
+                     .agg(NetDD=("NetDD","sum"))
+                     .reset_index())
 
-    # Ensure the index is a DatetimeIndex and sort it
-    if not isinstance(basis_df.index, pd.DatetimeIndex):
-        basis_df.index = pd.to_datetime(basis_df.index)
-    basis_df = basis_df.sort_index()
+# ---------- region column names ----------
+REGION_INFO = {
+    "East":"East Region Storage (Bcf)",
+    "Midwest":"Midwest Region Storage (Bcf)",
+    "Mountain":"Mountain Region Storage (Bcf)",
+    "Pacific":"Pacific Region Storage (Bcf)",
+    "South Central":"South Central Region Storage (Bcf)",
+    "Lower 48":"Total Lower 48 Storage (Bcf)"
+}
 
-    # Fill any NaN values in price data using forward and then backward fill, with a limited scope.
-    basis_df = basis_df.ffill(limit=FFILL_LIMIT_DAYS).bfill(limit=FFILL_LIMIT_DAYS)
+# ---------- hub → region map (short sample) ----------
+R = {"E":"East","M":"Midwest","S":"South Central",
+     "P":"Pacific","Mt":"Mountain"}
+COMPONENT_TO_REGION = {
+    "Transco-165":R["S"],"Panhandle":R["M"],"Waha":R["S"],
+    # ← copy the full mapping list you already maintain →
+}
+# auto‑map stray hubs
+for h in [c for c in prices.columns if c not in ("Date",HENRY_COL) and c not in COMPONENT_TO_REGION]:
+    COMPONENT_TO_REGION[h] = "Lower 48"
 
-    # Perform basis calculation: Component Price - Henry Hub Price
-    for col in basis_df.columns:
-        if col == HENRY_COL:
-            continue # Skip Henry Hub itself
-        basis_df[col] = basis_df[col] - basis_df[HENRY_COL]
+# ---------- helpers ----------
+def near(idx, ts):
+    loc = idx.searchsorted(ts)
+    if loc == 0: return idx[0]
+    if loc == len(idx): return idx[-1]
+    before, after = idx[loc-1], idx[loc]
+    return before if abs(ts-before) < abs(ts-after) else after
 
-    # Remove Henry Hub column after basis calculation
-    basis_df = basis_df.drop(columns=[HENRY_COL], errors='ignore')
-    return basis_df
+def wx_ok(region:str, yr:int, wk:int, cur_yr:int)->bool:
+    """return True if weather delta sign matches today's."""
+    cur = weekly_wx.query("`EIA Region`==@region and Year==@cur_yr and Week==@wk")
+    nxt = weekly_wx.query("`EIA Region`==@region and Year==@cur_yr and Week==@wk+1")
+    ana = weekly_wx.query("`EIA Region`==@region and Year==@yr      and Week==@wk")
+    anx = weekly_wx.query("`EIA Region`==@region and Year==@yr      and Week==@wk+1")
+    if cur.empty or nxt.empty or ana.empty or anx.empty:
+        return True  # no weather data → don’t veto
+    cur_sign = np.sign(nxt.NetDD.values[0] - cur.NetDD.values[0])
+    ana_sign = np.sign(anx.NetDD.values[0] - ana.NetDD.values[0])
+    return cur_sign == 0 or ana_sign == 0 or cur_sign == ana_sign
 
-# Calculate the basis for all components using the prices DataFrame.
-basis = compute_basis(prices)
+# ---------- analog routine ----------
+def analog(anchor: pd.Timestamp):
+    wk = anchor.isocalendar().week
+    cur_row = eia[eia["Period"]==anchor].iloc[0]
+    cur_st  = {r:cur_row.get(col,np.nan) for r,col in REGION_INFO.items()}
+    fiveyr  = eia[(eia["Period"].dt.year >= anchor.year-5) &
+                  (eia["Period"].dt.isocalendar().week == wk)]
+    subset  = eia[eia["Period"].dt.isocalendar().week == wk]
 
-# --- CURRENT EARLY‑JUNE STORAGE ---
-# Get the latest period available in the EIA totals data.
-latest_period = eia_totals["Period"].max()
-# Determine the ISO week number of the latest period.
-current_iso_week = latest_period.isocalendar().week
+    trades=[]
+    for hub, reg in COMPONENT_TO_REGION.items():
+        if hub not in basis.columns or pd.isna(cur_st.get(reg)): continue
+        tol = 0.03 if cur_st[reg] < fiveyr[REGION_INFO[reg]].mean() else 0.07
+        yrs, moves = [], []
+        for _, row in subset.iterrows():
+            scol = REGION_INFO[reg]
+            if pd.isna(row[scol]): continue
+            if abs(row[scol]-cur_st[reg])/cur_st[reg] <= tol \
+               and row["Period"].year != anchor.year \
+               and wx_ok(reg, row["Period"].year, wk, anchor.year):
 
-# Find the current early-June storage record.
-eia_totals['Period'] = pd.to_datetime(eia_totals['Period'])
-eia_early_june = eia_totals[eia_totals["Period"].dt.isocalendar().week == EARLY_JUNE_ISO_WEEK]
+                yrs.append(row["Period"].year)
+                ad = row["Period"]
+                b0 = basis.loc[near(basis.index, ad), hub]
+                b1 = basis.loc[near(basis.index, ad + timedelta(weeks=1)), hub]
+                if not pd.isna(b0) and not pd.isna(b1):
+                    moves.append(b1 - b0)
 
-# Use the most recent early-June data if current period isn't early June
-if current_iso_week != EARLY_JUNE_ISO_WEEK:
-    if eia_early_june.empty:
-        raise ValueError("No early-June data found in EIAtotals.csv to establish current storage for any year.")
-    current_record = eia_early_june.sort_values("Period").iloc[-1]
-else:
-    # If the latest period is already early June, use it directly.
-    current_record_candidates = eia_totals[eia_totals['Period'] == latest_period]
-    if current_record_candidates.empty:
-        raise ValueError(f"Could not find a record for the latest period {latest_period.date()} in EIAtotals.csv.")
-    current_record = current_record_candidates.iloc[0]
+        if not moves: continue
+        if len(moves) >= 2 and np.ptp(np.sign(moves)) > 0: continue
+        m = np.mean(moves)
+        if abs(m) < MIN_ABS_MOVE: continue
+        trades.append({
+            "Region": reg,
+            "Component": hub,
+            "Move¢": round(m*100,1),
+            "Action": "BUY basis ⬆" if m>0 else "SELL basis ⬇",
+            "Years": ",".join(map(str, sorted(set(yrs))))
+        })
 
-# Store current storage levels for relevant regions.
-current_storage = {}
-for reg, col_name in REGION_INFO.items():
-    current_storage[reg] = current_record.get(col_name, np.nan)
-
-
-# --- FIND ANALOG YEARS PER REGION ---
-def analog_years(region: str) -> list[int]:
-    """
-    Finds and returns a list of years where the early-June storage for a given
-    region was within the specified tolerance of the current storage level.
-
-    Args:
-        region (str): The name of the region (e.g., "East", "Midwest", "South Central").
-
-    Returns:
-        list[int]: A sorted list of analog years, excluding the current year.
-    """
-    analogs = []
-    regional_col = REGION_INFO[region] # Pull the column name directly from REGION_INFO
-
-    subset = eia_totals[eia_totals["Period"].dt.isocalendar().week == EARLY_JUNE_ISO_WEEK]
-
-    if regional_col not in subset.columns:
-        print(f"Warning: Regional column '{regional_col}' not found in EIAtotals.csv. Cannot find analogs for {region}.")
-        return []
-
-    if region not in current_storage or pd.isna(current_storage[region]):
-        print(f"Warning: Current storage for region '{region}' is unavailable or NaN. Cannot find analogs.")
-        return []
-
+    # --------------- Henry Hub ---------------
+    hh_moves, hh_yrs = [], []
     for _, row in subset.iterrows():
-        if not pd.isna(row[regional_col]):
-            if abs(row[regional_col] - current_storage[region]) <= TOLERANCE_BCF:
-                analogs.append(row["Period"].year)
+        if abs(row["Total Lower 48 Storage (Bcf)"] - cur_st["Lower 48"]) / cur_st["Lower 48"] <= 0.05 \
+           and row["Period"].year != anchor.year \
+           and wx_ok("South Central", row["Period"].year, wk, anchor.year):
 
-    # Exclude the latest period's year from analog years
-    return sorted(set(analogs) - {latest_period.year})
+            hh_yrs.append(row["Period"].year)
+            ad = row["Period"]
+            p0 = prices.loc[near(prices["Date"].values, ad), HENRY_COL]
+            p1 = prices.loc[near(prices["Date"].values, ad + timedelta(weeks=1)), HENRY_COL]
+            if not pd.isna(p0) and not pd.isna(p1):
+                hh_moves.append(p1 - p0)
+    hh = None
+    if hh_moves and (len(hh_moves)==1 or np.ptp(np.sign(hh_moves))==0):
+        hh = {"Dir":"UP" if np.mean(hh_moves)>0 else "DOWN",
+              "Move¢": round(np.mean(hh_moves)*100,1),
+              "Years": ",".join(map(str, sorted(set(hh_yrs))))}
+    return trades, hh
 
-# --- HELPER to fetch nearest date ---
-# Moved this function definition here, before its first call.
-def nearest_date(idx: pd.DatetimeIndex, target_ts: pd.Timestamp) -> pd.Timestamp:
-    """
-    Return the closest timestamp in idx to target_ts.
-    Assumes idx is a sorted pd.DatetimeIndex.
-    """
-    loc = idx.searchsorted(target_ts)
+# ---------- Back‑test ----------
+fridays = eia["Period"].drop_duplicates().sort_values()
+latest  = fridays.max()
+bt_dates = fridays.iloc[-(BACKTEST_WKS+1):-1]
 
-    if loc == 0: # Target is before or at the first element
-        return idx[0]
-    if loc == len(idx): # Target is after or at the last element
-        return idx[loc - 1]
+bt_tot = bt_hit = 0
+for d in bt_dates:
+    sig, _ = analog(d)
+    for r in sig:
+        hub = r["Component"]; pm = r["Move¢"]/100
+        s = basis.loc[near(basis.index, d), hub]
+        e = basis.loc[near(basis.index, d+timedelta(weeks=1)), hub]
+        if pd.isna(s)|pd.isna(e): continue
+        bt_tot += 1
+        if np.sign(pm) == np.sign(e-s): bt_hit += 1
 
-    # Compare with the element at loc and the one before it
-    before = idx[loc - 1]
-    after = idx[loc]
+print(f"\n🔎 Back‑test {BACKTEST_WKS} wks Hit‑Rate: "
+      f"{bt_hit/bt_tot*100:.1f}% on {bt_tot} trades" if bt_tot else
+      "\n⚠️  No qualifying trades in back‑test window.")
 
-    if abs(target_ts - before) < abs(target_ts - after):
-        return before
-    else:
-        return after
+# ---------- Live ----------
+trades, hh = analog(latest)
 
-records = [] # List to store individual price move records.
-
-# Iterate through each component and its assigned region.
-for comp_key_stripped, region in COMPONENT_TO_REGION.items(): # Using the new COMPONENT_TO_REGION map
-    if comp_key_stripped not in basis.columns:
-        # Suppress warning specifically for Henry Hub as it's the basis and removed
-        if comp_key_stripped == HENRY_COL:
-            continue
-        print(f"Warning: Component '{comp_key_stripped}' not found in prices data (after basis calculation). Skipping.")
-        continue
-
-    yrs = analog_years(region)
-    if not yrs:
-        print(f"No valid analog years found for region '{region}' (component '{comp_key_stripped}'). Skipping.")
-        continue
-
-    for y in yrs:
-        # Determine the exact analog date (first early-June date of that year from EIA totals).
-        analog_date_candidates = eia_totals[
-            (eia_totals["Period"].dt.year == y) &
-            (eia_totals["Period"].dt.isocalendar().week == EARLY_JUNE_ISO_WEEK)
-        ]["Period"].sort_values()
-
-        if analog_date_candidates.empty:
-            print(f"Warning: No specific early-June date found in EIAtotals for year {y}. Skipping analog year.")
-            continue
-
-        analog_date = analog_date_candidates.iloc[0]
-
-        # Get the base price (basis) for the component on the analog date.
-        closest_base_market_date = nearest_date(basis.index, analog_date)
-        base_price = basis.loc[closest_base_market_date, comp_key_stripped]
-
-        # Check for NaNs immediately after fetching prices
-        if pd.isna(base_price):
-            print(f"Info: Base price is NaN for '{comp_key_stripped}' on {closest_base_market_date.date()} (closest to {analog_date.date()}). Skipping analog year {y}.")
-            continue
-
-        # Calculate price moves for each specified 'weeks ahead' period.
-        for wk in WEEKS_AHEAD:
-            future_date_target = analog_date + timedelta(weeks=wk)
-            closest_future_market_date = nearest_date(basis.index, future_date_target)
-            fut_price = basis.loc[closest_future_market_date, comp_key_stripped]
-
-            # Skip if future price is NaN or if the price hasn't changed (0 move)
-            if pd.isna(fut_price) or fut_price == base_price:
-                continue
-
-            # Calculate percentage change, handling division by zero
-            pct_change_val = (fut_price - base_price) / base_price * 100 if base_price != 0 else np.nan
-
-            # Append the calculated record to the list.
-            records.append({
-                "Region": region,
-                "Component": comp_key_stripped,
-                "AnalogYear": y,
-                "WeeksAhead": wk,
-                "ΔBasis ($)": fut_price - base_price, # Absolute change.
-                "ΔBasis (%)": pct_change_val # Percentage change.
-            })
-
-# Create a DataFrame from the collected records.
-df = pd.DataFrame(records)
-
-# --- AGGREGATE PER-COMPONENT DATA ---
-if not df.empty:
-    # Group by Region, Component, and WeeksAhead to aggregate analog years.
-    summary = (
-        df.groupby(["Region", "Component", "WeeksAhead"])
-        .agg(
-            AnalogYear=('AnalogYear', lambda x: ",".join(map(str, sorted(set(x))))),
-            Mean_Delta_Basis_Dollars=('ΔBasis ($)', 'mean'),
-            Mean_Delta_Basis_Percent=('ΔBasis (%)', 'mean')
-        )
-        .reset_index()
-    )
-
-    # Pivot the table to have 'WeeksAhead' as columns for both absolute and percentage changes.
-    summary_pivoted = summary.pivot_table(
-        index=["Region", "Component", "AnalogYear"],
-        columns="WeeksAhead",
-        values=["Mean_Delta_Basis_Dollars", "Mean_Delta_Basis_Percent"]
-    )
-
-    # Flatten MultiIndex columns to a single level for easier readability.
-    summary_pivoted.columns = [
-        f"{col[0].replace('Mean_Delta_Basis_Dollars', 'ΔBasis ($)').replace('Mean_Delta_Basis_Percent', 'ΔBasis (%)')}_+{col[1]}wk"
-        for col in summary_pivoted.columns
-    ]
-    summary = summary_pivoted.reset_index() # Reset index again after pivoting.
-
-    # --- OUTPUT ---
-    # Define the output file path in the same directory as the script.
-    outfile = script_dir / "AnalogBasisReaction.csv"
-    # Save the summary DataFrame to a CSV file.
-    summary.to_csv(outfile, index=False)
-
-    # Print confirmation message and the first few rows of the summary table.
-    print("Analog basis reaction table saved to", outfile)
-    print("\nFirst 20 rows of the Analog Basis Reaction Table:")
-    print(summary.head(20))
-
-    # --- ADD REGION-LEVEL AGGREGATE ---
-    # Only calculate if df is not empty
-    region_summary = (
-        df.groupby(["Region", "WeeksAhead"])
-        .agg(
-            Count=('ΔBasis ($)', 'count'), # Count of individual data points contributing to the mean
-            Avg_Delta_Basis_Dollars=('ΔBasis ($)', 'mean'),
-            Avg_Delta_Basis_Percent=('ΔBasis (%)', 'mean')
-        )
-        .reset_index()
-        .pivot(index="Region", columns="WeeksAhead")
-    )
-
-    # Flatten MultiIndex columns
-    new_cols = []
-    for stat, wk in region_summary.columns:
-        stat_name = ""
-        if stat == 'Count':
-            stat_name = 'Count'
-        elif stat == 'Avg_Delta_Basis_Dollars':
-            stat_name = 'Avg_ΔBasis ($)'
-        elif stat == 'Avg_Delta_Basis_Percent':
-            stat_name = 'Avg_ΔBasis (%)'
-        new_cols.append(f"{stat_name}_+{wk}wk")
-
-    region_summary.columns = new_cols
-    region_summary = region_summary.reset_index()
-
-    # Print it
-    print("\n=== Region-Level ΔBasis Summary ===")
-    print(region_summary)
-
+if hh:
+    print(f"\nHenry Hub analog (+1 wk): {hh['Dir']} {hh['Move¢']} ¢ "
+          f"(years {hh['Years']})")
 else:
-    print("No data records were generated. Check inputs and data quality or adjust TOLERANCE_BCF and FFILL_LIMIT_DAYS.")
-    print("No AnalogBasisReaction.csv was saved.")
-    print("No Region-Level ΔBasis Summary was generated.")
+    print("\nHenry Hub analog: no match")
+
+if trades:
+    print("\n=== 🔔 TRADE BLOTTER (+1 wk) ===")
+    for r in trades:
+        print(f"{r['Region']:13} {r['Component']:<25} "
+              f"{r['Action']:14} {r['Move¢']:>6} ¢   yrs {r['Years']}")
+else:
+    print("\n📭  No pipelines met filters for the latest period.")

@@ -126,55 +126,88 @@ class MarketFlowAnalyzer:
         self._get_flow_data(all_tickers, filtered_locs_df)
 
     def _get_flow_data(self, all_tickers: list, locs_metadata_df: pd.DataFrame):
-        """Fetches flow data, processes it, and sets a DatetimeIndex."""
+        """
+        Fetches flow data using an incremental update strategy for the cache.
+        If cache exists, it replaces the last 15 days. Otherwise, it performs a full fetch.
+        """
         self.config.OUTPUT_DIR.mkdir(exist_ok=True)
         cache_path = self.config.OUTPUT_DIR / self.config.CACHE_FILENAME
-        
-        flows_df = pd.DataFrame()
+
+        df_to_keep = pd.DataFrame()
+        original_cached_df = pd.DataFrame()
+        # Default start date for a full fetch if no cache exists.
+        start_date_for_fetch = datetime(2018, 1, 1)
+
         if cache_path.exists():
-            print(f"INFO: Reading raw flow data from cache: {cache_path.name}")
-            flows_df = pd.read_csv(cache_path, parse_dates=['date'])
-            flows_df = flows_df[flows_df['ticker'].isin(all_tickers)]
-
-        if flows_df.empty:
-            print("INFO: No valid cache found. Performing full data fetch from DB...")
+            print("INFO: Cache file exists. Preparing for incremental update.")
             try:
-                with self.engine.connect() as connection:
-                    id_query = text("SELECT metadata_id, ticker FROM pipelines.metadata WHERE ticker IN :tickers")
-                    metadata_df = pd.read_sql_query(id_query, connection, params={'tickers': tuple(all_tickers)})
-                    metadata_ids = tuple(metadata_df['metadata_id'].unique())
-                    
-                    if metadata_ids:
-                        flows_query = text("""
-                            SELECT noms.eff_gas_day AS date, meta.ticker, noms.scheduled_quantity AS value
-                            FROM pipelines.nomination_points AS noms
-                            JOIN pipelines.metadata AS meta ON noms.metadata_id = meta.metadata_id
-                            WHERE noms.metadata_id IN :ids
-                        """)
-                        db_flows_df = pd.read_sql_query(flows_query, connection, params={'ids': metadata_ids})
-                        if not db_flows_df.empty:
-                            db_flows_df.to_csv(cache_path, index=False)
-                            flows_df = db_flows_df
+                original_cached_df = pd.read_csv(cache_path, parse_dates=['date'])
+                if not original_cached_df.empty:
+                    latest_date_in_cache = original_cached_df['date'].max()
+                    # Set the fetch to start 15 days before the last known date
+                    start_date_for_fetch = latest_date_in_cache - pd.Timedelta(days=15)
+                    # Keep the data from before this new fetch period
+                    df_to_keep = original_cached_df[original_cached_df['date'] < start_date_for_fetch].copy()
+                    print(f"INFO: Keeping cached data before {start_date_for_fetch.strftime('%Y-%m-%d')}.")
             except Exception as e:
-                print(f"CRITICAL: Failed to fetch initial data. Error: {e}")
-                return
+                print(f"WARNING: Could not read cache file properly: {e}. Performing a full fetch.")
+        else:
+            print("INFO: No cache file found. Performing a full data fetch.")
 
-        if flows_df.empty:
+        # --- Database Fetching (now with a dynamic start date) ---
+        newly_fetched_df = pd.DataFrame()
+        fetch_successful = False
+        try:
+            print(f"INFO: Fetching data from database starting from {start_date_for_fetch.strftime('%Y-%m-%d')}...")
+            with self.engine.connect() as connection:
+                id_query = text("SELECT metadata_id FROM pipelines.metadata WHERE ticker IN :tickers")
+                metadata_ids = tuple(pd.read_sql_query(id_query, connection, params={'tickers': tuple(all_tickers)})['metadata_id'].unique())
+
+                if metadata_ids:
+                    # The SQL query now includes a date condition
+                    flows_query = text("""
+                        SELECT noms.eff_gas_day AS date, meta.ticker, noms.scheduled_quantity AS value
+                        FROM pipelines.nomination_points AS noms
+                        JOIN pipelines.metadata AS meta ON noms.metadata_id = meta.metadata_id
+                        WHERE noms.metadata_id IN :ids AND noms.eff_gas_day >= :start_date
+                    """)
+                    params = {'ids': metadata_ids, 'start_date': start_date_for_fetch}
+                    newly_fetched_df = pd.read_sql_query(flows_query, connection, params=params)
+                    print(f"INFO: Successfully fetched {len(newly_fetched_df)} new/updated records.")
+                    fetch_successful = True
+        except Exception as e:
+            print(f"CRITICAL: Database fetch failed: {e}")
+            fetch_successful = False
+
+        # --- Combine, Save, and Process Logic ---
+        final_flows_df = pd.DataFrame()
+        if fetch_successful:
+            # Combine the old part of the cache with the newly fetched data
+            final_flows_df = pd.concat([df_to_keep, newly_fetched_df], ignore_index=True)
+            # Overwrite the cache with the fresh, combined data
+            print(f"INFO: Overwriting cache file with {len(final_flows_df)} total records.")
+            final_flows_df.to_csv(cache_path, index=False)
+        else:
+            # If the fetch failed, fall back to the original, unmodified cache to avoid data loss.
+            print("WARNING: Using stale cache data due to database fetch failure.")
+            final_flows_df = original_cached_df
+
+        if final_flows_df.empty:
             print("CRITICAL: No flow data could be loaded or fetched.")
             return
 
         print("INFO: Merging flow data with the latest location metadata...")
-        processed_df = pd.merge(flows_df, locs_metadata_df, on='ticker', how='left')
+        processed_df = pd.merge(final_flows_df, locs_metadata_df, on='ticker', how='left')
         processed_df.dropna(subset=['market_component', 'category_short'], inplace=True)
         processed_df['date'] = pd.to_datetime(processed_df['date'])
         processed_df['value'] = pd.to_numeric(processed_df['value'], errors='coerce').fillna(0)
-        
+
         delivery_mask = processed_df['ticker'].str.endswith('.2', na=False)
         processed_df.loc[delivery_mask, 'value'] *= -1
-        
+
         processed_df.set_index('date', inplace=True)
         processed_df.sort_index(inplace=True)
-        
+
         self.all_flow_data = processed_df
         print("INFO: Data preparation complete.")
 
