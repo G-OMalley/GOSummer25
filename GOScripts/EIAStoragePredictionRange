@@ -1,0 +1,808 @@
+#!/usr/bin/env python3
+"""
+EIAStorageForecast.py – looks one level up for INFO/
+
+• Loads core CSVs from <script_dir>/../INFO/
+• Converts CriterionLNGHist.csv → LNG_PIPE.csv on the fly
+• Trains Ridge+GBM/LightGBm + SARIMA, blends, prints table, writes CSV
+
+Dependencies: pandas, numpy, scikit-learn, statsmodels, tabulate, lightgbm (optional)
+"""
+from __future__ import annotations
+import sys, warnings
+from pathlib import Path
+from datetime import timedelta
+import numpy as np
+import pandas as pd
+from tabulate import tabulate
+from sklearn.linear_model import RidgeCV
+from sklearn.ensemble import ExtraTreesRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_absolute_error, median_absolute_error
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+
+try:
+    from lightgbm import LGBMRegressor, set_config
+    set_config(verbosity = -1) # Silence LightGBM warnings
+    USE_LIGHTGBM = True
+except ImportError:
+    USE_LIGHTGBM = False
+
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+# ────────── paths ──────────
+SCRIPT_DIR = Path(__file__).resolve().parent
+DATA_DIR   = SCRIPT_DIR.parent / "INFO"
+if not DATA_DIR.exists():
+    sys.exit(f"❌ INFO folder missing at {DATA_DIR}")
+
+OUTPUT_DIR = SCRIPT_DIR
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+G_OUTPUT_DIR = OUTPUT_DIR / "GOutput"
+G_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# ────────── constants ──────────
+REGIONS = [
+    "East Region", "Midwest Region", "South Central Region",
+    "Mountain Region", "Pacific Region", "Lower 48 States"
+]
+REGION_CITY = {
+    "East Region": "Boston",
+    "Midwest Region": "Chicago OHare",
+    "South Central Region": "Houston IAH",
+    "Mountain Region": "Denver",
+    "Pacific Region": "Los Angeles",
+    "Lower 48 States": "Conus",
+}
+
+# ── manual feature overrides ──
+# These are still used within ml function's weather selection logic
+ALWAYS_USE_WEATHER = {"Midwest Region", "Pacific Region", "Mountain Region"}
+NEVER_USE_WEATHER = {"East Region"}
+
+SAR_ORDER, SAR_SEAS = (2,1,1), (2,1,1,52) # SARIMA spec for levels
+
+# FUNDY MAPPING
+FUNDY_MAP = {
+    "East Region":          ["Northeast - ", "SouthEast - ", "SouthEast[Fl] - ", "SouthEast[Oth] - "],
+    "Midwest Region":       ["Midwest - "],
+    "South Central Region":["SouthCentral - "],
+    "Mountain Region":      ["Rockies - ", "Rockies[SW] - ", "Rockies[Up] - "],
+    "Pacific Region":       ["West - "],
+    "Lower 48 States":      ["CONUS - "]
+}
+BEST_FUN = ["Balance", "Prod", "PipeImports"]
+
+# STATE TO REGION MAPPING for Criterion data
+STATE_TO_REGION = {
+    "Texas":"South Central Region", "Louisiana":"South Central Region",
+    "Oklahoma":"South Central Region", "Kansas":"South Central Region",
+    "New Mexico":"Mountain Region",
+    "Colorado":"Mountain Region",
+    "Utah":"Mountain Region",
+    "Wyoming":"Mountain Region",
+    "Montana":"Mountain Region",
+    "Idaho":"Mountain Region",
+    "Arizona":"Mountain Region",
+    "Nevada":"Pacific Region",
+    "California":"Pacific Region",
+    "Oregon":"Pacific Region",
+    "Washington":"Pacific Region",
+    "Illinois": "Midwest Region", "Indiana": "Midwest Region", "Iowa": "Midwest Region",
+    "Michigan": "Midwest Region", "Minnesota": "Midwest Region", "Missouri": "Midwest Region",
+    "Nebraska": "Midwest Region", "North Dakota": "Midwest Region", "Ohio": "East Region",
+    "South Dakota": "Midwest Region", "Wisconsin": "Midwest Region",
+    "Maine": "East Region", "New Hampshire": "East Region", "Vermont": "East Region",
+    "Massachusetts": "East Region", "Rhode Island": "East Region", "Connecticut": "East Region",
+    "New York": "East Region", "New Jersey": "East Region", "Pennsylvania": "East Region",
+    "Delaware": "East Region", "Maryland": "East Region", "West Virginia": "East Region",
+    "Virginia": "East Region", "North Carolina": "East Region", "South Carolina": "East Region",
+    "Georgia": "East Region", "Florida": "East Region", "Alabama": "East Region",
+    "Mississippi": "East Region", "Tennessee": "East Region", "Kentucky": "East Region",
+    "Arkansas": "South Central Region",
+}
+
+GBM_PARAMS = {
+    "n_estimators": 250, "num_leaves": 63,
+    "learning_rate": 0.07, "subsample": 0.8, "random_state": 42
+}
+
+# --- feature switches -------------------------------------------------
+# These are still global constants for use within ml's logic for pricing/positioning
+REGIONS_USE_POS   = {"Lower 48 States"}
+REGIONS_USE_PRICE = {"Lower 48 States",
+                     "East Region",
+                     "Pacific Region",
+                     "Midwest Region",
+                     "Mountain Region",
+                     }
+
+# ────────── CSV helpers ──────────
+def get_csv(name, dates):
+    p = DATA_DIR / name
+    if not p.exists():
+        return None # Return None instead of exiting, allowing the script to continue without this data
+    return pd.read_csv(p, parse_dates=dates)
+
+def core_data():
+    chg = get_csv("EIAchanges.csv", ["Period"]).set_index("Period")
+    tot = get_csv("EIAtotals.csv", ["Period"]).set_index("Period")
+    fdy = get_csv("Fundy.csv", ["Date"])
+    wth = get_csv("WEATHER.csv", ["Date"])
+    return chg, tot, fdy, wth
+
+# ────────── LNG loader (fixed mapping) ──────────
+def lng_data():
+    lp = G_OUTPUT_DIR / "LNG_PIPE.csv"
+    if lp.exists():
+        return pd.read_csv(lp, parse_dates=["Date"])
+    
+    raw = DATA_DIR / "CriterionLNGHist.csv"
+    if not raw.exists():
+        return None 
+
+    df = pd.read_csv(raw, parse_dates=["Date"])
+    
+    required_cols = ["Value", "state_name"]
+    if not all(col in df.columns for col in required_cols):
+        return None
+
+    df = df.rename(columns={"Value": "LNG_Bcf", "state_name": "Region"})
+    df["Region"] = df["Region"].map(STATE_TO_REGION)
+    df.dropna(subset=['Region'], inplace=True)
+    
+    if df.empty:
+        return None
+
+    df["Pipe_Bcf"] = 0.0
+    df.to_csv(lp, index=False)
+    return df
+
+# ────────── positioning data ──────────
+def positioning_data():
+    pos_file = (SCRIPT_DIR / "INFO" / "Natural_Gas_Data_positioning.csv")
+    if not pos_file.exists():
+        return None
+    
+    pos = pd.read_csv(pos_file, parse_dates=["Date"]).set_index("Date").sort_index()
+
+    pos["Spread_MM_Prod"] = pos["Managed Money"] - pos["Producers"]
+    pos["Spread_MM_Prod_z"] = (pos["Spread_MM_Prod"] - pos["Spread_MM_Prod"].rolling(52).mean()) / (
+        pos["Spread_MM_Prod"].rolling(52).std()
+    )
+    pos["Spread_MM_Prod_z_lag1"] = pos["Spread_MM_Prod_z"].shift(1)
+
+    pos = pos[["Spread_MM_Prod_z", "Spread_MM_Prod_z_lag1"]].resample("W-FRI").last().ffill().bfill()
+    return pos
+
+# ────────── PRICE helper ──────────
+def make_price_features():
+    p = DATA_DIR / "PRICES.csv"
+    if not p.exists():
+        return None
+
+    temp_df = pd.read_csv(p)
+
+    if "Henry" not in temp_df.columns:
+        return None
+
+    temp_df['Date_Parsed'] = pd.to_datetime(temp_df['Date'], errors='coerce')
+    temp_df = temp_df.dropna(subset=['Date_Parsed'])
+    if temp_df.empty:
+        return None
+
+    px = temp_df.loc[:, ["Date_Parsed", "Henry"]].rename(columns={"Date_Parsed": "Date"}).set_index("Date").sort_index()
+
+    if not isinstance(px.index, pd.DatetimeIndex):
+        raise TypeError(f"CRITICAL ERROR: Date column parsing failed for {p}.")
+
+    wk = px.resample("W-FRI").mean()
+    wk["dHenry"]  = wk["Henry"].diff()
+    wk["Henry_z"] = (wk["Henry"] - wk["Henry"].rolling(12).mean()) / wk["Henry"].rolling(12).std()
+    wk = wk.ffill().bfill()
+    return wk
+
+# ────────── Henry Flow Data Loader and Feature Engineering ──────────
+def add_henry_features_to_df(df, base_index, henry_flow_data):
+    """
+    Adds Henry Hub flow features to the main feature DataFrame.
+    Assumes henry_flow_data is already loaded with a 'date' or 'Date' column.
+    """
+    if henry_flow_data is None or henry_flow_data.empty:
+        return df # Return original DataFrame if no Henry flow data
+
+    # Create a temporary DataFrame for Henry flow features
+    henry_temp_df = henry_flow_data.copy()
+    
+    # Ensure the date column is consistent before setting index
+    if 'date' in henry_temp_df.columns:
+        henry_temp_df.set_index("date", inplace=True)
+    elif 'Date' in henry_temp_df.columns: # Assuming 'Date' is the actual column name
+        henry_temp_df.set_index("Date", inplace=True)
+    else:
+        print("Warning: Henry Flow data does not have a 'date' or 'Date' column. Skipping Henry Flow features.")
+        return df
+
+    # --- START OF HENRY FLOW COLUMN RENAMING / CHECKING ---
+    found_scheduled_col = None
+    found_available_col = None
+
+    for col in henry_temp_df.columns:
+        if "scheduled" in col.lower() and "quantity" in col.lower():
+            found_scheduled_col = col
+        if "operationally" in col.lower() and "available" in col.lower():
+            found_available_col = col
+    
+    if found_scheduled_col and found_available_col:
+        henry_temp_df = henry_temp_df.rename(columns={
+            found_scheduled_col: 'scheduled_quantity',
+            found_available_col: 'operationally_available'
+        })
+    elif "scheduled_quantity" not in henry_temp_df.columns or "operationally_available" not in henry_temp_df.columns:
+        print(f"Warning: Essential Henry Flow columns 'scheduled_quantity' and 'operationally_available' (or common variants) not found in CriterionHenryFlows.csv. Found columns: {henry_temp_df.columns.tolist()}. Skipping Henry Flow features.")
+        return df # Exit if essential columns aren't found
+    # --- END OF HENRY FLOW COLUMN RENAMING / CHECKING ---
+
+    # Resample to weekly and calculate utilization
+    grouped = henry_temp_df.groupby(pd.Grouper(freq='W-FRI'))[["scheduled_quantity", "operationally_available"]].sum()
+    
+    # Avoid division by zero
+    grouped["utilization"] = grouped["scheduled_quantity"] / grouped["operationally_available"].replace(0, np.nan)
+    
+    grouped["util_lag1"] = grouped["utilization"].shift(1)
+    grouped["util_roll3"] = grouped["utilization"].rolling(3).mean()
+    grouped["util_diff"] = grouped["utilization"].diff(3)
+    
+    # Select desired features and reindex to match the base_index
+    henry_features = grouped[["util_lag1", "util_roll3", "util_diff"]].reindex(base_index)
+    
+    # Join with the main DataFrame, dropping any rows that now have NaNs from the join
+    df = df.join(henry_features, how='left')
+    return df
+
+
+# ────────── features ──────────
+def weekly_weather(df):
+    if df is None: return None
+    frames = []
+    unique_cities = df["City Title"].unique()
+    for city in unique_cities:
+        tmp = df[df["City Title"]==city].set_index("Date")
+        wk  = tmp.resample("W-FRI").agg({"Avg Temp":"mean","CDD":"sum","HDD":"sum"})
+        wk.columns = [f"{city}_{c.replace(' ', '')}" for c in wk.columns]
+        frames.append(wk)
+    return pd.concat(frames, axis=1)
+
+def add_cal(df):
+    wk = df.index.isocalendar().week.astype(int)
+    df["SinWeek"] = np.sin(2*np.pi*wk/52)
+    df["CosWeek"] = np.cos(2*np.pi*wk/52) # Corrected this back to the original form
+    return df
+
+def sar_delta(level):
+    m = SARIMAX(level,
+                order=SAR_ORDER,
+                seasonal_order=SAR_SEAS,
+                enforce_stationarity=False,
+                enforce_invertibility=False)
+    fit = m.fit(method="lbfgs", maxiter=30, disp=False)
+    return fit.forecast()[0] - level.iloc[-1]
+
+# ────────── ML block ──────────
+def calculate_maes(df_feat, y_target, K_weeks=52):
+    """
+    Calculates 4-week and 12-week median absolute errors using a walk-forward approach.
+    """
+    min_history_needed = K_weeks # Need at least 52 weeks for initial training
+
+    if len(df_feat) < min_history_needed + 12: # Ensure enough data for at least one 12-week test
+        return np.inf # Not enough data for meaningful MAE calculation
+
+    train_end_idx = len(df_feat) - 13 # Ensure at least 13 points for a test set
+    if train_end_idx < K_weeks: # Not enough history for even one split
+        return np.inf
+
+    train_X = df_feat.iloc[:train_end_idx]
+    test_X = df_feat.iloc[train_end_idx:] # Last 13 weeks (or whatever remains)
+    
+    train_y = y_target.loc[train_X.index]
+    test_y = y_target.loc[test_X.index]
+
+    if train_X.empty or test_X.empty or len(train_X) < 2 or len(test_X) < 2:
+        return np.inf
+
+    scaler = StandardScaler().fit(train_X)
+    ridge = RidgeCV(alphas=[0.1,1,10]).fit(scaler.transform(train_X), train_y)
+    
+    etr = (LGBMRegressor(**GBM_PARAMS).fit(train_X, train_y)
+            if USE_LIGHTGBM else
+            ExtraTreesRegressor(n_estimators=300, random_state=42).fit(train_X, train_y)) 
+
+    pred = 0.5 * ridge.predict(scaler.transform(test_X)) + 0.5 * etr.predict(test_X)
+    
+    # For quick_mae used in model selection, we just need one metric.
+    # Use 4-week MAE for this internal selection.
+    return median_absolute_error(test_y[-4:], pred[-4:])
+
+
+def ml(region, data_cutoff_date, chg_full, tot_full, fdy_full, wwk_full, lng_full, 
+        weekly_salt_crit_df_full, weekly_nsalt_crit_df_full, pos_full, price_full, 
+        weekly_platts_full, henry_flow_full, use_henry_flow, use_enhanced_weather, 
+        use_criterion, use_platts, regions_use_pos, regions_use_price, return_full_data=False): 
+    
+    def _filter_df_by_date(df, date_col='Date'):
+        if df is None: return None
+        if date_col is None and isinstance(df.index, pd.DatetimeIndex):
+            return df[df.index <= data_cutoff_date].copy()
+        elif date_col in df.columns:
+            return df[df[date_col] <= data_cutoff_date].copy()
+        else:
+            # If date_col is not in columns and index is not datetime, try to use index
+            try:
+                return df[df.index <= data_cutoff_date].copy()
+            except TypeError:
+                print(f"Warning: Cannot filter DataFrame by date. Date column/index not found or not datetime-like. DataFrame columns: {df.columns.tolist()}")
+                return df # Return unfiltered if date column/index is problematic
+
+
+    chg = _filter_df_by_date(chg_full, date_col=None)
+    tot = _filter_df_by_date(tot_full, date_col=None)
+    fdy = _filter_df_by_date(fdy_full)
+    wwk = _filter_df_by_date(wwk_full, date_col=None)
+    lng = _filter_df_by_date(lng_full)
+    weekly_salt_crit_df = _filter_df_by_date(weekly_salt_crit_df_full, date_col=None)
+    weekly_nsalt_crit_df = _filter_df_by_date(weekly_nsalt_crit_df_full, date_col=None)
+    pos_df = _filter_df_by_date(pos_full, date_col=None)
+    price_df = _filter_df_by_date(price_full, date_col=None)
+    weekly_platts = _filter_df_by_date(weekly_platts_full, date_col=None)
+    henry_flow_df = _filter_df_by_date(henry_flow_full)
+
+    tgt_col_name = f"{region} Storage Change (Bcf)"
+    if region == "South Central Region":
+        salt_col = "Salt Region SC Storage Change (Bcf)"
+        nonsalt_col = "Nonsalt Region SC Storage Change (Bcf)"
+        if salt_col in chg.columns and nonsalt_col in chg.columns:
+            df = pd.DataFrame({"Target": chg[salt_col] + chg[nonsalt_col]})
+        elif tgt_col_name in chg.columns: 
+            df = pd.DataFrame({"Target": chg[tgt_col_name]})
+        else:
+            return np.nan, np.nan, np.nan, np.nan, np.nan, None, None
+    elif tgt_col_name in chg.columns:
+        df = pd.DataFrame({"Target": chg[tgt_col_name]})
+    else:
+        return np.nan, np.nan, np.nan, np.nan, np.nan, None, None
+
+
+    internal_cutoff = chg.index.max() - pd.DateOffset(years=5)
+    df = df[df.index >= internal_cutoff]
+    if df.empty:
+        return np.nan, np.nan, np.nan, np.nan, np.nan, None, None
+
+    if region=="Lower 48 States":
+        lvl = "Lower 48 States Storage (Bcf)"
+        if lvl in tot.columns:
+            df["StorageDelta"] = tot[lvl] - tot[lvl].rolling(260,52).mean()
+        
+        if "HistoricalSumOfParts" in chg.columns:
+            df["SoP_lag1"] = chg["HistoricalSumOfParts"].shift(1)
+            df["DeltaSoP_lag1"] = chg["HistoricalSumOfParts"].diff(1).shift(1)
+
+    fundy_prefixes = FUNDY_MAP.get(region, [])
+    fundy_wide = None
+    if fundy_prefixes and fdy is not None:
+        fundy_wide = fdy.pivot_table(index='Date', columns='item', values='value').clip(-2e5, 2e5)
+        need_cols = [c for p in fundy_prefixes for c in fundy_wide.columns
+                     if c.startswith(p) and any(b_item in c for b_item in BEST_FUN)]
+        if need_cols:
+            df = df.join(fundy_wide[need_cols].resample('W-FRI').sum(), how='left')
+
+    # Weather Features
+    df_weather_features = pd.DataFrame(index=df.index)
+    if use_enhanced_weather and wwk is not None:
+        city = REGION_CITY[region]
+        weather_filtered = wwk.filter(like=f"{city}_")
+        if not weather_filtered.empty:
+            df_weather_features = weather_filtered.copy()
+            for suffix in ["_CDD", "_HDD"]:
+                col = f"{city}{suffix}"
+                if col in df_weather_features.columns:
+                    base = df_weather_features[col]
+                    if len(base.dropna()) >= 260:
+                        clim = base.rolling(260, min_periods=104).mean()
+                        df_weather_features[f"{col}_anom"] = base - clim
+            
+            if region == "South Central Region":
+                ercot_cdd_col = f"{REGION_CITY['South Central Region']}_CDD"
+                if ercot_cdd_col in df_weather_features.columns:
+                    ercot_base = df_weather_features[ercot_cdd_col]
+                    if len(ercot_base.dropna()) >= 260:
+                        ercot_clim = ercot_base.rolling(260, min_periods=104).mean()
+                        df_weather_features["ERCOT_CDD_anom"] = ercot_base - ercot_clim
+
+    # Criterion features (LNG, Pipe Imports, Salt/Non-Salt)
+    if use_criterion:
+        if lng is not None and "Region" in lng.columns:
+            lng_week = lng[lng["Region"]==region].set_index("Date")[["LNG_Bcf"]].resample("W-FRI").sum()
+            if not lng_week.empty:
+                if region == "South Central Region" and "LNG_Bcf" in lng_week.columns:
+                    df["LNG_Weekly"] = lng_week["LNG_Bcf"]
+                    df["LNG_lag1"] = lng_week["LNG_Bcf"].shift(1)
+                    df["LNG_lag2"] = lng_week["LNG_Bcf"].shift(2)
+                else:
+                    df = df.join(lng_week.rename(columns={"LNG_Bcf":"LNG_Weekly"}), how="left")
+
+        if region == "Midwest Region" and fundy_wide is not None:
+            pipe_imports_col_name = "Midwest - PipeImports"
+            if pipe_imports_col_name in fundy_wide.columns:
+                mid_imp_series = fundy_wide[pipe_imports_col_name]
+                if not mid_imp_series.dropna().empty:
+                    df["CanImp"] = mid_imp_series.reindex(df.index)
+                    df["CanImp_lag1"] = mid_imp_series.shift(1).reindex(df.index)
+
+        if weekly_salt_crit_df is not None and weekly_nsalt_crit_df is not None:
+            if region in ["South Central Region", "Lower 48 States"]:
+                all_crit_dfs = {'Salt': weekly_salt_crit_df, 'NSalt': weekly_nsalt_crit_df}
+                for prefix, src_df in all_crit_dfs.items():
+                    if region == "Lower 48 States":
+                        l48_crit_cols = [c for c in src_df.columns if c.startswith(prefix + '_')]
+                        if l48_crit_cols:
+                            l48_sum_col_name = f"{prefix}_L48_Total"
+                            summed_series = src_df[l48_crit_cols].sum(axis=1)
+                            df = df.join(summed_series.rename(l48_sum_col_name), how='left')
+                    else:
+                        col_name = f"{prefix}_{region}"
+                        if col_name in src_df.columns:
+                            df = df.join(src_df[[col_name]], how='left')
+
+    # Platts features (Positioning, Price, CONUS Fundamentals)
+    if use_platts:
+        if pos_df is not None and region in regions_use_pos: 
+            df = df.join(pos_df, how="left") 
+        
+        if price_df is not None and region in regions_use_price: 
+            df = df.join(price_df, how="left")
+        
+        if weekly_platts is not None and not weekly_platts.empty: 
+            df = df.join(weekly_platts, how="left")
+
+    # Henry Flow features
+    if use_henry_flow: 
+        df = add_henry_features_to_df(df, df.index, henry_flow_df)
+
+    df["Summer"] = ((df.index.month >= 5) & (df.index.month <= 9)).astype(int)
+    df["Target_lag1"] = df["Target"].shift(1)
+    df["Target_lag2"] = df["Target"].shift(2)
+
+    df = add_cal(df)
+    
+    df_cleaned = df.dropna()
+    if df_cleaned.empty:
+        return np.nan, np.nan, np.nan, np.nan, np.nan, None, None
+
+    y_full_filtered = df_cleaned.pop("Target")
+    X_base = df_cleaned.copy()
+
+    # The weather feature selection logic is still needed for use_enhanced_weather
+    # even if use_enhanced_weather is True based on region_toggles.
+    # This allows it to check if weather actually improves MAE for the specific region.
+    X_wthr = X_base.join(df_weather_features.reindex(X_base.index).dropna(how='all'), how='left')
+    
+    mae_base = calculate_maes(X_base, y_full_filtered)
+    mae_wthr = calculate_maes(X_wthr, y_full_filtered)
+
+    force_no_weather = region in NEVER_USE_WEATHER
+    force_yes_weather = region in ALWAYS_USE_WEATHER 
+
+    # Determine final use of weather based on performance
+    # This overrides the initial `use_enhanced_weather` toggle if manual overrides or MAE dictate.
+    use_weather_in_model = False
+    if force_no_weather:
+        use_weather_in_model = False
+    elif force_yes_weather: 
+        use_weather_in_model = True
+    elif mae_base == np.inf and mae_wthr == np.inf:
+        use_weather_in_model = False
+    elif mae_base == np.inf: 
+        use_weather_in_model = True
+    elif mae_wthr == np.inf:
+        use_weather_in_model = False
+    else: 
+        use_weather_in_model = mae_wthr + 0.01 < mae_base 
+
+    chosen_X = X_wthr if use_weather_in_model else X_base
+    
+    y = y_full_filtered 
+    X = chosen_X
+
+    # Ensure X and y are aligned and have enough data
+    if X.empty or y.empty or len(X) < 12: # Need at least 12 data points for 12-week MAE
+        return np.nan, np.nan, np.nan, np.nan, np.nan, None, None
+
+
+    scaler = StandardScaler(); Xs = scaler.fit_transform(X)
+    
+    ridge  = RidgeCV(alphas=[0.1,1.0,10.0]).fit(Xs,y)
+
+    if USE_LIGHTGBM:
+        etr = LGBMRegressor(**GBM_PARAMS).fit(X, y)
+    else:
+        etr = ExtraTreesRegressor(n_estimators=300, random_state=42).fit(X,y)
+    
+    R_W, G_W = 0.40, 0.60
+
+    all_preds_ridge = ridge.predict(Xs)
+    all_preds_etr = etr.predict(X)
+    all_combined_preds = R_W * all_preds_ridge + G_W * all_preds_etr
+
+    ml_fc  = all_combined_preds[-1]
+
+    mae_4wk = np.nan
+    mae_12wk = np.nan
+    
+    if len(y) >= 4:
+        mae_4wk = median_absolute_error(y.iloc[-4:], all_combined_preds[-4:])
+    if len(y) >= 12:
+        mae_12wk = median_absolute_error(y.iloc[-12:], all_combined_preds[-12:])
+
+    if return_full_data:
+        return ml_fc, mae_4wk, mae_12wk, all_combined_preds, y # Corrected: mae12 -> mae_12wk
+    else:
+        return ml_fc, mae_4wk, mae_12wk # Corrected: mae12 -> mae_12wk
+
+
+# ────────── main ──────────
+# Helper to get actuals, particularly for South Central
+def _get_regional_actual(chg_df, target_date, region_name):
+    if target_date not in chg_df.index:
+        return np.nan
+
+    if region_name == "South Central Region":
+        salt_col = "Salt Region SC Storage Change (Bcf)"
+        nonsalt_col = "Nonsalt Region SC Storage Change (Bcf)"
+        if salt_col in chg_df.columns and nonsalt_col in chg_df.columns:
+            return chg_df.loc[target_date, salt_col] + chg_df.loc[target_date, nonsalt_col]
+        else:
+            return chg_df.loc[target_date, "South Central Region Storage Change (Bcf)"] if "South Central Region Storage Change (Bcf)" in chg_df.columns else np.nan
+    else:
+        col_name = f"{region_name} Storage Change (Bcf)"
+        return chg_df.loc[target_date, col_name] if col_name in chg_df.columns else np.nan
+
+# Define a wrapper for ml function for the dual forecast
+def run_region_model(region, **kwargs):
+    """
+    Wrapper function to call ml with pre-loaded full data and return
+    forecast, 4wk_MAE, and 12wk_MAE.
+    This simulates the assumption for the dual forecast block.
+    """
+    # These global variables need to be passed down or accessed by run_region_model
+    # For simplicity, they are passed as attributes of the function here from main.
+    _chg_full, _tot_full, _fdy_full, _wwk_full, _lng_full, \
+    _weekly_salt_crit_df_full, _weekly_nsalt_crit_df_full, _pos_full, \
+    _price_full, _weekly_platts_full, _henry_flow_full, _latest_eia_date = (
+        run_region_model._chg_full, run_region_model._tot_full, run_region_model._fdy_full,
+        run_region_model._wwk_full, run_region_model._lng_full,
+        run_region_model._weekly_salt_crit_df_full, run_region_model._weekly_nsalt_crit_df_full,
+        run_region_model._pos_full, run_region_model._price_full,
+        run_region_model._weekly_platts_full, run_region_model._henry_flow_full,
+        run_region_model._latest_eia_date
+    )
+
+    forecast, mae4, mae12, _, _ = ml(
+        region,
+        _latest_eia_date,
+        _chg_full, _tot_full, _fdy_full, _wwk_full, _lng_full,
+        _weekly_salt_crit_df_full, _weekly_nsalt_crit_df_full, _pos_full,
+        _price_full, _weekly_platts_full, _henry_flow_full,
+        use_henry_flow=kwargs.get("use_henry", False),
+        use_enhanced_weather=kwargs.get("enhance_weather", False), 
+        use_criterion=kwargs.get("use_criterion", False),
+        use_platts=kwargs.get("use_platts", False),
+        regions_use_pos=REGIONS_USE_POS, # Use global constants here
+        regions_use_price=REGIONS_USE_PRICE, # Use global constants here
+        return_full_data=True # We need MAEs for the dual forecast logic
+    )
+    return forecast, mae4, mae12
+
+
+def main():
+    print("Loading...")
+
+    # Load all full datasets once and store them as attributes of run_region_model
+    # so they can be accessed by the wrapper without re-loading.
+    chg_full, tot_full, fdy_full, wth_full = core_data()
+    if any(df is None for df in [chg_full, tot_full, fdy_full, wth_full]):
+        sys.exit("❌ One or more core CSV files are missing. Please check the INFO directory.")
+
+    wwk_full = weekly_weather(wth_full)
+    lng_full = lng_data()
+    pos_full = positioning_data()
+    price_full = make_price_features()
+
+    henry_flow_full = get_csv("CriterionHenryFlows.csv", ["Date"]) 
+    if henry_flow_full is None:
+        print("Warning: CriterionHenryFlows.csv not found. Henry Flow features will not be used.")
+
+    platts_conus_path = DATA_DIR / "PlattsCONUSFundamentalsHIST.csv"
+    platts_conus_full = None
+    try:
+        # Load without parsing dates initially
+        platts_conus_raw = pd.read_csv(platts_conus_path) 
+        
+        # Check for 'GasDate' and 'GasDay' and prioritize 'GasDate' if it exists
+        date_col_name = None
+        if 'GasDate' in platts_conus_raw.columns:
+            date_col_name = 'GasDate'
+        elif 'GasDay' in platts_conus_raw.columns:
+            date_col_name = 'GasDay'
+        
+        if date_col_name is None:
+            raise ValueError("Neither 'GasDay' nor 'GasDate' column found in PlattsCONUSFundamentalsHIST.csv.")
+            
+        # Manually parse the identified date column ensuring it's a datetime object, coercing errors
+        platts_conus_raw[date_col_name] = pd.to_datetime(platts_conus_raw[date_col_name], errors='coerce')
+        platts_conus_raw = platts_conus_raw.dropna(subset=[date_col_name])
+        
+        # Rename the identified date column to 'Date' and set as index
+        platts_conus_full = platts_conus_raw.rename(columns={date_col_name: "Date"}).set_index("Date").sort_index()
+    except Exception as e:
+        print(f"Warning: Could not load or process PlattsCONUSFundamentalsHIST.csv from {platts_conus_path}. Error: {e}. Platts fundamentals will not be used.")
+        platts_conus_full = None # Explicitly set to None on error
+
+    selected_platts_features = [
+        "DryGasProduction", "MexExp", "LNGExports", 
+        "PowerBurn", "ResComDemand", "NetImpliedFlow"
+    ]
+    
+    weekly_platts_full = None
+    if platts_conus_full is not None and not platts_conus_full.empty:
+        existing_platts_features = [f for f in selected_platts_features if f in platts_conus_full.columns]
+        if existing_platts_features:
+            weekly_platts_full = platts_conus_full[existing_platts_features].resample("W-FRI").mean().dropna()
+
+    locs = get_csv("locs_list.csv", [])
+    
+    weekly_salt_crit_df_full = None 
+    weekly_nsalt_crit_df_full = None 
+
+    required_locs_cols = ['storage_name', 'state_name', 'storage_type']
+    if locs is not None and all(col in locs.columns for col in required_locs_cols):
+        crit_full = get_csv("CriterionStorageChange.csv", ["eff_gas_day"])
+        if crit_full is not None:
+            crit_full = (crit_full.merge(locs[required_locs_cols], 
+                                         on='storage_name', how='left')
+                                         .dropna(subset=['state_name','storage_type'])) 
+
+            crit_full['Region'] = crit_full['state_name'].map(STATE_TO_REGION)
+            crit_full = crit_full.dropna(subset=['Region']) 
+            crit_full.set_index('eff_gas_day', inplace=True)
+
+            weekly_salt_crit_df_full = (crit_full[crit_full['storage_type'].str.contains('salt',case=False)]
+                                    .groupby([pd.Grouper(freq='W-FRI'), 'Region'])['daily_storage_change']
+                                    .sum()
+                                    .unstack('Region')
+                                    .add_prefix('Salt_'))
+            weekly_nsalt_crit_df_full = (crit_full[~crit_full['storage_type'].str.contains('salt',case=False)]
+                                     .groupby([pd.Grouper(freq='W-FRI'), 'Region'])['daily_storage_change']
+                                     .sum()
+                                     .unstack('Region')
+                                     .add_prefix('NSalt_'))
+
+    l48_sum_cols_for_sop = [f"{r} Storage Change (Bcf)" for r in REGIONS if r not in ["Lower 48 States", "South Central Region"]]
+    if "South Central Region Storage Change (Bcf)" in chg_full.columns:
+        l48_sum_cols_for_sop.append("South Central Region Storage Change (Bcf)")
+    
+    existing_l48_sum_cols = [col for col in l48_sum_cols_for_sop if col in chg_full.columns]
+    
+    if existing_l48_sum_cols:
+        chg_full["HistoricalSumOfParts"] = chg_full[existing_l48_sum_cols].sum(axis=1)
+    else:
+        chg_full["HistoricalSumOfParts"] = np.nan 
+
+    latest_eia_date = chg_full.index.max()
+    forecast_date = latest_eia_date + pd.Timedelta(days=7)
+
+    # Store full data on the run_region_model function object
+    # so it can be accessed within the dual forecast loop without re-loading
+    run_region_model._chg_full = chg_full
+    run_region_model._tot_full = tot_full
+    run_region_model._fdy_full = fdy_full
+    run_region_model._wwk_full = wwk_full
+    run_region_model._lng_full = lng_full
+    run_region_model._weekly_salt_crit_df_full = weekly_salt_crit_df_full
+    run_region_model._weekly_nsalt_crit_df_full = weekly_nsalt_crit_df_full
+    run_region_model._pos_full = pos_full
+    run_region_model._price_full = price_full
+    run_region_model._weekly_platts_full = weekly_platts_full
+    run_region_model._henry_flow_full = henry_flow_full
+    run_region_model._latest_eia_date = latest_eia_date # Passed to ml for internal data filtering
+
+    print("\n========================= Running Dual Forecast Execution =========================")
+
+    # --- Best 4wk MAE Configs --- 
+    region_settings_4wk = {
+        "East Region":          {"use_criterion": False, "enhance_weather": True,  "use_henry": False, "use_platts": True},
+        "Midwest Region":       {"use_criterion": True,  "enhance_weather": False, "use_henry": True,  "use_platts": False},
+        "South Central Region": {"use_criterion": False, "enhance_weather": False, "use_henry": False, "use_platts": True},
+        "Mountain Region":      {"use_criterion": True,  "enhance_weather": True,  "use_henry": False, "use_platts": True},
+        "Pacific Region":       {"use_criterion": False, "enhance_weather": True,  "use_henry": False, "use_platts": True},
+        "Lower 48 States":      {"use_criterion": True,  "enhance_weather": True,  "use_henry": True,  "use_platts": False},
+    }
+    # --- Best 12wk MAE Configs --- 
+    region_settings_12wk = {
+        "East Region":          {"use_criterion": False, "enhance_weather": False, "use_henry": False, "use_platts": False},
+        "Midwest Region":       {"use_criterion": False, "enhance_weather": False, "use_henry": False, "use_platts": False},
+        "South Central Region": {"use_criterion": False, "enhance_weather": False, "use_henry": False, "use_platts": False},
+        "Mountain Region":      {"use_criterion": False, "enhance_weather": False, "use_henry": False, "use_platts": False},
+        "Pacific Region":       {"use_criterion": False, "enhance_weather": False, "use_henry": False, "use_platts": False},
+        "Lower 48 States":      {"use_criterion": False, "enhance_weather": False, "use_henry": False, "use_platts": False},
+    }
+
+    # === Final Output ===
+    output_rows = []
+
+    for region in REGIONS: # Loop through the global REGIONS list to ensure all are processed
+        print(f"\n==== Forecasting {region} ====")
+
+        # --- Run 4-week optimized model ---
+        cfg4 = region_settings_4wk.get(region, {})
+        if not cfg4:
+            print(f"Warning: 4-week settings not found for {region}. Skipping 4-week forecast for this region.")
+            f4, mae4_from_4wk_cfg, mae12_from_4wk_cfg = np.nan, np.nan, np.nan
+        else:
+            # run_region_model returns (forecast, 4wk_mae, 12wk_mae)
+            f4, mae4_from_4wk_cfg, mae12_from_4wk_cfg = run_region_model(region, **cfg4)
+
+        # --- Run 12-week optimized model ---
+        cfg12 = region_settings_12wk.get(region, {})
+        if not cfg12:
+            print(f"Warning: 12-week settings not found for {region}. Skipping 12-week forecast for this region.")
+            f12, mae4_from_12wk_cfg, mae12_from_12wk_cfg = np.nan, np.nan, np.nan
+        else:
+            f12, mae4_from_12wk_cfg, mae12_from_12wk_cfg = run_region_model(region, **cfg12)
+
+        # --- Forecast range ---
+        valid_forecasts = [val for val in [f4, f12] if not np.isnan(val)]
+
+        low, high = np.nan, np.nan
+        forecast_range_str = "N/A"
+
+        if len(valid_forecasts) == 1:
+            low = high = valid_forecasts[0]
+            forecast_range_str = f"[{low:.2f}, {high:.2f}] (Single valid forecast)"
+        elif len(valid_forecasts) == 2:
+            low, high = sorted(valid_forecasts)
+            forecast_range_str = f"[{low:.2f}, {high:.2f}]"
+        
+        output_rows.append({
+            "Region": region,
+            "Forecast Range (Bcf)": forecast_range_str,
+            "4wk Forecast": round(f4, 2) if not np.isnan(f4) else np.nan,
+            "12wk Forecast": round(f12, 2) if not np.isnan(f12) else np.nan,
+            "4wk MAE": round(mae4_from_4wk_cfg, 2) if not np.isnan(mae4_from_4wk_cfg) else np.nan,
+            "12wk MAE": round(mae12_from_12wk_cfg, 2) if not np.isnan(mae12_from_12wk_cfg) else np.nan,
+            "Forecast Date": forecast_date.date()
+        })
+
+    # --- Save output ---
+    output_df = pd.DataFrame(output_rows)
+
+    print("\n=== STORAGE FORECAST RANGE RESULTS ===")
+    print(tabulate(output_df, headers="keys", tablefmt="pipe", showindex=False))
+
+    range_output_path = G_OUTPUT_DIR / "EIAStoragePred_Range.csv"
+    try:
+        output_df.to_csv(range_output_path, index=False, float_format="%.2f")
+        print(f"\nForecast Range CSV written to: {range_output_path}\n")
+    except PermissionError:
+        print(f"\nERROR: Permission denied when writing to '{range_output_path}'.")
+        print("Please ensure the file is not open in another program (e.g., Excel) and try again.")
+        print(f"Attempting to save to a temporary file: '{range_output_path.parent / (range_output_path.stem + '_temp' + range_output_path.suffix)}'")
+        output_df.to_csv(range_output_path.parent / (range_output_path.stem + '_temp' + range_output_path.suffix), index=False, float_format="%.2f")
+    except Exception as e:
+        print(f"\nERROR: An unexpected error occurred when writing the Forecast Range CSV: {e}")
+
+
+if __name__ == "__main__":
+    main()

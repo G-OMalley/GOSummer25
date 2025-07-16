@@ -1,0 +1,7 @@
+Region,Forecast Range (Bcf),4wk Forecast,12wk Forecast,4wk MAE,12wk MAE,Forecast Date
+East Region,"[17.04, 17.26]",17.26,17.04,1.46,2.05,2025-07-11
+Midwest Region,"[23.12, 23.65]",23.12,23.65,0.93,2.26,2025-07-11
+South Central Region,"[12.41, 16.59]",12.41,16.59,2.21,3.38,2025-07-11
+Mountain Region,"[3.72, 3.91]",3.72,3.91,0.39,0.53,2025-07-11
+Pacific Region,"[4.24, 5.07]",4.24,5.07,0.31,0.50,2025-07-11
+Lower 48 States,"[63.08, 64.79]",63.08,64.79,3.37,5.02,2025-07-11
