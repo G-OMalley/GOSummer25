@@ -1,0 +1,80 @@
+import pandas as pd
+from pathlib import Path
+
+# Load file
+ice_path = Path("GOScripts/INFO/ICE_Reformatted_Long_Format.csv")
+output_path = Path("GOScripts/INFO/GOIceDaily.csv")
+
+print("Loading ICE file...")
+df = pd.read_csv(ice_path)
+
+# Fix month typos
+print("Fixing month typos...")
+month_fix = {
+    "Janurary": "January",
+    "Febuary": "February",
+    "Mar": "March",
+    "Apr": "April",
+    "Jun": "June",
+    "Jul": "July",
+    "Sept": "September",
+    "Ocotber": "October",
+    "Decemeber": "December"
+}
+df['settlement_month'] = df['settlement_month'].replace(month_fix)
+
+# Remove $ signs and convert settlement to float
+print("Cleaning settlement column...")
+df['settlement'] = df['settlement'].astype(str).str.replace('$', '', regex=False).str.strip()
+df['settlement'] = pd.to_numeric(df['settlement'], errors='coerce')
+
+# Ensure correct dtypes
+df['settlement_year'] = pd.to_numeric(df['settlement_year'], errors='coerce')
+
+# Extract Henry Hub prices
+print("Extracting Henry Hub prices...")
+henry_df = df[df['market_component'].str.strip().str.lower() == "henry"]
+henry_df = henry_df[['settlement_month', 'settlement_year', 'settlement']].rename(
+    columns={'settlement': 'henry_settlement'}
+)
+
+# Also apply month fix to Henry data
+henry_df['settlement_month'] = henry_df['settlement_month'].replace(month_fix)
+
+# Check for duplicates in Henry
+henry_dupes = henry_df.duplicated(subset=['settlement_month', 'settlement_year']).sum()
+print(f"Duplicate Henry entries (month/year): {henry_dupes}")
+
+# Merge Henry prices
+print("Merging Henry Hub prices into main dataframe...")
+df = df.merge(henry_df, on=['settlement_month', 'settlement_year'], how='left')
+
+# Debug: Check how many rows matched
+valid_henry = df['henry_settlement'].notna().sum()
+print(f"Rows with valid Henry match: {valid_henry} / {len(df)}")
+
+# Calculate basis, rounded to 2 decimals
+print("Calculating settlement_basis...")
+def compute_basis(row):
+    if pd.notnull(row['settlement']) and pd.notnull(row['henry_settlement']):
+        return round(row['settlement'] - row['henry_settlement'], 2)
+    return row.get('settlement_basis', pd.NA)
+
+df['settlement_basis'] = df.apply(compute_basis, axis=1)
+
+# Drop the Henry helper column
+df.drop(columns=['henry_settlement'], inplace=True)
+
+# Debug: Result summary
+calculated_basis = df['settlement_basis'].notna().sum()
+print(f"Rows with calculated basis: {calculated_basis} / {len(df)}")
+
+# Rows where settlement exists but no Henry (i.e., failed match)
+unmatched_henry_rows = df[df['settlement'].notna() & df['settlement_basis'].isna()]
+print(f"Rows with settlement but missing basis (likely no Henry): {len(unmatched_henry_rows)}")
+
+# Save final output
+print(f"Saving updated file to: {output_path}")
+df.to_csv(output_path, index=False)
+
+print("✅ All done.")

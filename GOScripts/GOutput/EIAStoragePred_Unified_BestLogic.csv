@@ -1,0 +1,7 @@
+Region,Forecast (Bcf),Forecast Range (Bcf),Prev-wk Fcst,Prev-wk Actual,4wk MedAE (from best_cfg),12wk MedAE (from best_cfg),Forecast Date
+East Region,17.26,N/A,12.94,14,1.46,2.11,2025-07-11
+Midwest Region,21.97,N/A,21.59,22,0.96,1.29,2025-07-11
+South Central Region,9.40,N/A,8.98,10,3.36,3.36,2025-07-11
+Mountain Region,3.82,"[3.72, 3.91]",,3,0.39,0.53,2025-07-11
+Pacific Region,4.66,"[4.24, 5.07]",,4,0.31,0.50,2025-07-11
+Lower 48 States,57.10,N/A (Sum of Parts),53.30,53,4.05,2.99,2025-07-11

@@ -1,0 +1,41 @@
+import pandas as pd
+from pathlib import Path
+
+# File paths
+ice_path = Path("GOScripts/INFO/GOIceDaily.csv")
+fom_path = Path("INFO/HistoricalFOM.csv")
+output_path = Path("INFO/HistoricalFOM_Updated.csv")
+
+print("Loading GOIceDaily and HistoricalFOM...")
+ice_df = pd.read_csv(ice_path)
+fom_df = pd.read_csv(fom_path)
+
+# Ensure clean types
+for df in [ice_df, fom_df]:
+    df['settlement_month'] = df['settlement_month'].astype(str)
+    df['settlement_year'] = pd.to_numeric(df['settlement_year'], errors='coerce')
+    df['market_component'] = df['market_component'].astype(str)
+
+# Merge to bring in missing values
+print("Merging on settlement_month, settlement_year, market_component...")
+merged = pd.merge(
+    fom_df,
+    ice_df[['settlement_month', 'settlement_year', 'market_component', 'settlement', 'settlement_basis']],
+    on=['settlement_month', 'settlement_year', 'market_component'],
+    how='left',
+    suffixes=('', '_ice')
+)
+
+# Fill only missing values from GOIceDaily
+print("Filling missing values from GOIceDaily...")
+merged['settlement'] = merged['settlement'].combine_first(merged['settlement_ice'])
+merged['settlement_basis'] = merged['settlement_basis'].combine_first(merged['settlement_basis_ice'])
+
+# Drop helper columns
+merged.drop(columns=['settlement_ice', 'settlement_basis_ice'], inplace=True)
+
+# Save to output
+print(f"Saving updated HistoricalFOM to: {output_path}")
+merged.to_csv(output_path, index=False)
+
+print("✅ HistoricalFOM updated successfully.")

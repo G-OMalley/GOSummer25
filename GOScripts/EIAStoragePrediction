@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-"""
-EIAStorageForecast.py – looks one level up for INFO/
-
-• Loads core CSVs from <script_dir>/../INFO/
-• Converts CriterionLNGHist.csv → LNG_PIPE.csv on the fly
-• Trains Ridge+GBM/LightGBm + SARIMA, blends, prints table, writes CSV
-
-Dependencies: pandas, numpy, scikit-learn, statsmodels, tabulate, lightgbm (optional)
-"""
 from __future__ import annotations
 import sys, warnings
 from pathlib import Path
@@ -56,14 +46,11 @@ REGION_CITY = {
     "Pacific Region": "Los Angeles",
     "Lower 48 States": "Conus",
 }
-
 # ── manual feature overrides ──
 ALWAYS_USE_WEATHER = {"Midwest Region", "Pacific Region", "Mountain Region"}
 NEVER_USE_WEATHER = {"East Region"}
-
-SAR_ORDER, SAR_SEAS = (2,1,1), (2,1,1,52) # SARIMA spec for levels
-
-# FUNDY MAPPING - SOLUTION 2.A.1: Add a mapping table
+SAR_ORDER, SAR_SEAS = (2,1,1), (2,1,1,52) # SARIMA specification for levels
+# FUNDY MAPPING: Maps regions to prefixes for fundamental data columns
 FUNDY_MAP = {
     "East Region":          ["Northeast - ", "SouthEast - ", "SouthEast[Fl] - ", "SouthEast[Oth] - "],
     "Midwest Region":       ["Midwest - "],
@@ -73,8 +60,7 @@ FUNDY_MAP = {
     "Lower 48 States":      ["CONUS - "]
 }
 BEST_FUN = ["Balance", "Prod", "PipeImports"]
-
-# STATE TO REGION MAPPING for Criterion data - SOLUTION 2.A.2
+# STATE TO REGION MAPPING for Criterion data
 STATE_TO_REGION = {
     "Texas":"South Central Region", "Louisiana":"South Central Region",
     "Oklahoma":"South Central Region", "Kansas":"South Central Region",
@@ -91,7 +77,7 @@ STATE_TO_REGION = {
     "Washington":"Pacific Region",
     "Illinois": "Midwest Region", "Indiana": "Midwest Region", "Iowa": "Midwest Region",
     "Michigan": "Midwest Region", "Minnesota": "Midwest Region", "Missouri": "Midwest Region",
-    "Nebraska": "Midwest Region", "North Dakota": "North Dakota", "Ohio": "Ohio", # Note: North Dakota and Ohio were mapped to themselves previously, now mapped to Midwest/East for consistency if they are part of a region. Adjusted based on common regional groupings.
+    "Nebraska": "Midwest Region", "North Dakota": "Midwest Region", "Ohio": "East Region", # Ohio mapped to East Region in 796
     "South Dakota": "Midwest Region", "Wisconsin": "Midwest Region",
     "Maine": "East Region", "New Hampshire": "East Region", "Vermont": "East Region",
     "Massachusetts": "East Region", "Rhode Island": "East Region", "Connecticut": "East Region",
@@ -103,12 +89,66 @@ STATE_TO_REGION = {
     "Arkansas": "South Central Region",
 }
 
+FACILITY_TO_REGION_MAP = {
+    'Arcadia': 'South Central Region', 'Atmos': 'South Central Region',
+    'Barnsley': 'South Central Region', 'Bay Gas': 'South Central Region',
+    'Bobcat': 'South Central Region', 'Boardwalk': 'South Central Region',
+    'Cadeville Gas Storage': 'South Central Region', 'Clear Lake': 'South Central Region',
+    'Egan': 'South Central Region', 'Enable': 'South Central Region',
+    'Freebird': 'South Central Region', 'Golden Triangle': 'South Central Region',
+    'Grama Ridge': 'South Central Region', 'Hattiesburg': 'South Central Region',
+    'Jefferson Island': 'South Central Region', 'Katy': 'South Central Region',
+    'LA Storage': 'South Central Region', 'Leaf River': 'South Central Region',
+    'Lee 8': 'South Central Region',
+    'Mississippi Hub': 'South Central Region', 'Mississippi River Trans': 'South Central Region',
+    'Monroe': 'South Central Region', 'Moss Bluff': 'South Central Region',
+    'Napoleonville': 'South Central Region',
+    'Perryville': 'South Central Region', 'Petal': 'South Central Region',
+    'Pine Prairie': 'South Central Region', 'Salt Plains': 'South Central Region',
+    'Southern Natural Gas': 'South Central Region', 'Southern Pines': 'South Central Region',
+    'SSC': 'South Central Region', 'SWGS East': 'South Central Region',
+    'SWGS West': 'South Central Region', 'Texas Gas': 'South Central Region',
+    'Tres Palacios': 'South Central Region', 'Washington Ranch': 'South Central Region',
+
+    'ANR Storage': 'Midwest Region', 'Caledonia': 'Midwest Region',
+    'Eaton Rapids': 'Midwest Region', 'Hardy': 'Midwest Region',
+    'Kimball-27': 'Midwest Region', 'Leidy': 'Midwest Region',
+    'Leroy': 'Midwest Region', 'Oakford': 'Midwest Region',
+    'Ohio Valley Hub': 'Midwest Region', 'Saltville': 'Midwest Region',
+    'Steckman Ridge': 'Midwest Region', 'UGI': 'Midwest Region',
+    'Washington': 'Midwest Region', 'Washington 10': 'Midwest Region',
+    'Wyckoff': 'Midwest Region', 'ANR Pipeline': 'Midwest Region',
+    'NGPL': 'Midwest Region', 'Tennessee': 'Midwest Region',
+    'TransGas': 'Midwest Region', 'Bell River Mills': 'Midwest Region',
+    'Eminence': 'Midwest Region', 'Keystone': 'Midwest Region',
+
+    'Accident': 'East Region', 'Blue Lake': 'East Region',
+    'Bluewater': 'East Region', 'Columbia Gas Storage': 'East Region',
+    'DTI Storage': 'East Region', 'Dawn Storage Hub': 'East Region',
+    'Equitrans': 'East Region', 'Honeoye': 'East Region',
+    'Rager Mountain': 'East Region', 'Seneca Lake Gas': 'East Region',
+    'Stagecoach': 'East Region', 'Steuben': 'East Region',
+    'Thomas Corners': 'East Region',
+
+    'Bijou Creek': 'Mountain Region', 'CIG': 'Mountain Region',
+    'Chalk Creek': 'Mountain Region', 'Coalville': 'Mountain Region',
+    'Clay Basin': 'Mountain Region', 'East Cheyenne': 'Mountain Region',
+    'Jackson Prairie': 'Mountain Region',
+    'Kiowa Creek': 'Mountain Region', 'Lost River': 'Mountain Region',
+    'North Summit': 'Mountain Region', 'Spire Storage West': 'Mountain Region',
+    'White River': 'Mountain Region', 'Williston Basin': 'Mountain Region',
+    'Young': 'Mountain Region',
+
+    'Central Valley': 'Pacific Region', 'Gill Ranch': 'Pacific Region',
+    'Lodi': 'Pacific Region', 'PG&E': 'Pacific Region',
+    'Socal': 'Pacific Region', 'TransCanada Alberta': 'Pacific Region',
+    'Wild Goose': 'Pacific Region',
+}
+
 GBM_PARAMS = {
     "n_estimators": 250, "num_leaves": 63,
     "learning_rate": 0.07, "subsample": 0.8, "random_state": 42
 }
-
-# --- feature switches -------------------------------------------------
 REGIONS_USE_POS   = {"Lower 48 States"}
 REGIONS_USE_PRICE = {"Lower 48 States",
                      "East Region",
@@ -130,19 +170,18 @@ def core_data():
     fdy = get_csv("Fundy.csv", ["Date"])
     wth = get_csv("WEATHER.csv", ["Date"])
     return chg, tot, fdy, wth
-
 # ────────── LNG loader (fixed mapping) ──────────
 def lng_data():
     lp = G_OUTPUT_DIR / "LNG_PIPE.csv"
     if lp.exists():
         return pd.read_csv(lp, parse_dates=["Date"])
-    
+
     raw = DATA_DIR / "CriterionLNGHist.csv"
     if not raw.exists():
-        return None 
+        return None
 
     df = pd.read_csv(raw, parse_dates=["Date"])
-    
+
     required_cols = ["Value", "state_name"]
     if not all(col in df.columns for col in required_cols):
         return None
@@ -150,7 +189,7 @@ def lng_data():
     df = df.rename(columns={"Value": "LNG_Bcf", "state_name": "Region"})
     df["Region"] = df["Region"].map(STATE_TO_REGION)
     df.dropna(subset=['Region'], inplace=True)
-    
+
     if df.empty:
         return None
 
@@ -163,7 +202,7 @@ def positioning_data():
     pos_file = (SCRIPT_DIR / "INFO" / "Natural_Gas_Data_positioning.csv")
     if not pos_file.exists():
         return None
-    
+
     pos = pd.read_csv(pos_file, parse_dates=["Date"]).set_index("Date").sort_index()
 
     pos["Spread_MM_Prod"] = pos["Managed Money"] - pos["Producers"]
@@ -202,6 +241,52 @@ def make_price_features():
     wk = wk.ffill().bfill()
     return wk
 
+# --- 796 INTEGRATION START: New function to add Henry Flow features ---
+def add_henry_features_to_df(df, base_index, henry_flow_data):
+    """
+    Adds Henry Hub flow-related features to the main DataFrame.
+    These features are derived from CriterionHenryFlows.csv.
+    """
+    if henry_flow_data is None or henry_flow_data.empty:
+        return df
+
+    henry_temp_df = henry_flow_data.copy()
+    if 'date' in henry_temp_df.columns:
+        henry_temp_df.set_index("date", inplace=True)
+    elif 'Date' in henry_temp_df.columns:
+        henry_temp_df.set_index("Date", inplace=True)
+    else:
+        print("Warning: Henry Flow data does not have a 'date' or 'Date' column. Skipping Henry Flow features.")
+        return df
+
+    found_scheduled_col = None
+    found_available_col = None
+
+    for col in henry_temp_df.columns:
+        if "scheduled" in col.lower() and "quantity" in col.lower():
+            found_scheduled_col = col
+        if "operationally" in col.lower() and "available" in col.lower():
+            found_available_col = col
+
+    if found_scheduled_col and found_available_col:
+        henry_temp_df = henry_temp_df.rename(columns={
+            found_scheduled_col: 'scheduled_quantity',
+            found_available_col: 'operationally_available'
+        })
+    elif "scheduled_quantity" not in henry_temp_df.columns or "operationally_available" not in henry_temp_df.columns:
+        print(f"Warning: Essential Henry Flow columns 'scheduled_quantity' and 'operationally_available' (or common variants) not found in CriterionHenryFlows.csv. Found columns: {henry_temp_df.columns.tolist()}. Skipping Henry Flow features.")
+        return df
+
+    grouped = henry_temp_df.groupby(pd.Grouper(freq='W-FRI'))[["scheduled_quantity", "operationally_available"]].sum()
+    grouped["utilization"] = grouped["scheduled_quantity"] / grouped["operationally_available"].replace(0, np.nan)
+    grouped["util_lag1"] = grouped["utilization"].shift(1)
+    grouped["util_roll3"] = grouped["utilization"].rolling(3).mean()
+    grouped["util_diff"] = grouped["utilization"].diff(3)
+
+    henry_features = grouped[["util_lag1", "util_roll3", "util_diff"]].reindex(base_index)
+    df = df.join(henry_features, how='left')
+    return df
+
 # ────────── features ──────────
 def weekly_weather(df):
     if df is None: return None
@@ -230,54 +315,62 @@ def sar_delta(level):
     return fit.forecast()[0] - level.iloc[-1]
 
 # ────────── ML block ──────────
-def quick_mae(df_feat, y_target):
-    K = 52
-    min_history_needed = 26 
-    if len(df_feat) < min_history_needed:
-         return np.inf
-
-    y_true, y_pred = [], []
-
-    # Iterate over relevant splits. Changed range to be more explicit and avoid off-by-one errors.
-    # The loop should go from `len(df_feat) - 13` down to `K` (inclusive), stepping by -13
-    # This ensures we get at least K data points for the first train set, and then test 13 weeks.
-    for split_end in range(len(df_feat) - 13, K -1, -13):
-        train_X = df_feat.iloc[:split_end]
-        test_X  = df_feat.iloc[split_end:split_end + 13]
-        
-        train_y = y_target.loc[train_X.index]
-        test_y  = y_target.loc[test_X.index]
-
-        if train_X.empty or test_X.empty or len(train_X) < 2 or len(test_X) < 2:
-            continue
-
-        scaler = StandardScaler().fit(train_X)
-        ridge  = RidgeCV(alphas=[0.1,1,10]).fit(scaler.transform(train_X), train_y)
-        
-        etr = (LGBMRegressor(**GBM_PARAMS).fit(train_X, train_y)
-               if USE_LIGHTGBM else
-               ExtraTreesRegressor(n_estimators=300, random_state=42).fit(train_X, train_y)) 
-
-        pred = 0.5*ridge.predict(scaler.transform(test_X)) + 0.5*etr.predict(test_X)
-        y_true.extend(test_y.tolist())
-        y_pred.extend(pred.tolist())
-
-    if not y_true:
+def calculate_maes(df_feat, y_target, K_weeks=52):
+    """
+    Calculates the Mean Absolute Error (MAE) using a walk-forward validation.
+    """
+    # Ensure enough history for training and testing
+    if len(df_feat) < K_weeks + 12: # Need at least K_weeks for training + 12 for testing
+        return np.inf
+    train_end_idx = len(df_feat) - 13 # Train up to 13 weeks before current end
+    if train_end_idx < K_weeks: # Ensure train set has at least K_weeks
         return np.inf
 
-    return mean_absolute_error(y_true, y_pred)
+    # Prepare training and testing sets
+    train_X = df_feat.iloc[:train_end_idx]
+    test_X = df_feat.iloc[train_end_idx:]
 
+    train_y = y_target.loc[train_X.index]
+    test_y = y_target.loc[test_X.index]
 
-def ml(region, data_cutoff_date, chg_full, tot_full, fdy_full, wwk_full, lng_full, weekly_salt_crit_df_full, weekly_nsalt_crit_df_full, pos_full, price_full, weekly_platts_full):
-    # Filter all dataframes to only include data up to the data_cutoff_date
-    # Using a helper function `_filter_df_by_date` to reduce repetition
+    if train_X.empty or test_X.empty or len(train_X) < 2 or len(test_X) < 2:
+        return np.inf
+
+    # Train Ridge Regression model
+    scaler = StandardScaler().fit(train_X)
+    ridge = RidgeCV(alphas=[0.1,1,10]).fit(scaler.transform(train_X), train_y)
+
+    # Train LightGBM or ExtraTreesRegressor model
+    etr = (LGBMRegressor(**GBM_PARAMS).fit(train_X, train_y)
+             if USE_LIGHTGBM else
+             ExtraTreesRegressor(n_estimators=300, random_state=42).fit(train_X, train_y))
+
+    # Blend predictions
+    pred = 0.5 * ridge.predict(scaler.transform(test_X)) + 0.5 * etr.predict(test_X)
+
+    # Return MAE for the last 4 weeks of predictions
+    return mean_absolute_error(test_y[-4:], pred[-4:])
+
+# It also returns more detailed results for backtesting.
+def ml(region, data_cutoff_date, chg_full, tot_full, fdy_full, wwk_full, lng_full,
+       weekly_salt_crit_df_full, weekly_nsalt_crit_df_full, pos_full, price_full,
+       weekly_platts_full, henry_flow_full, use_henry_flow, use_enhanced_weather,
+       use_criterion, use_platts, regions_use_pos, regions_use_price, return_full_data=False):
+    """
+    Performs machine learning forecasting for a given region,
+    with conditional feature inclusion based on provided toggles.
+    """
+    # Helper to filter dataframes up to the data_cutoff_date
     def _filter_df_by_date(df, date_col='Date'):
         if df is None: return None
-        if date_col in df.columns:
+        if date_col is None and isinstance(df.index, pd.DatetimeIndex):
+            return df[df.index <= data_cutoff_date].copy()
+        elif date_col in df.columns:
             return df[df[date_col] <= data_cutoff_date].copy()
-        else: # For index-based filtering
+        else:
             return df[df.index <= data_cutoff_date].copy()
 
+    # Filter all input dataframes based on the current data_cutoff_date
     chg = _filter_df_by_date(chg_full, date_col=None)
     tot = _filter_df_by_date(tot_full, date_col=None)
     fdy = _filter_df_by_date(fdy_full)
@@ -288,26 +381,41 @@ def ml(region, data_cutoff_date, chg_full, tot_full, fdy_full, wwk_full, lng_ful
     pos_df = _filter_df_by_date(pos_full, date_col=None)
     price_df = _filter_df_by_date(price_full, date_col=None)
     weekly_platts = _filter_df_by_date(weekly_platts_full, date_col=None)
+    henry_flow_df = _filter_df_by_date(henry_flow_full)
 
-    tgt = f"{region} Storage Change (Bcf)" if region!="Lower 48 States" else "Lower 48 States Storage Change (Bcf)"
-    if tgt not in chg.columns:
-        return np.nan, np.nan
-    df = pd.DataFrame({"Target": chg[tgt]})
+    # For South Central, the target is a combination of Salt and Non-Salt changes.
+    tgt_col_name = f"{region} Storage Change (Bcf)"
+    if region == "South Central Region":
+        salt_col = "Salt Region SC Storage Change (Bcf)"
+        nonsalt_col = "Nonsalt Region SC Storage Change (Bcf)"
+        if salt_col in chg.columns and nonsalt_col in chg.columns:
+            df = pd.DataFrame({"Target": chg[salt_col] + chg[nonsalt_col]})
+        elif tgt_col_name in chg.columns: # Fallback if combined columns not available
+            df = pd.DataFrame({"Target": chg[tgt_col_name]})
+        else: # Return NaNs if target column is missing
+            return np.nan, np.nan, np.nan, np.nan, np.nan, None, None
+    elif tgt_col_name in chg.columns: # For all other regions
+        df = pd.DataFrame({"Target": chg[tgt_col_name]})
+    else: # Return NaNs if target column is missing
+        return np.nan, np.nan, np.nan, np.nan, np.nan, None, None
 
+    # Filter data to the last 5 years for modeling
     internal_cutoff = chg.index.max() - pd.DateOffset(years=5)
     df = df[df.index >= internal_cutoff]
     if df.empty:
-        return np.nan, np.nan
+        return np.nan, np.nan, np.nan, np.nan, np.nan, None, None
 
+    # Add Lower 48 specific features
     if region=="Lower 48 States":
         lvl = "Lower 48 States Storage (Bcf)"
         if lvl in tot.columns:
             df["StorageDelta"] = tot[lvl] - tot[lvl].rolling(260,52).mean()
-        
+
         if "HistoricalSumOfParts" in chg.columns:
             df["SoP_lag1"] = chg["HistoricalSumOfParts"].shift(1)
             df["DeltaSoP_lag1"] = chg["HistoricalSumOfParts"].diff(1).shift(1)
 
+    # Add Fundamental data features
     fundy_prefixes = FUNDY_MAP.get(region, [])
     fundy_wide = None
     if fundy_prefixes and fdy is not None:
@@ -317,9 +425,9 @@ def ml(region, data_cutoff_date, chg_full, tot_full, fdy_full, wwk_full, lng_ful
         if need_cols:
             df = df.join(fundy_wide[need_cols].resample('W-FRI').sum(), how='left')
 
-    # Weather Features
+    # Add Weather Features (conditional based on use_enhanced_weather toggle)
     df_weather_features = pd.DataFrame(index=df.index)
-    if wwk is not None:
+    if use_enhanced_weather and wwk is not None:
         city = REGION_CITY[region]
         weather_filtered = wwk.filter(like=f"{city}_")
         if not weather_filtered.empty:
@@ -331,7 +439,8 @@ def ml(region, data_cutoff_date, chg_full, tot_full, fdy_full, wwk_full, lng_ful
                     if len(base.dropna()) >= 260:
                         clim = base.rolling(260, min_periods=104).mean()
                         df_weather_features[f"{col}_anom"] = base - clim
-            
+
+            # --- 796 INTEGRATION: ERCOT CDD anomaly for South Central ---
             if region == "South Central Region":
                 ercot_cdd_col = f"{REGION_CITY['South Central Region']}_CDD"
                 if ercot_cdd_col in df_weather_features.columns:
@@ -339,128 +448,239 @@ def ml(region, data_cutoff_date, chg_full, tot_full, fdy_full, wwk_full, lng_ful
                     if len(ercot_base.dropna()) >= 260:
                         ercot_clim = ercot_base.rolling(260, min_periods=104).mean()
                         df_weather_features["ERCOT_CDD_anom"] = ercot_base - ercot_clim
+            # --- 796 INTEGRATION END ---
 
-    # LNG and Pipe Imports
-    if lng is not None and "Region" in lng.columns:
-        lng_week = lng[lng["Region"]==region].set_index("Date")[["LNG_Bcf"]].resample("W-FRI").sum()
-        if not lng_week.empty:
-            if region == "South Central Region" and "LNG_Bcf" in lng_week.columns:
-                df["LNG_Weekly"] = lng_week["LNG_Bcf"]
-                df["LNG_lag1"] = lng_week["LNG_Bcf"].shift(1)
-                df["LNG_lag2"] = lng_week["LNG_Bcf"].shift(2)
-            else:
-                df = df.join(lng_week.rename(columns={"LNG_Bcf":"LNG_Weekly"}), how="left")
-
-    if region == "Midwest Region" and fundy_wide is not None:
-        pipe_imports_col_name = "Midwest - PipeImports"
-        if pipe_imports_col_name in fundy_wide.columns:
-            mid_imp_series = fundy_wide[pipe_imports_col_name]
-            if not mid_imp_series.dropna().empty:
-                df["CanImp"] = mid_imp_series.reindex(df.index)
-                df["CanImp_lag1"] = mid_imp_series.shift(1).reindex(df.index)
-
-    # Salt / Non-Salt Features
-    if weekly_salt_crit_df is not None and weekly_nsalt_crit_df is not None:
-        if region in ["South Central Region", "Lower 48 States"]:
-            all_crit_dfs = {'Salt': weekly_salt_crit_df, 'NSalt': weekly_nsalt_crit_df}
-            for prefix, src_df in all_crit_dfs.items():
-                if region == "Lower 48 States":
-                    l48_crit_cols = [c for c in src_df.columns if c.startswith(prefix + '_')]
-                    if l48_crit_cols:
-                        l48_sum_col_name = f"{prefix}_L48_Total"
-                        summed_series = src_df[l48_crit_cols].sum(axis=1)
-                        df = df.join(summed_series.rename(l48_sum_col_name), how='left')
+    # --- 796 INTEGRATION: Conditional Criterion (LNG, Pipe Imports, Salt/Non-Salt) features ---
+    if use_criterion: # This block is guarded by the use_criterion toggle
+        if lng is not None and "Region" in lng.columns:
+            lng_week = lng[lng["Region"]==region].set_index("Date")[["LNG_Bcf"]].resample("W-FRI").sum()
+            if not lng_week.empty:
+                if region == "South Central Region" and "LNG_Bcf" in lng_week.columns:
+                    df["LNG_Weekly"] = lng_week["LNG_Bcf"]
+                    df["LNG_lag1"] = lng_week["LNG_Bcf"].shift(1)
+                    df["LNG_lag2"] = lng_week["LNG_Bcf"].shift(2)
                 else:
-                    col_name = f"{prefix}_{region}"
-                    if col_name in src_df.columns:
-                        df = df.join(src_df[[col_name]], how='left')
+                    df = df.join(lng_week.rename(columns={"LNG_Bcf":"LNG_Weekly"}), how="left")
 
-    # Positioning and Price Features
-    if pos_df is not None and region in REGIONS_USE_POS:
-        df = df.join(pos_df, how="left") 
-    
-    if price_df is not None and region in REGIONS_USE_PRICE:
-        df = df.join(price_df, how="left")
-    
-    # Platts CONUS data
-    if weekly_platts is not None and not weekly_platts.empty:
-        df = df.join(weekly_platts, how="left")
+        if region == "Midwest Region" and fundy_wide is not None:
+            pipe_imports_col_name = "Midwest - PipeImports"
+            if pipe_imports_col_name in fundy_wide.columns:
+                mid_imp_series = fundy_wide[pipe_imports_col_name]
+                if not mid_imp_series.dropna().empty:
+                    df["CanImp"] = mid_imp_series.reindex(df.index)
+                    df["CanImp_lag1"] = mid_imp_series.shift(1).reindex(df.index)
 
+        if weekly_salt_crit_df is not None and weekly_nsalt_crit_df is not None:
+            if region == "South Central Region": # Specific handling for SC
+                salt_col_name = f"Salt_{region}"
+                nsalt_col_name = f"NSalt_{region}"
+                if salt_col_name in weekly_salt_crit_df.columns:
+                    df = df.join(weekly_salt_crit_df[[salt_col_name]].rename(columns={salt_col_name: "Criterion_Salt_SC_Change"}), how='left')
+                if nsalt_col_name in weekly_nsalt_crit_df.columns:
+                    df = df.join(weekly_nsalt_crit_df[[nsalt_col_name]].rename(columns={nsalt_col_name: "Criterion_NSalt_SC_Change"}), how='left')
+            elif region == "Lower 48 States": # Specific handling for L48
+                l48_salt_cols = [c for c in weekly_salt_crit_df.columns if c.startswith('Salt_')]
+                l48_nsalt_cols = [c for c in weekly_nsalt_crit_df.columns if c.startswith('NSalt_')]
+
+                if l48_salt_cols:
+                    df["Criterion_Salt_L48_Total"] = weekly_salt_crit_df[l48_salt_cols].sum(axis=1).reindex(df.index)
+                if l48_nsalt_cols:
+                    df["Criterion_NSalt_L48_Total"] = weekly_nsalt_crit_df[l48_nsalt_cols].sum(axis=1).reindex(df.index)
+            else: # General handling for other regions
+                salt_col_name = f"Salt_{region}"
+                nsalt_col_name = f"NSalt_{region}"
+                if salt_col_name in weekly_salt_crit_df.columns:
+                    df = df.join(weekly_salt_crit_df[[salt_col_name]].rename(columns={salt_col_name: "Criterion_Salt_Change"}), how='left')
+                if nsalt_col_name in weekly_nsalt_crit_df.columns:
+                    df = df.join(weekly_nsalt_crit_df[[nsalt_col_name]].rename(columns={nsalt_col_name: "Criterion_NSalt_Change"}), how='left')
+    # --- 796 INTEGRATION END ---
+
+    # --- 796 INTEGRATION: Conditional Platts and Positioning/Price features ---
+    if use_platts: # This block is guarded by the use_platts toggle
+        if pos_df is not None and region in regions_use_pos:
+            df = df.join(pos_df, how="left")
+
+        if price_df is not None and region in regions_use_price:
+            df = df.join(price_df, how="left")
+
+        if weekly_platts is not None and not weekly_platts.empty:
+            df = df.join(weekly_platts, how="left")
+    # --- 796 INTEGRATION END ---
+
+    # --- 796 INTEGRATION: Conditional Henry Flow features ---
+    if use_henry_flow: # This block is guarded by the use_henry_flow toggle
+        df = add_henry_features_to_df(df, df.index, henry_flow_df)
+    # --- 796 INTEGRATION END ---
+
+    # Add common time-series features (Summer dummy, lagged target)
     df["Summer"] = ((df.index.month >= 5) & (df.index.month <= 9)).astype(int)
-    df["Target_lag1"] = chg[tgt].shift(1)
-    df["Target_lag2"] = chg[tgt].shift(2)
+    # Note: Target_lag1 and Target_lag2 now correctly reference df["Target"]
+    # as the target column is already set up at the beginning of the ml function.
+    df["Target_lag1"] = df["Target"].shift(1)
+    df["Target_lag2"] = df["Target"].shift(2)
 
-    df = add_cal(df)
-    
+    df = add_cal(df) # Add sinusoidal week features
+
+    # Drop rows with any NaN values that resulted from feature engineering
     df_cleaned = df.dropna()
     if df_cleaned.empty:
-        return np.nan, np.nan
+        return np.nan, np.nan, np.nan, np.nan, np.nan, None, None
 
-    y_full = df_cleaned.pop("Target")
-    X_base = df_cleaned.copy()
+    y_full_filtered = df_cleaned.pop("Target") # Separate target variable
+    X_base = df_cleaned.copy() # Features for base model
 
+    # Join weather features to the base features, if available
     X_wthr = X_base.join(df_weather_features.reindex(X_base.index).dropna(how='all'), how='left')
-    
-    mae_base = quick_mae(X_base, y_full)
-    mae_wthr = quick_mae(X_wthr, y_full)
 
+    # Calculate MAE for base model (without weather) and weather-enhanced model
+    mae_base = calculate_maes(X_base, y_full_filtered)
+    mae_wthr = calculate_maes(X_wthr, y_full_filtered)
+
+    # Determine whether to use weather features based on predefined overrides or MAE comparison
     force_no_weather = region in NEVER_USE_WEATHER
-    force_yes_weather = region in ALWAYS_USE_WEATHER 
+    force_yes_weather = region in ALWAYS_USE_WEATHER
 
-    use_weather = False
+    use_weather_in_model = False
     if force_no_weather:
-        use_weather = False
-    elif force_yes_weather: 
-        use_weather = True
-    elif mae_base == np.inf and mae_wthr == np.inf:
-        use_weather = False
-    elif mae_base == np.inf: 
-        use_weather = True
-    elif mae_wthr == np.inf:
-        use_weather = False
-    else: 
-        use_weather = mae_wthr + 0.01 < mae_base 
+        use_weather_in_model = False
+    elif force_yes_weather:
+        use_weather_in_model = True
+    elif mae_base == np.inf and mae_wthr == np.inf: # If both MAEs are infinite, no weather
+        use_weather_in_model = False
+    elif mae_base == np.inf: # If base MAE is infinite, but weather is not, use weather
+        use_weather_in_model = True
+    elif mae_wthr == np.inf: # If weather MAE is infinite, but base is not, don't use weather
+        use_weather_in_model = False
+    else: # Otherwise, use weather if it improves MAE by at least 0.01
+        use_weather_in_model = mae_wthr + 0.01 < mae_base
 
-    chosen_X = X_wthr if use_weather else X_base
-    
-    y = y_full 
+    chosen_X = X_wthr if use_weather_in_model else X_base # Select the feature set
+
+    y = y_full_filtered
     X = chosen_X
 
+    # Scale features
     scaler = StandardScaler(); Xs = scaler.fit_transform(X)
-    
+
+    # Train Ridge Regression
     ridge  = RidgeCV(alphas=[0.1,1.0,10.0]).fit(Xs,y)
 
+    # Train LightGBM or ExtraTreesRegressor
     if USE_LIGHTGBM:
         etr = LGBMRegressor(**GBM_PARAMS).fit(X, y)
     else:
         etr = ExtraTreesRegressor(n_estimators=300, random_state=42).fit(X,y)
-    
-    R_W, G_W = 0.40, 0.60
 
-    ml_fc  = R_W * ridge.predict(Xs[-1].reshape(1, -1))[0] + \
-             G_W * etr.predict(X.iloc[[-1]])[0]
+    R_W, G_W = 0.40, 0.60 # Blending weights for Ridge and GBM
 
-    mae    = mean_absolute_error(
-                     y.iloc[-4:],
-                     R_W * ridge.predict(Xs[-4:]) + G_W * etr.predict(X.iloc[-4:]))
-    return ml_fc, mae
+    # Get predictions from both models
+    all_preds_ridge = ridge.predict(Xs)
+    all_preds_etr = etr.predict(X)
+    all_combined_preds = R_W * all_preds_ridge + G_W * all_preds_etr # Blended predictions
+
+    ml_fc  = all_combined_preds[-1] # Final forecast is the last blended prediction
+
+    # --- 796 INTEGRATION: Feature contribution logging for Lower 48 ---
+    if region == "Lower 48 States":
+        print(f"[{region}] Final Forecast (from ML function, no external scale): {ml_fc:.2f} Bcf")
+        if not X.empty:
+            print(f"[{region}] Top Feature Contributions (for the last forecast point):")
+            try:
+                last_X_row = pd.Series(X.iloc[-1], index=X.columns)
+                if USE_LIGHTGBM and hasattr(etr, 'feature_importances_'):
+                    feature_importances_series = pd.Series(etr.feature_importances_, index=X.columns)
+                    print("--- LGBM Feature Importances (global) ---")
+                    print(feature_importances_series.sort_values(ascending=False).head(10))
+                print("--- Feature Values for Last Forecast Point ---")
+                print(last_X_row.sort_values(ascending=False).head(10))
+            except Exception as e:
+                print(f"[{region}] Feature logging (detailed) failed: {e}")
+    # --- 796 INTEGRATION END ---
+
+    # --- 796 INTEGRATION: Return 4-week and 12-week Median Absolute Error ---
+    # Calculate MAE for the last 4 and 12 weeks of predictions
+    mae_4wk = np.nan
+    mae_12wk = np.nan
+    if len(y) >= 4:
+        mae_4wk = np.median(np.abs(all_combined_preds[-4:] - y.iloc[-4:]))
+    if len(y) >= 12:
+        mae_12wk = np.median(np.abs(all_combined_preds[-12:] - y.iloc[-12:]))
+
+    # Return full data (predictions and actuals) if requested for backtesting
+    if return_full_data:
+        return ml_fc, mae_4wk, mae_12wk, all_combined_preds, y
+    else:
+        return ml_fc, mae_4wk, mae_12wk
+# --- 796 INTEGRATION END ---
+
+# --- 796 INTEGRATION START: Updated _get_regional_actual function ---
+# This helper function retrieves the actual storage change for a region,
+# specifically handling the combined South Central target.
+def _get_regional_actual(chg_df, target_date, region_name):
+    """
+    Retrieves the actual storage change for a given region and date,
+    handling the combined South Central target.
+    """
+    if target_date not in chg_df.index:
+        return np.nan
+
+    if region_name == "South Central Region":
+        salt_col = "Salt Region SC Storage Change (Bcf)"
+        nonsalt_col = "Nonsalt Region SC Storage Change (Bcf)"
+        if salt_col in chg_df.columns and nonsalt_col in chg_df.columns:
+            return chg_df.loc[target_date, salt_col] + chg_df.loc[target_date, nonsalt_col]
+        else:
+            return chg_df.loc[target_date, "South Central Region Storage Change (Bcf)"] if "South Central Region Storage Change (Bcf)" in chg_df.columns else np.nan
+    else:
+        col_name = f"{region_name} Storage Change (Bcf)"
+        return chg_df.loc[target_date, col_name] if col_name in chg_df.columns else np.nan
+# --- 796 INTEGRATION END ---
 
 # ────────── main ──────────
+# --- 796 INTEGRATION START: Main function with regional toggles and enhanced data loading/processing ---
 def main():
     print("Loading...")
 
-    # Load all full datasets once
-    chg_full, tot_full, fdy_full, wth_full = core_data()
-    # Handle cases where core_data components might be None due to missing files
-    if any(df is None for df in [chg_full, tot_full, fdy_full, wth_full]):
-        sys.exit("❌ One or more core CSV files are missing. Please check the INFO directory.")
+    # Define regional feature toggles and model scaling factors.
+    # This dictionary is the core of the hybrid approach, allowing
+    # specific features (weather, criterion, henry, platts) to be
+    # turned on/off per region, and a model_scale to be applied.
+    region_toggles = {
+        "East Region":          {"use_weather": True, "use_criterion": True, "use_henry": False, "use_platts": True,  "model_scale": 1.0},
+        # --- EDITED FOR MIDWEST REGION: To use 605 logic exactly ---
+        # Original 605 used LNG, Midwest-specific Pipe Imports (part of criterion),
+        # and general positioning/price/Platts (part of platts toggle).
+        # It did not use Henry Flow and had no explicit model scale.
+        "Midwest Region":       {"use_weather": True, "use_criterion": True, "use_henry": False, "use_platts": True, "model_scale": 1.0},
+        # --- END EDIT FOR MIDWEST REGION ---
+        "South Central Region": {"use_weather": True, "use_criterion": True, "use_henry": True,  "use_platts": False, "model_scale": 0.70},
+        "Mountain Region":      {"use_weather": True, "use_criterion": False,"use_henry": True,  "use_platts": False, "model_scale": 1.0},
+        "Pacific Region":       {"use_weather": True, "use_criterion": True, "use_henry": False, "use_platts": True,  "model_scale": 1.0},
+        "Lower 48 States":      {"use_weather": True, "use_criterion": True, "use_henry": False, "use_platts": True,  "model_scale": 1.0},
+    }
+    # Flag to determine if Lower 48 forecast should be the sum of its parts
+    USE_SUM_OF_PARTS_FOR_L48 = True
 
+    # Load core data files
+    chg_full, tot_full, fdy_full, wth_full = core_data()
+    if any(df is None for df in [chg_full, tot_full, fdy_full, wth_full]):
+        sys.exit(f"❌ One or more core CSV files are missing. Please check the INFO directory.")
+
+    # Process weekly weather data
     wwk_full = weekly_weather(wth_full)
+    # Load LNG data
     lng_full = lng_data()
+    # Load positioning data
     pos_full = positioning_data()
+    # Load and process price features
     price_full = make_price_features()
 
-    # === Load and clean Platts CONUS Fundamentals ===
+    # Load Henry Flow data (new in 796 for specific regions)
+    henry_flow_full = get_csv("CriterionHenryFlows.csv", ["Date"])
+    if henry_flow_full is None:
+        print("Warning: CriterionHenryFlows.csv not found. Henry Flow features will not be used.")
+
+    # Load and clean Platts CONUS Fundamentals (new in 796 for specific regions)
     platts_conus_path = DATA_DIR / "PlattsCONUSFundamentalsHIST.csv"
     platts_conus_full = None
     try:
@@ -471,116 +691,145 @@ def main():
         pass # platts_conus_full remains None
 
     selected_platts_features = [
-        "DryGasProduction", "MexExp", "LNGExports", 
+        "DryGasProduction", "MexExp", "LNGExports",
         "PowerBurn", "ResComDemand", "NetImpliedFlow"
     ]
-    
+
     weekly_platts_full = None
     if platts_conus_full is not None and not platts_conus_full.empty:
         existing_platts_features = [f for f in selected_platts_features if f in platts_conus_full.columns]
         if existing_platts_features:
             weekly_platts_full = platts_conus_full[existing_platts_features].resample("W-FRI").mean().dropna()
 
-    # Build weekly salt / non-salt Criterion series once
+    # Build weekly salt / non-salt Criterion series
     locs = get_csv("locs_list.csv", [])
-    
-    weekly_salt_crit_df_full = None 
-    weekly_nsalt_crit_df_full = None 
+
+    weekly_salt_crit_df_full = None
+    weekly_nsalt_crit_df_full = None
 
     required_locs_cols = ['storage_name', 'state_name', 'storage_type']
     if locs is not None and all(col in locs.columns for col in required_locs_cols):
         crit_full = get_csv("CriterionStorageChange.csv", ["eff_gas_day"])
         if crit_full is not None:
-            crit_full = (crit_full.merge(locs[required_locs_cols], 
-                                         on='storage_name', how='left')
-                                         .dropna(subset=['state_name','storage_type'])) 
+            crit_full = (crit_full.merge(locs[required_locs_cols],
+                                            on='storage_name', how='left'))
 
-            crit_full['Region'] = crit_full['state_name'].map(STATE_TO_REGION)
-            crit_full = crit_full.dropna(subset=['Region']) 
+            # --- 796 INTEGRATION: Apply FACILITY_TO_REGION_MAP first, then STATE_TO_REGION ---
+            # This provides more accurate regional mapping for Criterion data.
+            crit_full['Region'] = crit_full['storage_name'].map(FACILITY_TO_REGION_MAP)
+            crit_full['Region'] = crit_full['Region'].fillna(crit_full['state_name'].map(STATE_TO_REGION))
+            # --- 796 INTEGRATION END ---
+
+            crit_full = crit_full.dropna(subset=['Region', 'storage_type'])
             crit_full.set_index('eff_gas_day', inplace=True)
 
             weekly_salt_crit_df_full = (crit_full[crit_full['storage_type'].str.contains('salt',case=False)]
-                                .groupby([pd.Grouper(freq='W-FRI'), 'Region'])['daily_storage_change']
-                                .sum()
-                                .unstack('Region')
-                                .add_prefix('Salt_'))
+                                    .groupby([pd.Grouper(freq='W-FRI'), 'Region'])['daily_storage_change']
+                                    .sum()
+                                    .unstack('Region')
+                                    .add_prefix('Salt_'))
             weekly_nsalt_crit_df_full = (crit_full[~crit_full['storage_type'].str.contains('salt',case=False)]
-                                 .groupby([pd.Grouper(freq='W-FRI'), 'Region'])['daily_storage_change']
-                                 .sum()
-                                 .unstack('Region')
-                                 .add_prefix('NSalt_'))
+                                     .groupby([pd.Grouper(freq='W-FRI'), 'Region'])['daily_storage_change']
+                                     .sum()
+                                     .unstack('Region')
+                                     .add_prefix('NSalt_'))
 
-    # Calculate historical Sum-of-Parts from actual regional changes for L48 features
-    regional_change_cols_full = [f"{r} Storage Change (Bcf)" for r in REGIONS if r != "Lower 48 States"]
-    existing_regional_change_cols_full = [col for col in regional_change_cols_full if col in chg_full.columns]
-    
-    if existing_regional_change_cols_full:
-        chg_full["HistoricalSumOfParts"] = chg_full[existing_regional_change_cols_full].sum(axis=1)
+    # --- 796 INTEGRATION: Calculate historical Sum-of-Parts for L48 features ---
+    # This logic is updated to correctly sum regional changes, including the
+    # combined South Central target if available.
+    l48_sum_cols_for_sop = [f"{r} Storage Change (Bcf)" for r in REGIONS if r not in ["Lower 48 States", "South Central Region"]]
+    if "Salt Region SC Storage Change (Bcf)" in chg_full.columns and "Nonsalt Region SC Storage Change (Bcf)" in chg_full.columns:
+        chg_full["South Central Region Storage Change (Bcf)_Combined"] = chg_full["Salt Region SC Storage Change (Bcf)"] + chg_full["Nonsalt Region SC Storage Change (Bcf)"]
+        l48_sum_cols_for_sop.append("South Central Region Storage Change (Bcf)_Combined")
+    elif "South Central Region Storage Change (Bcf)" in chg_full.columns:
+        l48_sum_cols_for_sop.append("South Central Region Storage Change (Bcf)")
+
+    existing_l48_sum_cols = [col for col in l48_sum_cols_for_sop if col in chg_full.columns]
+
+    if existing_l48_sum_cols:
+        chg_full["HistoricalSumOfParts"] = chg_full[existing_l48_sum_cols].sum(axis=1)
     else:
-        chg_full["HistoricalSumOfParts"] = np.nan 
+        chg_full["HistoricalSumOfParts"] = np.nan
+    # --- 796 INTEGRATION END ---
 
     latest_eia_date = chg_full.index.max()
     current_forecast_date = latest_eia_date + timedelta(days=7)
 
-    backtest_results = {r: {'forecasts': [np.nan]*4, 'actuals': [np.nan]*4} for r in REGIONS}
+    output_rows = []
 
-    # ────────── Walk-Forward Backtesting Loop ──────────
-    for i in range(4, 0, -1):
-        forecast_target_date = latest_eia_date - pd.DateOffset(weeks=i-1)
-        data_cutoff_date = forecast_target_date - pd.DateOffset(weeks=1)
-
-        # No need for get_data_snapshot, ml function handles the filtering internally with full dataframes
-        # This keeps the main loop cleaner and avoids redundant data copying.
-        
-        if chg_full[chg_full.index <= data_cutoff_date].empty or len(chg_full[chg_full.index <= data_cutoff_date]) < 52:
-            continue
-
-        for r in REGIONS:
-            region_target_col = f"{r} Storage Change (Bcf)"
-            actual_val = chg_full.loc[forecast_target_date, region_target_col] if forecast_target_date in chg_full.index and region_target_col in chg_full.columns else np.nan
-
-            fc_val, _ = ml(r, data_cutoff_date, chg_full, tot_full, fdy_full, wwk_full, lng_full, weekly_salt_crit_df_full, weekly_nsalt_crit_df_full, pos_full, price_full, weekly_platts_full)
-            
-            backtest_results[r]['forecasts'][4-i] = round(fc_val, 2)
-            backtest_results[r]['actuals'][4-i] = round(actual_val, 2)
-
-    # ────────── Current Forward Forecast ──────────
-    rows = []
-    reg_fc = {}
-
+    # Iterate through regions to generate forecasts
     for r in REGIONS:
-        ml_fc, mae = ml(r, latest_eia_date, chg_full, tot_full, fdy_full, wwk_full, lng_full, weekly_salt_crit_df_full, weekly_nsalt_crit_df_full, pos_full, price_full, weekly_platts_full) 
-        fc = ml_fc
-        reg_fc[r] = fc
-        rows.append((r, round(fc,2), round(mae,2)))
-    # Ensure 'Lower 48 States' is included correctly if it's computed as a sum of parts
-    l48_forecast = reg_fc.get("Lower 48 States", np.nan)
-    if pd.isna(l48_forecast): # If L48 forecast is not directly available, try to sum up
-        sum_of_regional_forecasts = sum(v for k, v in reg_fc.items() if k != "Lower 48 States" and not np.isnan(v))
-        if sum_of_regional_forecasts != 0: # Only assign if there's a meaningful sum
-            chg_full.loc[chg_full.index.max(), "ForecastedSumOfParts"] = sum_of_regional_forecasts
-        else:
-            chg_full.loc[chg_full.index.max(), "ForecastedSumOfParts"] = np.nan
-    else:
-        chg_full.loc[chg_full.index.max(), "ForecastedSumOfParts"] = l48_forecast
+        # Get region-specific toggles from the dictionary
+        region_config = region_toggles.get(r, {})
+        use_enhanced_weather = region_config.get("use_weather", False)
+        use_criterion = region_config.get("use_criterion", False)
+        use_henry_flow = region_config.get("use_henry", False)
+        use_platts = region_config.get("use_platts", False)
+        model_scale = region_config.get("model_scale", 1.0)
 
-    out = pd.DataFrame(rows, columns=["Region","Forecast (Bcf)","4-wk MAE"])
-    out["Forecast Date"] = current_forecast_date.date()
+        print(f"\n--- Region: {r} ---")
+        print(f"   Toggles applied: Weather={use_enhanced_weather}, Criterion={use_criterion}, Henry={use_henry_flow}, Platts={use_platts}, Scale={model_scale}")
+        print("--------------------")
 
-    for r in REGIONS:
-        region_row_idx = out[out['Region'] == r].index
-        if not region_row_idx.empty:
-            for i in range(1, 5):
-                out.loc[region_row_idx, f"Back-{i} wk Fcst"] = backtest_results[r]['forecasts'][4-i]
-                out.loc[region_row_idx, f"Back-{i} wk Actual"] = backtest_results[r]['actuals'][4-i]
+        # Call the ml function with all parameters and request full data for backtesting
+        current_fcst, mae_4wk, mae_12wk, current_preds_history, current_actuals_history = ml(
+            r, latest_eia_date, chg_full, tot_full, fdy_full, wwk_full, lng_full,
+            weekly_salt_crit_df_full, weekly_nsalt_crit_df_full, pos_full, price_full,
+            weekly_platts_full, henry_flow_full, use_henry_flow, use_enhanced_weather,
+            use_criterion, use_platts, REGIONS_USE_POS, REGIONS_USE_PRICE, return_full_data=True
+        )
 
-    print("Preparing final output table and CSV.")
-    col_order = (
-        ["Region","Forecast (Bcf)"] +
-        [f"Back-{i} wk Fcst" for i in range(1,5)] +
-        [f"Back-{i} wk Actual" for i in range(1,5)] +
-        ["4-wk MAE","Forecast Date"]
-    )
+        # Apply model scale to the forecast
+        if not np.isnan(current_fcst):
+            original_fcst = current_fcst
+            current_fcst *= model_scale
+            print(f"[{r}] Raw Forecast: {original_fcst:.2f} Bcf, Scaled Forecast: {current_fcst:.2f} Bcf (Scale: {model_scale:.2f})")
+
+        # --- 796 INTEGRATION: Retrieve previous week's actual and forecast ---
+        prev_wk_actual = _get_regional_actual(chg_full, latest_eia_date, r)
+        prev_wk_fcst = np.nan
+        if current_preds_history is not None and len(current_preds_history) >= 2:
+            prev_wk_fcst = current_preds_history[-2] # Second to last prediction
+            if not np.isnan(prev_wk_fcst):
+                prev_wk_fcst *= model_scale # Apply scale to previous week's forecast as well
+        # --- 796 INTEGRATION END ---
+
+        # Append results to output_rows
+        output_rows.append({
+            "Region": r,
+            "Forecast (Bcf)": round(current_fcst, 2),
+            "Prev-wk Fcst": round(prev_wk_fcst, 2),
+            "Prev-wk Actual": round(prev_wk_actual, 2),
+            "4-wk MedAE": round(mae_4wk, 2),
+            "12-wk MedAE": round(mae_12wk, 2),
+            "Forecast Date": current_forecast_date.strftime("%Y-%m-%d")
+        })
+
+    # --- 796 INTEGRATION: Override Lower 48 forecast with Sum of Parts if enabled ---
+    if USE_SUM_OF_PARTS_FOR_L48:
+        sum_of_parts = sum(row["Forecast (Bcf)"] for row in output_rows if row["Region"] != "Lower 48 States")
+        for row in output_rows:
+            if row["Region"] == "Lower 48 States":
+                print(f"\n[Override] Replacing Lower 48 forecast {row['Forecast (Bcf)']:.2f} Bcf → {sum_of_parts:.2f} Bcf (Sum of Parts)")
+                row["Forecast (Bcf)"] = round(sum_of_parts, 2)
+                break
+    # --- 796 INTEGRATION END ---
+
+    out = pd.DataFrame(output_rows)
+
+    print("\nPreparing final output table and CSV.")
+    # --- 796 INTEGRATION: Updated column order for the final output table ---
+    col_order = [
+        "Region",
+        "Forecast (Bcf)",
+        "Prev-wk Fcst",
+        "Prev-wk Actual",
+        "4-wk MedAE",
+        "12-wk MedAE",
+        "Forecast Date"
+    ]
+    # --- 796 INTEGRATION END ---
+
     for col in col_order:
         if col not in out.columns:
             out[col] = np.nan
@@ -603,3 +852,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+# --- 796 INTEGRATION END: Main function ---
