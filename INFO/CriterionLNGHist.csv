@@ -3852,8 +3852,9 @@ Date,Item,Value,state_name
 07/17/2025,Calcasieu Pass LNG Feed Gas,1719.578,Louisiana
 07/18/2025,Calcasieu Pass LNG Feed Gas,1668.159,Louisiana
 07/19/2025,Calcasieu Pass LNG Feed Gas,1696.266,Louisiana
-07/20/2025,Calcasieu Pass LNG Feed Gas,1701.372,Louisiana
-07/21/2025,Calcasieu Pass LNG Feed Gas,1696.266,Louisiana
+07/20/2025,Calcasieu Pass LNG Feed Gas,1701.91,Louisiana
+07/21/2025,Calcasieu Pass LNG Feed Gas,1630.69,Louisiana
+07/22/2025,Calcasieu Pass LNG Feed Gas,1691.616,Louisiana
 01/01/2015,Cameron LNG Feed Gas,0.0,Louisiana
 01/02/2015,Cameron LNG Feed Gas,0.0,Louisiana
 01/03/2015,Cameron LNG Feed Gas,0.0,Louisiana
@@ -7709,6 +7710,7 @@ Date,Item,Value,state_name
 07/19/2025,Cameron LNG Feed Gas,1989.0,Louisiana
 07/20/2025,Cameron LNG Feed Gas,1989.0,Louisiana
 07/21/2025,Cameron LNG Feed Gas,1989.0,Louisiana
+07/22/2025,Cameron LNG Feed Gas,1982.835,Louisiana
 01/01/2015,Corpus Christi LNG Feed Gas,0.0,Texas
 01/02/2015,Corpus Christi LNG Feed Gas,0.0,Texas
 01/03/2015,Corpus Christi LNG Feed Gas,0.0,Texas
@@ -11563,7 +11565,8 @@ Date,Item,Value,state_name
 07/18/2025,Corpus Christi LNG Feed Gas,2400.528,Texas
 07/19/2025,Corpus Christi LNG Feed Gas,2439.39,Texas
 07/20/2025,Corpus Christi LNG Feed Gas,2369.39,Texas
-07/21/2025,Corpus Christi LNG Feed Gas,1705.54,Texas
+07/21/2025,Corpus Christi LNG Feed Gas,1707.39,Texas
+07/22/2025,Corpus Christi LNG Feed Gas,1799.596,Texas
 01/01/2015,Cove Point LNG Feed Gas,0.0,Maryland
 01/02/2015,Cove Point LNG Feed Gas,0.0,Maryland
 01/03/2015,Cove Point LNG Feed Gas,0.0,Maryland
@@ -15419,6 +15422,7 @@ Date,Item,Value,state_name
 07/19/2025,Cove Point LNG Feed Gas,819.4,Maryland
 07/20/2025,Cove Point LNG Feed Gas,819.4,Maryland
 07/21/2025,Cove Point LNG Feed Gas,819.4,Maryland
+07/22/2025,Cove Point LNG Feed Gas,818.6,Maryland
 01/01/2015,Elba Island LNG Feed Gas,0.0,Georgia
 01/02/2015,Elba Island LNG Feed Gas,0.0,Georgia
 01/03/2015,Elba Island LNG Feed Gas,0.0,Georgia
@@ -19273,7 +19277,8 @@ Date,Item,Value,state_name
 07/18/2025,Elba Island LNG Feed Gas,49.466,Georgia
 07/19/2025,Elba Island LNG Feed Gas,189.097,Georgia
 07/20/2025,Elba Island LNG Feed Gas,289.195,Georgia
-07/21/2025,Elba Island LNG Feed Gas,286.958,Georgia
+07/21/2025,Elba Island LNG Feed Gas,291.227,Georgia
+07/22/2025,Elba Island LNG Feed Gas,358.991,Georgia
 01/01/2015,Freeport LNG Feed Gas,0.0,Texas
 01/02/2015,Freeport LNG Feed Gas,0.0,Texas
 01/03/2015,Freeport LNG Feed Gas,0.0,Texas
@@ -23127,8 +23132,9 @@ Date,Item,Value,state_name
 07/17/2025,Freeport LNG Feed Gas,1812.636,Texas
 07/18/2025,Freeport LNG Feed Gas,1793.407,Texas
 07/19/2025,Freeport LNG Feed Gas,1641.746,Texas
-07/20/2025,Freeport LNG Feed Gas,1784.361,Texas
-07/21/2025,Freeport LNG Feed Gas,1840.827,Texas
+07/20/2025,Freeport LNG Feed Gas,1775.861,Texas
+07/21/2025,Freeport LNG Feed Gas,1702.069,Texas
+07/22/2025,Freeport LNG Feed Gas,1808.55,Texas
 01/01/2015,Sabine Pass LNG Feed Gas,0.0,Louisiana
 01/02/2015,Sabine Pass LNG Feed Gas,0.0,Louisiana
 01/03/2015,Sabine Pass LNG Feed Gas,0.0,Louisiana
@@ -26983,7 +26989,8 @@ Date,Item,Value,state_name
 07/18/2025,Sabine Pass LNG Feed Gas,4570.501,Louisiana
 07/19/2025,Sabine Pass LNG Feed Gas,4493.0,Louisiana
 07/20/2025,Sabine Pass LNG Feed Gas,4438.0,Louisiana
-07/21/2025,Sabine Pass LNG Feed Gas,4391.439,Louisiana
+07/21/2025,Sabine Pass LNG Feed Gas,4430.0,Louisiana
+07/22/2025,Sabine Pass LNG Feed Gas,4407.707,Louisiana
 01/01/2015,US LNG Exports - Plaquemines LNG,0.0,
 01/02/2015,US LNG Exports - Plaquemines LNG,0.0,
 01/03/2015,US LNG Exports - Plaquemines LNG,0.0,
@@ -30837,5 +30844,6 @@ Date,Item,Value,state_name
 07/17/2025,US LNG Exports - Plaquemines LNG,2883.4,
 07/18/2025,US LNG Exports - Plaquemines LNG,2749.17,
 07/19/2025,US LNG Exports - Plaquemines LNG,2793.209,
-07/20/2025,US LNG Exports - Plaquemines LNG,2791.499,
-07/21/2025,US LNG Exports - Plaquemines LNG,2784.92,
+07/20/2025,US LNG Exports - Plaquemines LNG,2692.21,
+07/21/2025,US LNG Exports - Plaquemines LNG,2789.955,
+07/22/2025,US LNG Exports - Plaquemines LNG,2611.178,

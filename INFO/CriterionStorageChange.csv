@@ -3486,7 +3486,8 @@ ANR Pipeline,2025-07-17,382123.0
 ANR Pipeline,2025-07-18,518230.0
 ANR Pipeline,2025-07-19,518230.0
 ANR Pipeline,2025-07-20,518230.0
-ANR Pipeline,2025-07-21,518230.0
+ANR Pipeline,2025-07-21,493889.0
+ANR Pipeline,2025-07-22,423265.0
 ANR Storage,2015-01-01,-363870.0
 ANR Storage,2015-01-02,-351963.0
 ANR Storage,2015-01-03,-432503.0
@@ -7335,6 +7336,7 @@ ANR Storage,2025-07-18,152467.0
 ANR Storage,2025-07-19,180784.0
 ANR Storage,2025-07-20,180784.0
 ANR Storage,2025-07-21,180784.0
+ANR Storage,2025-07-22,145963.0
 Accident,2015-10-17,41256.0
 Accident,2015-10-18,11736.0
 Accident,2015-10-19,31761.0
@@ -10900,7 +10902,8 @@ Accident,2025-07-17,36607.0
 Accident,2025-07-18,51830.0
 Accident,2025-07-19,56538.0
 Accident,2025-07-20,40256.0
-Accident,2025-07-21,23153.0
+Accident,2025-07-21,60410.0
+Accident,2025-07-22,35415.0
 Arcadia,2015-01-01,-22106.0
 Arcadia,2015-01-02,-22112.0
 Arcadia,2015-01-03,-17031.0
@@ -14755,7 +14758,8 @@ Arcadia,2025-07-17,-27242.0
 Arcadia,2025-07-18,3923.0
 Arcadia,2025-07-19,-19132.0
 Arcadia,2025-07-20,-43275.0
-Arcadia,2025-07-21,-5894.0
+Arcadia,2025-07-21,-6275.0
+Arcadia,2025-07-22,12883.0
 Atmos,2016-01-03,-0.0
 Atmos,2016-01-04,-0.0
 Atmos,2016-01-05,-0.0
@@ -18243,6 +18247,7 @@ Atmos,2025-07-18,12273.0
 Atmos,2025-07-19,12273.0
 Atmos,2025-07-20,12273.0
 Atmos,2025-07-21,12273.0
+Atmos,2025-07-22,12273.0
 Barnsley,2016-08-21,-0.0
 Barnsley,2016-08-22,-0.0
 Barnsley,2016-08-23,-0.0
@@ -21500,6 +21505,7 @@ Barnsley,2025-07-18,-0.0
 Barnsley,2025-07-19,-0.0
 Barnsley,2025-07-20,-0.0
 Barnsley,2025-07-21,-0.0
+Barnsley,2025-07-22,-0.0
 Bay Gas,2015-01-01,199471.0
 Bay Gas,2015-01-02,110664.0
 Bay Gas,2015-01-03,221575.0
@@ -25354,7 +25360,8 @@ Bay Gas,2025-07-17,85152.0
 Bay Gas,2025-07-18,201757.0
 Bay Gas,2025-07-19,155141.0
 Bay Gas,2025-07-20,149971.0
-Bay Gas,2025-07-21,157200.0
+Bay Gas,2025-07-21,107662.0
+Bay Gas,2025-07-22,211761.0
 Bell River Mills,2015-11-25,-198275.0
 Bell River Mills,2015-11-26,-140637.0
 Bell River Mills,2015-11-27,-220474.0
@@ -28882,6 +28889,7 @@ Bell River Mills,2025-07-18,118038.0
 Bell River Mills,2025-07-19,174058.0
 Bell River Mills,2025-07-20,181058.0
 Bell River Mills,2025-07-21,146058.0
+Bell River Mills,2025-07-22,114009.0
 Bijou Creek,2016-07-19,-0.0
 Bijou Creek,2016-07-20,-0.0
 Bijou Creek,2016-07-21,-0.0
@@ -33004,7 +33012,8 @@ Bistineau,2025-07-17,-22380.0
 Bistineau,2025-07-18,51814.0
 Bistineau,2025-07-19,62191.0
 Bistineau,2025-07-20,89322.0
-Bistineau,2025-07-21,86965.0
+Bistineau,2025-07-21,86235.0
+Bistineau,2025-07-22,-25237.0
 Blue Lake,2015-01-01,-447000.0
 Blue Lake,2015-01-02,-222000.0
 Blue Lake,2015-01-03,-222000.0
@@ -36860,6 +36869,7 @@ Blue Lake,2025-07-18,-0.0
 Blue Lake,2025-07-19,-0.0
 Blue Lake,2025-07-20,-0.0
 Blue Lake,2025-07-21,-0.0
+Blue Lake,2025-07-22,-0.0
 Bluewater,2015-03-11,2222.0
 Bluewater,2015-03-12,-4300.0
 Bluewater,2015-03-13,-4300.0
@@ -40645,6 +40655,7 @@ Bluewater,2025-07-18,60287.0
 Bluewater,2025-07-19,60287.0
 Bluewater,2025-07-20,60287.0
 Bluewater,2025-07-21,60287.0
+Bluewater,2025-07-22,60287.0
 Boardwalk,2016-08-23,5076.0
 Boardwalk,2016-08-24,-7087.0
 Boardwalk,2016-08-25,-0.0
@@ -43899,7 +43910,8 @@ Boardwalk,2025-07-17,5076.0
 Boardwalk,2025-07-18,-44922.0
 Boardwalk,2025-07-19,-20901.0
 Boardwalk,2025-07-20,-20901.0
-Boardwalk,2025-07-21,-20901.0
+Boardwalk,2025-07-21,-52880.0
+Boardwalk,2025-07-22,-17092.0
 Bobcat,2015-10-30,-87191.0
 Bobcat,2015-10-31,3123.0
 Bobcat,2015-11-01,35859.0
@@ -47452,7 +47464,8 @@ Bobcat,2025-07-17,-323710.0
 Bobcat,2025-07-18,-243533.0
 Bobcat,2025-07-19,-192769.0
 Bobcat,2025-07-20,-167119.0
-Bobcat,2025-07-21,-376508.0
+Bobcat,2025-07-21,-124287.0
+Bobcat,2025-07-22,-492009.0
 CIG,2016-07-23,48819.0
 CIG,2016-07-24,47819.0
 CIG,2016-07-25,48819.0
@@ -54028,6 +54041,7 @@ Cadeville Gas Storage,2025-07-18,-16915.0
 Cadeville Gas Storage,2025-07-19,-16298.0
 Cadeville Gas Storage,2025-07-20,-15063.0
 Cadeville Gas Storage,2025-07-21,-19993.0
+Cadeville Gas Storage,2025-07-22,108111.0
 Caledonia,2015-01-01,37955.0
 Caledonia,2015-01-02,0.0
 Caledonia,2015-01-03,37955.0
@@ -57858,7 +57872,8 @@ Caledonia,2025-07-17,-13871.0
 Caledonia,2025-07-18,-13871.0
 Caledonia,2025-07-19,-13871.0
 Caledonia,2025-07-20,-165.0
-Caledonia,2025-07-21,-13871.0
+Caledonia,2025-07-21,-165.0
+Caledonia,2025-07-22,-16371.0
 Central Valley,2015-01-01,-77000.0
 Central Valley,2015-01-02,-43000.0
 Central Valley,2015-01-03,-85000.0
@@ -61713,7 +61728,8 @@ Central Valley,2025-07-17,-66000.0
 Central Valley,2025-07-18,33000.0
 Central Valley,2025-07-19,78000.0
 Central Valley,2025-07-20,91000.0
-Central Valley,2025-07-21,-51000.0
+Central Valley,2025-07-21,75000.0
+Central Valley,2025-07-22,-51000.0
 Chalk Creek,2016-10-10,-0.0
 Chalk Creek,2016-10-11,-0.0
 Chalk Creek,2016-10-12,-0.0
@@ -67651,6 +67667,7 @@ Clay Basin,2025-07-18,854148.0
 Clay Basin,2025-07-19,839311.0
 Clay Basin,2025-07-20,842018.0
 Clay Basin,2025-07-21,842018.0
+Clay Basin,2025-07-22,828216.0
 Clear Lake,2015-10-17,-0.0
 Clear Lake,2015-10-18,-0.0
 Clear Lake,2015-10-19,-0.0
@@ -71598,6 +71615,7 @@ Coalville,2025-07-18,-0.0
 Coalville,2025-07-19,-0.0
 Coalville,2025-07-20,-0.0
 Coalville,2025-07-21,-0.0
+Coalville,2025-07-22,-0.0
 Columbia Gas Storage,2015-11-23,-643033.0
 Columbia Gas Storage,2015-11-24,-434704.0
 Columbia Gas Storage,2015-11-25,44886.0
@@ -75126,7 +75144,8 @@ Columbia Gas Storage,2025-07-17,221840.0
 Columbia Gas Storage,2025-07-18,452316.0
 Columbia Gas Storage,2025-07-19,501212.0
 Columbia Gas Storage,2025-07-20,534455.0
-Columbia Gas Storage,2025-07-21,525510.0
+Columbia Gas Storage,2025-07-21,542229.0
+Columbia Gas Storage,2025-07-22,479116.0
 DTI Storage,2016-08-20,642302.0
 DTI Storage,2016-08-21,675716.0
 DTI Storage,2016-08-22,577955.0
@@ -78384,7 +78403,8 @@ DTI Storage,2025-07-17,138638.0
 DTI Storage,2025-07-18,127602.0
 DTI Storage,2025-07-19,442428.0
 DTI Storage,2025-07-20,204174.0
-DTI Storage,2025-07-21,312027.0
+DTI Storage,2025-07-21,304895.0
+DTI Storage,2025-07-22,16067.0
 Dawn Storage Hub,2016-07-01,1142280.0
 Dawn Storage Hub,2016-07-02,1548753.0
 Dawn Storage Hub,2016-07-03,1464687.0
@@ -81691,8 +81711,9 @@ Dawn Storage Hub,2025-07-16,-588894.0
 Dawn Storage Hub,2025-07-17,-310313.0
 Dawn Storage Hub,2025-07-18,9375.0
 Dawn Storage Hub,2025-07-19,96275.0
-Dawn Storage Hub,2025-07-20,-299740.0
+Dawn Storage Hub,2025-07-20,84477.0
 Dawn Storage Hub,2025-07-21,-295560.0
+Dawn Storage Hub,2025-07-22,8992.0
 Early Grove,2015-10-30,1305.0
 Early Grove,2015-10-31,1298.0
 Early Grove,2015-11-01,-10.0
@@ -85246,6 +85267,7 @@ Early Grove,2025-07-18,3932.0
 Early Grove,2025-07-19,5100.0
 Early Grove,2025-07-20,4905.0
 Early Grove,2025-07-21,4905.0
+Early Grove,2025-07-22,6739.0
 East Cheyenne,2016-02-02,-78306.0
 East Cheyenne,2016-02-03,-68066.0
 East Cheyenne,2016-02-04,-78166.0
@@ -88704,6 +88726,7 @@ East Cheyenne,2025-07-18,-0.0
 East Cheyenne,2025-07-19,-0.0
 East Cheyenne,2025-07-20,-0.0
 East Cheyenne,2025-07-21,-0.0
+East Cheyenne,2025-07-22,-0.0
 Eaton Rapids,2022-12-12,-51955.0
 Eaton Rapids,2022-12-13,-65777.0
 Eaton Rapids,2022-12-14,-68731.0
@@ -89656,7 +89679,8 @@ Eaton Rapids,2025-07-17,41355.0
 Eaton Rapids,2025-07-18,40821.0
 Eaton Rapids,2025-07-19,45427.0
 Eaton Rapids,2025-07-20,45460.0
-Eaton Rapids,2025-07-21,48657.0
+Eaton Rapids,2025-07-21,41966.0
+Eaton Rapids,2025-07-22,50094.0
 Egan,2015-10-30,-411291.0
 Egan,2015-10-31,-409705.0
 Egan,2015-11-01,277833.0
@@ -93209,7 +93233,8 @@ Egan,2025-07-17,-385774.0
 Egan,2025-07-18,-342916.0
 Egan,2025-07-19,-357208.0
 Egan,2025-07-20,-372059.0
-Egan,2025-07-21,-409783.0
+Egan,2025-07-21,-399478.0
+Egan,2025-07-22,-511374.0
 Eminence,2016-04-27,42899.0
 Eminence,2016-04-28,42539.0
 Eminence,2016-04-29,39725.0
@@ -96581,8 +96606,9 @@ Eminence,2025-07-16,34728.0
 Eminence,2025-07-17,38701.0
 Eminence,2025-07-18,11371.0
 Eminence,2025-07-19,-41131.0
-Eminence,2025-07-20,-10371.0
-Eminence,2025-07-21,-69076.0
+Eminence,2025-07-20,-13804.0
+Eminence,2025-07-21,-19721.0
+Eminence,2025-07-22,-24179.0
 Enable,2016-04-22,1841.0
 Enable,2016-04-23,5254.0
 Enable,2016-04-24,5182.0
@@ -99648,7 +99674,8 @@ Enable,2025-07-17,43306.0
 Enable,2025-07-18,44256.0
 Enable,2025-07-19,19190.0
 Enable,2025-07-20,17696.0
-Enable,2025-07-21,18095.0
+Enable,2025-07-21,18566.0
+Enable,2025-07-22,38362.0
 Equitrans,2016-09-18,138556.0
 Equitrans,2016-09-19,138556.0
 Equitrans,2016-09-20,138557.0
@@ -102877,7 +102904,8 @@ Equitrans,2025-07-17,100852.0
 Equitrans,2025-07-18,85200.0
 Equitrans,2025-07-19,95200.0
 Equitrans,2025-07-20,92806.0
-Equitrans,2025-07-21,85145.0
+Equitrans,2025-07-21,79877.0
+Equitrans,2025-07-22,53708.0
 Freebird,2015-01-09,-148476.0
 Freebird,2015-01-10,-98476.0
 Freebird,2015-01-11,-98476.0
@@ -106724,7 +106752,8 @@ Freebird,2025-07-17,-54114.0
 Freebird,2025-07-18,-63598.0
 Freebird,2025-07-19,-17677.0
 Freebird,2025-07-20,-6427.0
-Freebird,2025-07-21,-6427.0
+Freebird,2025-07-21,-53582.0
+Freebird,2025-07-22,-20457.0
 Gill Ranch,2015-01-01,-80000.0
 Gill Ranch,2015-01-02,-70000.0
 Gill Ranch,2015-01-03,-103000.0
@@ -110579,7 +110608,8 @@ Gill Ranch,2025-07-17,-34000.0
 Gill Ranch,2025-07-18,-2000.0
 Gill Ranch,2025-07-19,57000.0
 Gill Ranch,2025-07-20,57000.0
-Gill Ranch,2025-07-21,-72000.0
+Gill Ranch,2025-07-21,49000.0
+Gill Ranch,2025-07-22,-72000.0
 Golden Triangle,2015-01-01,-15000.0
 Golden Triangle,2015-01-02,-15000.0
 Golden Triangle,2015-01-03,-12850.0
@@ -113921,67 +113951,68 @@ Golden Triangle,2025-05-18,-167969.0
 Golden Triangle,2025-05-19,-167969.0
 Golden Triangle,2025-05-20,-167969.0
 Golden Triangle,2025-05-21,-167969.0
-Golden Triangle,2025-05-22,-167969.0
-Golden Triangle,2025-05-23,-167969.0
-Golden Triangle,2025-05-24,-167969.0
-Golden Triangle,2025-05-25,-167969.0
-Golden Triangle,2025-05-26,-167969.0
-Golden Triangle,2025-05-27,-167969.0
-Golden Triangle,2025-05-28,-167969.0
-Golden Triangle,2025-05-29,-167969.0
-Golden Triangle,2025-05-30,-167969.0
-Golden Triangle,2025-05-31,-167969.0
-Golden Triangle,2025-06-01,-167969.0
-Golden Triangle,2025-06-02,-167969.0
-Golden Triangle,2025-06-03,-167969.0
-Golden Triangle,2025-06-04,-167969.0
-Golden Triangle,2025-06-05,-167969.0
-Golden Triangle,2025-06-06,-167969.0
-Golden Triangle,2025-06-07,-167969.0
-Golden Triangle,2025-06-08,-167969.0
-Golden Triangle,2025-06-09,-167969.0
-Golden Triangle,2025-06-10,-164963.0
-Golden Triangle,2025-06-11,-16000.0
-Golden Triangle,2025-06-12,-110463.0
-Golden Triangle,2025-06-13,-134976.0
-Golden Triangle,2025-06-14,-139672.0
-Golden Triangle,2025-06-15,-159475.0
-Golden Triangle,2025-06-16,-144475.0
-Golden Triangle,2025-06-17,-169963.0
-Golden Triangle,2025-06-18,-169963.0
-Golden Triangle,2025-06-19,-169963.0
-Golden Triangle,2025-06-20,-169012.0
-Golden Triangle,2025-06-21,-166510.0
-Golden Triangle,2025-06-22,-169963.0
-Golden Triangle,2025-06-23,-169963.0
-Golden Triangle,2025-06-24,-169585.0
-Golden Triangle,2025-06-25,-169963.0
-Golden Triangle,2025-06-26,-169833.0
-Golden Triangle,2025-06-27,-169963.0
-Golden Triangle,2025-06-28,-168463.0
-Golden Triangle,2025-06-29,-168463.0
-Golden Triangle,2025-06-30,-168354.0
-Golden Triangle,2025-07-01,-164993.0
-Golden Triangle,2025-07-02,-164993.0
-Golden Triangle,2025-07-03,-164993.0
-Golden Triangle,2025-07-04,-167993.0
-Golden Triangle,2025-07-05,-167993.0
-Golden Triangle,2025-07-06,-167993.0
-Golden Triangle,2025-07-07,-167993.0
-Golden Triangle,2025-07-08,-167296.0
-Golden Triangle,2025-07-09,-164997.0
-Golden Triangle,2025-07-10,-164993.0
-Golden Triangle,2025-07-11,-166985.0
-Golden Triangle,2025-07-12,-166985.0
-Golden Triangle,2025-07-13,-166985.0
-Golden Triangle,2025-07-14,-166985.0
-Golden Triangle,2025-07-15,-147500.0
-Golden Triangle,2025-07-16,-146993.0
-Golden Triangle,2025-07-17,-142500.0
-Golden Triangle,2025-07-18,-132500.0
-Golden Triangle,2025-07-19,-164981.0
-Golden Triangle,2025-07-20,-164981.0
-Golden Triangle,2025-07-21,-164981.0
+Golden Triangle,2025-05-22,64488.0
+Golden Triangle,2025-05-23,77548.0
+Golden Triangle,2025-05-24,96175.0
+Golden Triangle,2025-05-25,98844.0
+Golden Triangle,2025-05-26,87166.0
+Golden Triangle,2025-05-27,87166.0
+Golden Triangle,2025-05-28,6262.0
+Golden Triangle,2025-05-29,-25534.0
+Golden Triangle,2025-05-30,55135.0
+Golden Triangle,2025-05-31,68141.0
+Golden Triangle,2025-06-01,76979.0
+Golden Triangle,2025-06-02,77076.0
+Golden Triangle,2025-06-03,66713.0
+Golden Triangle,2025-06-04,11388.0
+Golden Triangle,2025-06-05,96943.0
+Golden Triangle,2025-06-06,7068.0
+Golden Triangle,2025-06-07,46703.0
+Golden Triangle,2025-06-08,56702.0
+Golden Triangle,2025-06-09,16078.0
+Golden Triangle,2025-06-10,6334.0
+Golden Triangle,2025-06-11,9367.0
+Golden Triangle,2025-06-12,59910.0
+Golden Triangle,2025-06-13,56893.0
+Golden Triangle,2025-06-14,38684.0
+Golden Triangle,2025-06-15,38693.0
+Golden Triangle,2025-06-16,40026.0
+Golden Triangle,2025-06-17,6246.0
+Golden Triangle,2025-06-18,1589.0
+Golden Triangle,2025-06-19,-4496.0
+Golden Triangle,2025-06-20,-5633.0
+Golden Triangle,2025-06-21,29287.0
+Golden Triangle,2025-06-22,32502.0
+Golden Triangle,2025-06-23,-17958.0
+Golden Triangle,2025-06-24,-36676.0
+Golden Triangle,2025-06-25,25634.0
+Golden Triangle,2025-06-26,27388.0
+Golden Triangle,2025-06-27,5057.0
+Golden Triangle,2025-06-28,81632.0
+Golden Triangle,2025-06-29,102677.0
+Golden Triangle,2025-06-30,93410.0
+Golden Triangle,2025-07-01,-36688.0
+Golden Triangle,2025-07-02,-18510.0
+Golden Triangle,2025-07-03,-17350.0
+Golden Triangle,2025-07-04,24727.0
+Golden Triangle,2025-07-05,24798.0
+Golden Triangle,2025-07-06,24433.0
+Golden Triangle,2025-07-07,24643.0
+Golden Triangle,2025-07-08,-48850.0
+Golden Triangle,2025-07-09,-44448.0
+Golden Triangle,2025-07-10,-47004.0
+Golden Triangle,2025-07-11,11678.0
+Golden Triangle,2025-07-12,-822.0
+Golden Triangle,2025-07-13,-1106.0
+Golden Triangle,2025-07-14,-1140.0
+Golden Triangle,2025-07-15,-1248.0
+Golden Triangle,2025-07-16,10093.0
+Golden Triangle,2025-07-17,18801.0
+Golden Triangle,2025-07-18,21910.0
+Golden Triangle,2025-07-19,35033.0
+Golden Triangle,2025-07-20,44639.0
+Golden Triangle,2025-07-21,28806.0
+Golden Triangle,2025-07-22,-38175.0
 Grama Ridge,2015-04-28,-0.0
 Grama Ridge,2015-04-29,10000.0
 Grama Ridge,2015-04-30,-0.0
@@ -117480,7 +117511,8 @@ Grama Ridge,2025-07-17,-88126.0
 Grama Ridge,2025-07-18,-77077.0
 Grama Ridge,2025-07-19,8579.0
 Grama Ridge,2025-07-20,78052.0
-Grama Ridge,2025-07-21,3592.0
+Grama Ridge,2025-07-21,-695.0
+Grama Ridge,2025-07-22,-3631.0
 Hardy,2016-02-11,-110981.0
 Hardy,2016-02-12,-110981.0
 Hardy,2016-02-13,-174889.0
@@ -120797,7 +120829,7 @@ Hardy,2025-07-17,-50870.0
 Hardy,2025-07-18,2258.0
 Hardy,2025-07-19,21389.0
 Hardy,2025-07-20,-59901.0
-Hardy,2025-07-21,21389.0
+Hardy,2025-07-21,64.0
 Hattiesburg,2016-08-23,-1956.0
 Hattiesburg,2016-08-24,-7181.0
 Hattiesburg,2016-08-25,-0.0
@@ -124038,7 +124070,8 @@ Hattiesburg,2025-07-17,-35183.0
 Hattiesburg,2025-07-18,-39340.0
 Hattiesburg,2025-07-19,-207892.0
 Hattiesburg,2025-07-20,-131540.0
-Hattiesburg,2025-07-21,-14801.0
+Hattiesburg,2025-07-21,-15634.0
+Hattiesburg,2025-07-22,-961.0
 Honeoye,2015-01-01,-9440.0
 Honeoye,2015-01-02,-13975.0
 Honeoye,2015-01-03,-20239.0
@@ -127894,6 +127927,7 @@ Honeoye,2025-07-18,22617.0
 Honeoye,2025-07-19,21589.0
 Honeoye,2025-07-20,21589.0
 Honeoye,2025-07-21,21589.0
+Honeoye,2025-07-22,22617.0
 Jackson Prairie,2016-03-11,-1777.0
 Jackson Prairie,2016-03-12,74516.0
 Jackson Prairie,2016-03-13,18549.0
@@ -135045,7 +135079,8 @@ Jefferson Island,2025-07-17,-14811.0
 Jefferson Island,2025-07-18,-17688.0
 Jefferson Island,2025-07-19,40272.0
 Jefferson Island,2025-07-20,38199.0
-Jefferson Island,2025-07-21,20870.0
+Jefferson Island,2025-07-21,292.0
+Jefferson Island,2025-07-22,72897.0
 KMIGT,2023-05-17,25419.0
 KMIGT,2023-05-18,28209.0
 KMIGT,2023-05-20,34249.0
@@ -138844,7 +138879,8 @@ Katy,2025-07-17,-493153.0
 Katy,2025-07-18,-514238.0
 Katy,2025-07-19,-356587.0
 Katy,2025-07-20,-466587.0
-Katy,2025-07-21,-464953.0
+Katy,2025-07-21,-460493.0
+Katy,2025-07-22,-456418.0
 Keystone,2016-01-07,55168.0
 Keystone,2016-01-08,49903.0
 Keystone,2016-01-09,46577.0
@@ -142328,7 +142364,8 @@ Keystone,2025-07-17,-32220.0
 Keystone,2025-07-18,-49328.0
 Keystone,2025-07-19,67992.0
 Keystone,2025-07-20,87672.0
-Keystone,2025-07-21,49059.0
+Keystone,2025-07-21,53795.0
+Keystone,2025-07-22,-19191.0
 Kimball-27,2015-12-14,55045.0
 Kimball-27,2015-12-15,-0.0
 Kimball-27,2015-12-16,4500.0
@@ -145837,6 +145874,7 @@ Kimball-27,2025-07-18,-0.0
 Kimball-27,2025-07-19,-0.0
 Kimball-27,2025-07-20,-0.0
 Kimball-27,2025-07-21,-0.0
+Kimball-27,2025-07-22,-0.0
 Kiowa Creek,2016-07-23,-0.0
 Kiowa Creek,2016-07-24,-0.0
 Kiowa Creek,2016-07-25,-0.0
@@ -152343,6 +152381,7 @@ LA Storage,2025-07-18,42008.0
 LA Storage,2025-07-19,42008.0
 LA Storage,2025-07-20,42008.0
 LA Storage,2025-07-21,42008.0
+LA Storage,2025-07-22,42008.0
 Leaf River,2015-01-01,0.0
 Leaf River,2015-01-02,25445.0
 Leaf River,2015-01-03,25445.0
@@ -156197,7 +156236,8 @@ Leaf River,2025-07-17,95193.0
 Leaf River,2025-07-18,60240.0
 Leaf River,2025-07-19,178531.0
 Leaf River,2025-07-20,132874.0
-Leaf River,2025-07-21,29140.0
+Leaf River,2025-07-21,35786.0
+Leaf River,2025-07-22,20559.0
 Lee 8,2015-11-27,26715.0
 Lee 8,2015-11-28,27215.0
 Lee 8,2015-11-29,26959.0
@@ -159723,6 +159763,7 @@ Lee 8,2025-07-18,-0.0
 Lee 8,2025-07-19,-0.0
 Lee 8,2025-07-20,-0.0
 Lee 8,2025-07-21,-0.0
+Lee 8,2025-07-22,-0.0
 Leidy,2015-10-17,-125995.0
 Leidy,2015-10-18,-118659.0
 Leidy,2015-10-19,-158827.0
@@ -163288,7 +163329,8 @@ Leidy,2025-07-17,-260875.0
 Leidy,2025-07-18,-199600.0
 Leidy,2025-07-19,-171873.0
 Leidy,2025-07-20,-207110.0
-Leidy,2025-07-21,-376090.0
+Leidy,2025-07-21,-232528.0
+Leidy,2025-07-22,-351529.0
 Leroy,2016-10-10,-0.0
 Leroy,2016-10-11,-23000.0
 Leroy,2016-10-12,-28000.0
@@ -169873,7 +169915,8 @@ Lodi,2025-07-17,6000.0
 Lodi,2025-07-18,22000.0
 Lodi,2025-07-19,58000.0
 Lodi,2025-07-20,89000.0
-Lodi,2025-07-21,-50000.0
+Lodi,2025-07-21,50000.0
+Lodi,2025-07-22,-50000.0
 Lost River,2015-12-02,4842.0
 Lost River,2015-12-09,-34600.0
 Lost River,2016-06-18,86362.0
@@ -173196,7 +173239,8 @@ Lost River,2025-07-17,-77252.0
 Lost River,2025-07-18,2304.0
 Lost River,2025-07-19,21826.0
 Lost River,2025-07-20,-59465.0
-Lost River,2025-07-21,21826.0
+Lost River,2025-07-21,65.0
+Lost River,2025-07-22,-0.0
 Mississippi Hub,2015-03-10,93375.0
 Mississippi Hub,2015-03-11,109395.0
 Mississippi Hub,2015-03-12,72637.0
@@ -176982,7 +177026,8 @@ Mississippi Hub,2025-07-17,-92072.0
 Mississippi Hub,2025-07-18,-12271.0
 Mississippi Hub,2025-07-19,-57668.0
 Mississippi Hub,2025-07-20,-211887.0
-Mississippi Hub,2025-07-21,-206809.0
+Mississippi Hub,2025-07-21,-276598.0
+Mississippi Hub,2025-07-22,-219409.0
 Mississippi River Trans,2016-04-22,-16570.0
 Mississippi River Trans,2016-04-23,-16570.0
 Mississippi River Trans,2016-04-24,-16570.0
@@ -183435,7 +183480,8 @@ Monroe,2025-07-17,-601.0
 Monroe,2025-07-18,40289.0
 Monroe,2025-07-19,21383.0
 Monroe,2025-07-20,16378.0
-Monroe,2025-07-21,22115.0
+Monroe,2025-07-21,21388.0
+Monroe,2025-07-22,16910.0
 Moss Bluff,2015-04-28,7279.0
 Moss Bluff,2015-04-29,61453.0
 Moss Bluff,2015-04-30,37074.0
@@ -187173,7 +187219,8 @@ Moss Bluff,2025-07-17,17942.0
 Moss Bluff,2025-07-18,-138269.0
 Moss Bluff,2025-07-19,-41187.0
 Moss Bluff,2025-07-20,-65053.0
-Moss Bluff,2025-07-21,-22528.0
+Moss Bluff,2025-07-21,-42966.0
+Moss Bluff,2025-07-22,-239553.0
 NGPL,2016-07-23,172843.0
 NGPL,2016-07-24,160948.0
 NGPL,2016-07-25,99677.0
@@ -190409,7 +190456,7 @@ NGPL,2025-07-17,372593.0
 NGPL,2025-07-18,439010.0
 NGPL,2025-07-19,499743.0
 NGPL,2025-07-20,493265.0
-NGPL,2025-07-21,364395.0
+NGPL,2025-07-21,397091.0
 Napoleonville,2016-08-23,-0.0
 Napoleonville,2016-08-24,-0.0
 Napoleonville,2016-08-25,-0.0
@@ -193665,6 +193712,7 @@ Napoleonville,2025-07-18,-0.0
 Napoleonville,2025-07-19,-0.0
 Napoleonville,2025-07-20,-0.0
 Napoleonville,2025-07-21,-0.0
+Napoleonville,2025-07-22,-0.0
 North Summit,2015-10-17,-3.0
 North Summit,2015-10-18,3674.0
 North Summit,2015-10-19,-0.0
@@ -197230,7 +197278,8 @@ North Summit,2025-07-17,32559.0
 North Summit,2025-07-18,32287.0
 North Summit,2025-07-19,-0.0
 North Summit,2025-07-20,-0.0
-North Summit,2025-07-21,36922.0
+North Summit,2025-07-21,30922.0
+North Summit,2025-07-22,20559.0
 Northern Natural Gas,2016-10-12,418293.0
 Northern Natural Gas,2016-10-13,485843.0
 Northern Natural Gas,2016-10-14,518452.0
@@ -200434,8 +200483,9 @@ Northern Natural Gas,2025-07-16,233265.0
 Northern Natural Gas,2025-07-17,272370.0
 Northern Natural Gas,2025-07-18,382631.0
 Northern Natural Gas,2025-07-19,352901.0
-Northern Natural Gas,2025-07-20,455579.0
-Northern Natural Gas,2025-07-21,407719.0
+Northern Natural Gas,2025-07-20,333909.0
+Northern Natural Gas,2025-07-21,266697.0
+Northern Natural Gas,2025-07-22,421024.0
 Oakford,2015-10-17,39938.0
 Oakford,2015-10-18,-85690.0
 Oakford,2015-10-19,-31195.0
@@ -204001,7 +204051,8 @@ Oakford,2025-07-17,-29050.0
 Oakford,2025-07-18,-56084.0
 Oakford,2025-07-19,162548.0
 Oakford,2025-07-20,121366.0
-Oakford,2025-07-21,-319627.0
+Oakford,2025-07-21,38752.0
+Oakford,2025-07-22,-151059.0
 Ohio Valley Hub,2015-11-30,-0.0
 Ohio Valley Hub,2015-12-01,-0.0
 Ohio Valley Hub,2015-12-02,-0.0
@@ -207523,7 +207574,8 @@ Ohio Valley Hub,2025-07-17,10000.0
 Ohio Valley Hub,2025-07-18,10000.0
 Ohio Valley Hub,2025-07-19,10000.0
 Ohio Valley Hub,2025-07-20,10000.0
-Ohio Valley Hub,2025-07-21,9719.0
+Ohio Valley Hub,2025-07-21,10000.0
+Ohio Valley Hub,2025-07-22,8922.0
 PG&E,2015-01-01,-492000.0
 PG&E,2015-01-02,-831000.0
 PG&E,2015-01-03,-474000.0
@@ -211377,8 +211429,9 @@ PG&E,2025-07-16,177000.0
 PG&E,2025-07-17,-0.0
 PG&E,2025-07-18,-0.0
 PG&E,2025-07-19,17000.0
-PG&E,2025-07-20,96000.0
-PG&E,2025-07-21,100000.0
+PG&E,2025-07-20,67000.0
+PG&E,2025-07-21,17000.0
+PG&E,2025-07-22,100000.0
 Perryville,2017-01-03,97923.0
 Perryville,2017-01-04,-75460.0
 Perryville,2017-01-05,-320780.0
@@ -214500,7 +214553,8 @@ Perryville,2025-07-17,-26763.0
 Perryville,2025-07-18,14529.0
 Perryville,2025-07-19,41582.0
 Perryville,2025-07-20,-35339.0
-Perryville,2025-07-21,35673.0
+Perryville,2025-07-21,37585.0
+Perryville,2025-07-22,-80289.0
 Petal,2023-10-01,198984.0
 Petal,2023-10-02,158847.0
 Petal,2023-10-03,103623.0
@@ -215157,7 +215211,8 @@ Petal,2025-07-17,188326.0
 Petal,2025-07-18,243735.0
 Petal,2025-07-19,262531.0
 Petal,2025-07-20,307128.0
-Petal,2025-07-21,282847.0
+Petal,2025-07-21,296693.0
+Petal,2025-07-22,223532.0
 Pine Prairie,2015-03-12,44911.0
 Pine Prairie,2015-03-13,19148.0
 Pine Prairie,2015-03-14,171780.0
@@ -218941,7 +218996,8 @@ Pine Prairie,2025-07-17,-434610.0
 Pine Prairie,2025-07-18,-369014.0
 Pine Prairie,2025-07-19,-138355.0
 Pine Prairie,2025-07-20,-32382.0
-Pine Prairie,2025-07-21,-40701.0
+Pine Prairie,2025-07-21,3683.0
+Pine Prairie,2025-07-22,-80046.0
 Rager Mountain,2015-01-01,-9173.0
 Rager Mountain,2015-01-02,-9173.0
 Rager Mountain,2015-01-03,-9173.0
@@ -222797,6 +222853,7 @@ Rager Mountain,2025-07-18,-19940.0
 Rager Mountain,2025-07-19,-19940.0
 Rager Mountain,2025-07-20,-19940.0
 Rager Mountain,2025-07-21,-19940.0
+Rager Mountain,2025-07-22,-19940.0
 SSC,2016-07-27,14596.0
 SSC,2016-07-28,13566.0
 SSC,2016-07-29,34736.0
@@ -226078,7 +226135,8 @@ SSC,2025-07-17,-24863.0
 SSC,2025-07-18,-19831.0
 SSC,2025-07-19,-31923.0
 SSC,2025-07-20,-49090.0
-SSC,2025-07-21,12707.0
+SSC,2025-07-21,15803.0
+SSC,2025-07-22,47610.0
 SWGS East,2015-11-26,-22785.0
 SWGS East,2015-11-27,-21999.0
 SWGS East,2015-11-28,64756.0
@@ -229605,6 +229663,7 @@ SWGS East,2025-07-18,-1.0
 SWGS East,2025-07-19,-1.0
 SWGS East,2025-07-20,-1.0
 SWGS East,2025-07-21,-1.0
+SWGS East,2025-07-22,-1.0
 SWGS West,2015-11-26,-47558.0
 SWGS West,2015-11-27,142602.0
 SWGS West,2015-11-28,200000.0
@@ -233130,7 +233189,8 @@ SWGS West,2025-07-17,83867.0
 SWGS West,2025-07-18,83867.0
 SWGS West,2025-07-19,84208.0
 SWGS West,2025-07-20,87100.0
-SWGS West,2025-07-21,90626.0
+SWGS West,2025-07-21,90633.0
+SWGS West,2025-07-22,72177.0
 Salt Plains,2016-07-27,-25880.0
 Salt Plains,2016-07-28,-18341.0
 Salt Plains,2016-07-29,-20880.0
@@ -236412,7 +236472,8 @@ Salt Plains,2025-07-17,493.0
 Salt Plains,2025-07-18,5234.0
 Salt Plains,2025-07-19,22006.0
 Salt Plains,2025-07-20,23537.0
-Salt Plains,2025-07-21,23127.0
+Salt Plains,2025-07-21,23537.0
+Salt Plains,2025-07-22,21508.0
 Saltville,2015-10-30,-13598.0
 Saltville,2015-10-31,4190.0
 Saltville,2015-11-01,-3235.0
@@ -239966,6 +240027,7 @@ Saltville,2025-07-18,8258.0
 Saltville,2025-07-19,6624.0
 Saltville,2025-07-20,3782.0
 Saltville,2025-07-21,3432.0
+Saltville,2025-07-22,3432.0
 Seneca Lake Gas,2015-01-01,-0.0
 Seneca Lake Gas,2015-01-02,-0.0
 Seneca Lake Gas,2015-01-03,-0.0
@@ -243820,7 +243882,8 @@ Seneca Lake Gas,2025-07-17,-4796.0
 Seneca Lake Gas,2025-07-18,-4796.0
 Seneca Lake Gas,2025-07-19,41990.0
 Seneca Lake Gas,2025-07-20,35358.0
-Seneca Lake Gas,2025-07-21,41990.0
+Seneca Lake Gas,2025-07-21,25248.0
+Seneca Lake Gas,2025-07-22,-0.0
 Socal,2016-05-11,-66000.0
 Socal,2016-05-12,65000.0
 Socal,2016-05-13,203000.0
@@ -247178,8 +247241,9 @@ Socal,2025-07-16,52000.0
 Socal,2025-07-17,223000.0
 Socal,2025-07-18,230000.0
 Socal,2025-07-19,463000.0
-Socal,2025-07-20,396164.0
-Socal,2025-07-21,470800.0
+Socal,2025-07-20,377000.0
+Socal,2025-07-21,280000.0
+Socal,2025-07-22,570095.0
 Southern Natural Gas,2023-05-17,95298.0
 Southern Natural Gas,2023-05-18,92597.0
 Southern Natural Gas,2023-05-20,124691.0
@@ -247847,7 +247911,7 @@ Southern Natural Gas,2025-07-17,33917.0
 Southern Natural Gas,2025-07-18,51504.0
 Southern Natural Gas,2025-07-19,38963.0
 Southern Natural Gas,2025-07-20,20897.0
-Southern Natural Gas,2025-07-21,-65697.0
+Southern Natural Gas,2025-07-21,-20287.0
 Southern Pines,2015-12-15,46097.0
 Southern Pines,2015-12-16,36417.0
 Southern Pines,2015-12-17,9070.0
@@ -251354,7 +251418,8 @@ Southern Pines,2025-07-17,-153440.0
 Southern Pines,2025-07-18,-163703.0
 Southern Pines,2025-07-19,-153663.0
 Southern Pines,2025-07-20,-160269.0
-Southern Pines,2025-07-21,-176503.0
+Southern Pines,2025-07-21,-158151.0
+Southern Pines,2025-07-22,-273694.0
 Spire Storage West,2019-04-02,-0.0
 Spire Storage West,2019-04-03,-0.0
 Spire Storage West,2019-04-04,-0.0
@@ -253657,7 +253722,8 @@ Spire Storage West,2025-07-17,-44367.0
 Spire Storage West,2025-07-18,-24918.0
 Spire Storage West,2025-07-19,-4530.0
 Spire Storage West,2025-07-20,797.0
-Spire Storage West,2025-07-21,-8885.0
+Spire Storage West,2025-07-21,-5021.0
+Spire Storage West,2025-07-22,-9978.0
 Stagecoach,2022-09-04,124792.0
 Stagecoach,2022-09-05,145366.0
 Stagecoach,2022-09-06,131182.0
@@ -254422,7 +254488,7 @@ Stagecoach,2025-07-17,-178233.0
 Stagecoach,2025-07-18,-85237.0
 Stagecoach,2025-07-19,16293.0
 Stagecoach,2025-07-20,-118571.0
-Stagecoach,2025-07-21,-2091.0
+Stagecoach,2025-07-21,-57501.0
 Steckman Ridge,2015-10-30,83737.0
 Steckman Ridge,2015-10-31,177967.0
 Steckman Ridge,2015-11-01,228577.0
@@ -257975,7 +258041,8 @@ Steckman Ridge,2025-07-17,-116542.0
 Steckman Ridge,2025-07-18,-65079.0
 Steckman Ridge,2025-07-19,38542.0
 Steckman Ridge,2025-07-20,-46917.0
-Steckman Ridge,2025-07-21,-63394.0
+Steckman Ridge,2025-07-21,80861.0
+Steckman Ridge,2025-07-22,-98216.0
 Steuben,2018-11-08,-10651.0
 Steuben,2018-11-10,-9581.0
 Steuben,2018-11-11,-9603.0
@@ -260418,7 +260485,8 @@ Steuben,2025-07-17,-62433.0
 Steuben,2025-07-18,-29130.0
 Steuben,2025-07-19,-29709.0
 Steuben,2025-07-20,-32218.0
-Steuben,2025-07-21,-34043.0
+Steuben,2025-07-21,-27316.0
+Steuben,2025-07-22,-44822.0
 Tennessee,2016-07-23,77611.0
 Tennessee,2016-07-24,20074.0
 Tennessee,2016-07-25,10095.0
@@ -263546,7 +263614,7 @@ Tennessee,2025-07-17,-77228.0
 Tennessee,2025-07-18,3563.0
 Tennessee,2025-07-19,6637.0
 Tennessee,2025-07-20,24988.0
-Tennessee,2025-07-21,-8532.0
+Tennessee,2025-07-21,10797.0
 Texas Gas,2016-08-21,1111.0
 Texas Gas,2016-08-22,92.0
 Texas Gas,2016-08-23,294.0
@@ -266803,7 +266871,8 @@ Texas Gas,2025-07-17,-23121.0
 Texas Gas,2025-07-18,-30192.0
 Texas Gas,2025-07-19,3130.0
 Texas Gas,2025-07-20,-31302.0
-Texas Gas,2025-07-21,-46013.0
+Texas Gas,2025-07-21,-41286.0
+Texas Gas,2025-07-22,-8848.0
 Thomas Corners,2015-01-01,-89866.0
 Thomas Corners,2015-01-02,-83487.0
 Thomas Corners,2015-01-03,-44733.0
@@ -270658,7 +270727,8 @@ Thomas Corners,2025-07-17,-1139.0
 Thomas Corners,2025-07-18,65806.0
 Thomas Corners,2025-07-19,31285.0
 Thomas Corners,2025-07-20,22838.0
-Thomas Corners,2025-07-21,39813.0
+Thomas Corners,2025-07-21,55174.0
+Thomas Corners,2025-07-22,6387.0
 TransCanada Alberta,2015-01-01,3107.0
 TransCanada Alberta,2015-01-02,3797.0
 TransCanada Alberta,2015-01-03,4179.0
@@ -273137,8 +273207,8 @@ TransGas,2024-04-24,260748.0
 TransGas,2024-04-25,300000.0
 TransGas,2024-04-26,245795.0
 TransGas,2025-05-26,2804.0
-TransGas,2025-07-20,2804.0
 TransGas,2025-07-21,2804.0
+TransGas,2025-07-22,2804.0
 Tres Palacios,2015-01-01,-58444.0
 Tres Palacios,2015-01-02,-78444.0
 Tres Palacios,2015-01-03,-178902.0
@@ -276993,7 +277063,8 @@ Tres Palacios,2025-07-17,-20657.0
 Tres Palacios,2025-07-18,45696.0
 Tres Palacios,2025-07-19,60651.0
 Tres Palacios,2025-07-20,117535.0
-Tres Palacios,2025-07-21,66080.0
+Tres Palacios,2025-07-21,148282.0
+Tres Palacios,2025-07-22,23134.0
 UGI,2015-01-01,-24653.0
 UGI,2015-01-02,-24388.0
 UGI,2015-01-03,97663.0
@@ -280848,7 +280919,8 @@ UGI,2025-07-17,-4590.0
 UGI,2025-07-18,6182.0
 UGI,2025-07-19,47240.0
 UGI,2025-07-20,46979.0
-UGI,2025-07-21,34785.0
+UGI,2025-07-21,39442.0
+UGI,2025-07-22,23992.0
 Washington,2016-04-27,243496.0
 Washington,2016-04-28,230384.0
 Washington,2016-04-29,196897.0
@@ -284220,8 +284292,9 @@ Washington,2025-07-16,140857.0
 Washington,2025-07-17,173460.0
 Washington,2025-07-18,124842.0
 Washington,2025-07-19,58609.0
-Washington,2025-07-20,149865.0
-Washington,2025-07-21,142695.0
+Washington,2025-07-20,113651.0
+Washington,2025-07-21,147095.0
+Washington,2025-07-22,143007.0
 Washington 10,2015-11-25,58229.0
 Washington 10,2015-11-26,119034.0
 Washington 10,2015-11-27,125932.0
@@ -287748,7 +287821,8 @@ Washington 10,2025-07-17,203555.0
 Washington 10,2025-07-18,274018.0
 Washington 10,2025-07-19,207373.0
 Washington 10,2025-07-20,190993.0
-Washington 10,2025-07-21,206258.0
+Washington 10,2025-07-21,208065.0
+Washington 10,2025-07-22,163055.0
 Washington Ranch,2016-07-21,-0.0
 Washington Ranch,2016-07-22,-0.0
 Washington Ranch,2016-07-23,-0.0
@@ -291443,6 +291517,7 @@ White River,2025-07-18,-0.0
 White River,2025-07-19,-0.0
 White River,2025-07-20,-0.0
 White River,2025-07-21,-0.0
+White River,2025-07-22,-0.0
 Wild Goose,2015-01-01,-444000.0
 Wild Goose,2015-01-02,-444000.0
 Wild Goose,2015-01-03,-449000.0
@@ -295297,7 +295372,8 @@ Wild Goose,2025-07-17,154000.0
 Wild Goose,2025-07-18,162000.0
 Wild Goose,2025-07-19,196000.0
 Wild Goose,2025-07-20,201000.0
-Wild Goose,2025-07-21,-15000.0
+Wild Goose,2025-07-21,168000.0
+Wild Goose,2025-07-22,-15000.0
 Williston Basin,2016-01-29,-54638.0
 Williston Basin,2016-01-30,-91401.0
 Williston Basin,2016-01-31,-128841.0
@@ -298752,7 +298828,8 @@ Williston Basin,2025-07-17,129310.0
 Williston Basin,2025-07-18,145540.0
 Williston Basin,2025-07-19,146058.0
 Williston Basin,2025-07-20,147485.0
-Williston Basin,2025-07-21,153196.0
+Williston Basin,2025-07-21,143703.0
+Williston Basin,2025-07-22,148278.0
 Wyckoff,2016-07-19,-0.0
 Wyckoff,2016-07-20,-0.0
 Wyckoff,2016-07-21,-0.0
@@ -302042,7 +302119,8 @@ Wyckoff,2025-07-17,-0.0
 Wyckoff,2025-07-18,-0.0
 Wyckoff,2025-07-19,-0.0
 Wyckoff,2025-07-20,-0.0
-Wyckoff,2025-07-21,-3941.0
+Wyckoff,2025-07-21,-0.0
+Wyckoff,2025-07-22,-3278.0
 Young,2016-07-19,17983.0
 Young,2016-07-20,17983.0
 Young,2016-07-21,17983.0
@@ -305333,6 +305411,7 @@ Young,2025-07-18,9906.0
 Young,2025-07-19,8406.0
 Young,2025-07-20,8906.0
 Young,2025-07-21,9406.0
+Young,2025-07-22,9906.0
 ,2015-10-17,-0.0
 ,2015-10-18,-0.0
 ,2015-10-19,-0.0
@@ -308898,4 +308977,5 @@ Young,2025-07-21,9406.0
 ,2025-07-18,-0.0
 ,2025-07-19,-0.0
 ,2025-07-20,-0.0
-,2025-07-21,-8318.0
+,2025-07-21,-0.0
+,2025-07-22,-8318.0
