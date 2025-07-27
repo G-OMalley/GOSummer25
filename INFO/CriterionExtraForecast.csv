@@ -1,9 +1,4 @@
 Date,item,value,region
-07/22/2025,CONUS - Balance,0.0,Conus
-07/23/2025,CONUS - Balance,0.0,Conus
-07/24/2025,CONUS - Balance,0.0,Conus
-07/25/2025,CONUS - Balance,0.0,Conus
-07/26/2025,CONUS - Balance,0.0,Conus
 07/27/2025,CONUS - Balance,0.0,Conus
 07/28/2025,CONUS - Balance,0.0,Conus
 07/29/2025,CONUS - Balance,0.0,Conus
@@ -14,11 +9,11 @@ Date,item,value,region
 08/03/2025,CONUS - Balance,0.0,Conus
 08/04/2025,CONUS - Balance,0.0,Conus
 08/05/2025,CONUS - Balance,0.0,Conus
-07/22/2025,Midwest - Balance,0.0,Midwest
-07/23/2025,Midwest - Balance,0.0,Midwest
-07/24/2025,Midwest - Balance,0.0,Midwest
-07/25/2025,Midwest - Balance,0.0,Midwest
-07/26/2025,Midwest - Balance,0.0,Midwest
+08/06/2025,CONUS - Balance,0.0,Conus
+08/07/2025,CONUS - Balance,0.0,Conus
+08/08/2025,CONUS - Balance,0.0,Conus
+08/09/2025,CONUS - Balance,0.0,Conus
+08/10/2025,CONUS - Balance,0.0,Conus
 07/27/2025,Midwest - Balance,0.0,Midwest
 07/28/2025,Midwest - Balance,0.0,Midwest
 07/29/2025,Midwest - Balance,0.0,Midwest
@@ -29,11 +24,11 @@ Date,item,value,region
 08/03/2025,Midwest - Balance,0.0,Midwest
 08/04/2025,Midwest - Balance,0.0,Midwest
 08/05/2025,Midwest - Balance,0.0,Midwest
-07/22/2025,Northeast - Balance,0.0,Northeast
-07/23/2025,Northeast - Balance,0.0,Northeast
-07/24/2025,Northeast - Balance,0.0,Northeast
-07/25/2025,Northeast - Balance,0.0,Northeast
-07/26/2025,Northeast - Balance,0.0,Northeast
+08/06/2025,Midwest - Balance,0.0,Midwest
+08/07/2025,Midwest - Balance,0.0,Midwest
+08/08/2025,Midwest - Balance,0.0,Midwest
+08/09/2025,Midwest - Balance,0.0,Midwest
+08/10/2025,Midwest - Balance,0.0,Midwest
 07/27/2025,Northeast - Balance,0.0,Northeast
 07/28/2025,Northeast - Balance,0.0,Northeast
 07/29/2025,Northeast - Balance,0.0,Northeast
@@ -44,11 +39,11 @@ Date,item,value,region
 08/03/2025,Northeast - Balance,0.0,Northeast
 08/04/2025,Northeast - Balance,0.0,Northeast
 08/05/2025,Northeast - Balance,0.0,Northeast
-07/22/2025,Rockies - Balance,0.0,Rockies
-07/23/2025,Rockies - Balance,0.0,Rockies
-07/24/2025,Rockies - Balance,0.0,Rockies
-07/25/2025,Rockies - Balance,0.0,Rockies
-07/26/2025,Rockies - Balance,0.0,Rockies
+08/06/2025,Northeast - Balance,0.0,Northeast
+08/07/2025,Northeast - Balance,0.0,Northeast
+08/08/2025,Northeast - Balance,0.0,Northeast
+08/09/2025,Northeast - Balance,0.0,Northeast
+08/10/2025,Northeast - Balance,0.0,Northeast
 07/27/2025,Rockies - Balance,0.0,Rockies
 07/28/2025,Rockies - Balance,0.0,Rockies
 07/29/2025,Rockies - Balance,0.0,Rockies
@@ -59,11 +54,11 @@ Date,item,value,region
 08/03/2025,Rockies - Balance,0.0,Rockies
 08/04/2025,Rockies - Balance,0.0,Rockies
 08/05/2025,Rockies - Balance,0.0,Rockies
-07/22/2025,SouthCentral - Balance,0.0,SouthCentral
-07/23/2025,SouthCentral - Balance,0.0,SouthCentral
-07/24/2025,SouthCentral - Balance,0.0,SouthCentral
-07/25/2025,SouthCentral - Balance,0.0,SouthCentral
-07/26/2025,SouthCentral - Balance,0.0,SouthCentral
+08/06/2025,Rockies - Balance,0.0,Rockies
+08/07/2025,Rockies - Balance,0.0,Rockies
+08/08/2025,Rockies - Balance,0.0,Rockies
+08/09/2025,Rockies - Balance,0.0,Rockies
+08/10/2025,Rockies - Balance,0.0,Rockies
 07/27/2025,SouthCentral - Balance,0.0,SouthCentral
 07/28/2025,SouthCentral - Balance,0.0,SouthCentral
 07/29/2025,SouthCentral - Balance,0.0,SouthCentral
@@ -74,11 +69,11 @@ Date,item,value,region
 08/03/2025,SouthCentral - Balance,0.0,SouthCentral
 08/04/2025,SouthCentral - Balance,0.0,SouthCentral
 08/05/2025,SouthCentral - Balance,0.0,SouthCentral
-07/22/2025,SouthEast - Balance,0.0,SouthEast
-07/23/2025,SouthEast - Balance,0.0,SouthEast
-07/24/2025,SouthEast - Balance,0.0,SouthEast
-07/25/2025,SouthEast - Balance,0.0,SouthEast
-07/26/2025,SouthEast - Balance,0.0,SouthEast
+08/06/2025,SouthCentral - Balance,0.0,SouthCentral
+08/07/2025,SouthCentral - Balance,0.0,SouthCentral
+08/08/2025,SouthCentral - Balance,0.0,SouthCentral
+08/09/2025,SouthCentral - Balance,0.0,SouthCentral
+08/10/2025,SouthCentral - Balance,0.0,SouthCentral
 07/27/2025,SouthEast - Balance,0.0,SouthEast
 07/28/2025,SouthEast - Balance,0.0,SouthEast
 07/29/2025,SouthEast - Balance,0.0,SouthEast
@@ -89,176 +84,176 @@ Date,item,value,region
 08/03/2025,SouthEast - Balance,0.0,SouthEast
 08/04/2025,SouthEast - Balance,0.0,SouthEast
 08/05/2025,SouthEast - Balance,0.0,SouthEast
-07/22/2025,Total Demand - California ,4977.5454,California
-07/23/2025,Total Demand - California ,4959.3623,California
-07/24/2025,Total Demand - California ,4954.6753,California
-07/25/2025,Total Demand - California ,4895.058,California
-07/26/2025,Total Demand - California ,4385.149,California
-07/27/2025,Total Demand - California ,4428.13,California
-07/28/2025,Total Demand - California ,5010.676,California
-07/29/2025,Total Demand - California ,5119.5176,California
-07/30/2025,Total Demand - California ,5106.7896,California
-07/31/2025,Total Demand - California ,5069.3857,California
-08/01/2025,Total Demand - California ,5013.7935,California
-08/02/2025,Total Demand - California ,4601.3726,California
-08/03/2025,Total Demand - California ,4780.6436,California
-08/04/2025,Total Demand - California ,5376.9497,California
-08/05/2025,Total Demand - California ,5438.33,California
-07/22/2025,Total Demand - Lower 48 ,77179.164,Lower 48
-07/23/2025,Total Demand - Lower 48 ,77597.914,Lower 48
-07/24/2025,Total Demand - Lower 48 ,80097.34,Lower 48
-07/25/2025,Total Demand - Lower 48 ,81950.14,Lower 48
-07/26/2025,Total Demand - Lower 48 ,73530.266,Lower 48
-07/27/2025,Total Demand - Lower 48 ,71898.65,Lower 48
-07/28/2025,Total Demand - Lower 48 ,80645.49,Lower 48
-07/29/2025,Total Demand - Lower 48 ,81654.11,Lower 48
-07/30/2025,Total Demand - Lower 48 ,81172.92,Lower 48
-07/31/2025,Total Demand - Lower 48 ,78863.625,Lower 48
-08/01/2025,Total Demand - Lower 48 ,77202.12,Lower 48
-08/02/2025,Total Demand - Lower 48 ,69395.445,Lower 48
-08/03/2025,Total Demand - Lower 48 ,69556.055,Lower 48
-08/04/2025,Total Demand - Lower 48 ,77232.76,Lower 48
-08/05/2025,Total Demand - Lower 48 ,77708.266,Lower 48
-07/22/2025,Total Demand - Midwest,12007.432,Midwest
-07/23/2025,Total Demand - Midwest,12624.818,Midwest
-07/24/2025,Total Demand - Midwest,13098.945,Midwest
-07/25/2025,Total Demand - Midwest,12450.903,Midwest
-07/26/2025,Total Demand - Midwest,11153.199,Midwest
-07/27/2025,Total Demand - Midwest,11348.742,Midwest
-07/28/2025,Total Demand - Midwest,12757.3,Midwest
-07/29/2025,Total Demand - Midwest,12592.973,Midwest
-07/30/2025,Total Demand - Midwest,11706.1455,Midwest
-07/31/2025,Total Demand - Midwest,11424.328,Midwest
-08/01/2025,Total Demand - Midwest,11432.048,Midwest
-08/02/2025,Total Demand - Midwest,10391.19,Midwest
-08/03/2025,Total Demand - Midwest,10463.593,Midwest
-08/04/2025,Total Demand - Midwest,11752.94,Midwest
-08/05/2025,Total Demand - Midwest,11854.967,Midwest
-07/22/2025,Total Demand - Northeast,16196.065,Northeast
-07/23/2025,Total Demand - Northeast,16665.873,Northeast
-07/24/2025,Total Demand - Northeast,18198.592,Northeast
-07/25/2025,Total Demand - Northeast,20278.832,Northeast
-07/26/2025,Total Demand - Northeast,18142.438,Northeast
-07/27/2025,Total Demand - Northeast,16305.459,Northeast
-07/28/2025,Total Demand - Northeast,17988.072,Northeast
-07/29/2025,Total Demand - Northeast,18529.326,Northeast
-07/30/2025,Total Demand - Northeast,18649.422,Northeast
-07/31/2025,Total Demand - Northeast,16956.02,Northeast
-08/01/2025,Total Demand - Northeast,16055.13,Northeast
-08/02/2025,Total Demand - Northeast,14539.83,Northeast
-08/03/2025,Total Demand - Northeast,14645.453,Northeast
-08/04/2025,Total Demand - Northeast,16477.945,Northeast
-08/05/2025,Total Demand - Northeast,16763.295,Northeast
-07/22/2025,Total Demand - Pacific Northwest ,1386.7006,West
-07/23/2025,Total Demand - Pacific Northwest ,1455.6052,West
-07/24/2025,Total Demand - Pacific Northwest ,1380.3273,West
-07/25/2025,Total Demand - Pacific Northwest ,1361.529,West
-07/26/2025,Total Demand - Pacific Northwest ,1217.316,West
-07/27/2025,Total Demand - Pacific Northwest ,1226.213,West
-07/28/2025,Total Demand - Pacific Northwest ,1401.3208,West
-07/29/2025,Total Demand - Pacific Northwest ,1458.4581,West
-07/30/2025,Total Demand - Pacific Northwest ,1436.2379,West
-07/31/2025,Total Demand - Pacific Northwest ,1390.6481,West
-08/01/2025,Total Demand - Pacific Northwest ,1376.0197,West
-08/02/2025,Total Demand - Pacific Northwest ,1249.4802,West
-08/03/2025,Total Demand - Pacific Northwest ,1253.477,West
-08/04/2025,Total Demand - Pacific Northwest ,1402.0942,West
-08/05/2025,Total Demand - Pacific Northwest ,1407.6288,West
-07/22/2025,Total Demand - Rockies,5073.8135,Rockies
-07/23/2025,Total Demand - Rockies,5020.5156,Rockies
-07/24/2025,Total Demand - Rockies,4952.267,Rockies
-07/25/2025,Total Demand - Rockies,5038.021,Rockies
-07/26/2025,Total Demand - Rockies,4622.3027,Rockies
-07/27/2025,Total Demand - Rockies,4690.5127,Rockies
-07/28/2025,Total Demand - Rockies,5299.2915,Rockies
-07/29/2025,Total Demand - Rockies,5325.8135,Rockies
-07/30/2025,Total Demand - Rockies,5281.67,Rockies
-07/31/2025,Total Demand - Rockies,5203.0728,Rockies
-08/01/2025,Total Demand - Rockies,5173.1807,Rockies
-08/02/2025,Total Demand - Rockies,4688.944,Rockies
-08/03/2025,Total Demand - Rockies,4699.25,Rockies
-08/04/2025,Total Demand - Rockies,5219.665,Rockies
-08/05/2025,Total Demand - Rockies,5219.665,Rockies
-07/22/2025,Total Demand - Rockies - SW,2186.1885,Rockies
-07/23/2025,Total Demand - Rockies - SW,2242.311,Rockies
-07/24/2025,Total Demand - Rockies - SW,2237.9756,Rockies
-07/25/2025,Total Demand - Rockies - SW,2261.4321,Rockies
-07/26/2025,Total Demand - Rockies - SW,2045.5494,Rockies
-07/27/2025,Total Demand - Rockies - SW,2083.103,Rockies
-07/28/2025,Total Demand - Rockies - SW,2390.9805,Rockies
-07/29/2025,Total Demand - Rockies - SW,2449.7827,Rockies
-07/30/2025,Total Demand - Rockies - SW,2454.5562,Rockies
-07/31/2025,Total Demand - Rockies - SW,2413.8816,Rockies
-08/01/2025,Total Demand - Rockies - SW,2391.6157,Rockies
-08/02/2025,Total Demand - Rockies - SW,2166.8452,Rockies
-08/03/2025,Total Demand - Rockies - SW,2179.5815,Rockies
-08/04/2025,Total Demand - Rockies - SW,2415.3606,Rockies
-08/05/2025,Total Demand - Rockies - SW,2410.4177,Rockies
-07/22/2025,Total Demand - Rockies - Upper,2887.625,Rockies
-07/23/2025,Total Demand - Rockies - Upper,2778.2046,Rockies
-07/24/2025,Total Demand - Rockies - Upper,2714.2915,Rockies
-07/25/2025,Total Demand - Rockies - Upper,2776.5886,Rockies
-07/26/2025,Total Demand - Rockies - Upper,2576.7534,Rockies
-07/27/2025,Total Demand - Rockies - Upper,2607.41,Rockies
-07/28/2025,Total Demand - Rockies - Upper,2908.311,Rockies
-07/29/2025,Total Demand - Rockies - Upper,2876.0305,Rockies
-07/30/2025,Total Demand - Rockies - Upper,2827.114,Rockies
-07/31/2025,Total Demand - Rockies - Upper,2789.1912,Rockies
-08/01/2025,Total Demand - Rockies - Upper,2781.5652,Rockies
-08/02/2025,Total Demand - Rockies - Upper,2522.0989,Rockies
-08/03/2025,Total Demand - Rockies - Upper,2519.6682,Rockies
-08/04/2025,Total Demand - Rockies - Upper,2804.3044,Rockies
-08/05/2025,Total Demand - Rockies - Upper,2804.0576,Rockies
-07/22/2025,Total Demand - South Central ,24354.227,South Central
-07/23/2025,Total Demand - South Central ,24576.176,South Central
-07/24/2025,Total Demand - South Central ,25022.541,South Central
-07/25/2025,Total Demand - South Central ,25155.844,South Central
-07/26/2025,Total Demand - South Central ,22242.113,South Central
-07/27/2025,Total Demand - South Central ,21932.918,South Central
-07/28/2025,Total Demand - South Central ,24315.139,South Central
-07/29/2025,Total Demand - South Central ,24754.201,South Central
-07/30/2025,Total Demand - South Central ,25129.016,South Central
-07/31/2025,Total Demand - South Central ,25071.172,South Central
-08/01/2025,Total Demand - South Central ,24687.85,South Central
-08/02/2025,Total Demand - South Central ,21959.559,South Central
-08/03/2025,Total Demand - South Central ,21956.008,South Central
-08/04/2025,Total Demand - South Central ,24262.443,South Central
-08/05/2025,Total Demand - South Central ,24375.867,South Central
-07/22/2025,Total Demand - Southeast - Florida ,5522.0894,Southeast
-07/23/2025,Total Demand - Southeast - Florida ,5116.546,Southeast
-07/24/2025,Total Demand - Southeast - Florida ,5346.841,Southeast
-07/25/2025,Total Demand - Southeast - Florida ,5588.2466,Southeast
-07/26/2025,Total Demand - Southeast - Florida ,5150.0547,Southeast
-07/27/2025,Total Demand - Southeast - Florida ,5207.1045,Southeast
-07/28/2025,Total Demand - Southeast - Florida ,6042.8276,Southeast
-07/29/2025,Total Demand - Southeast - Florida ,5929.332,Southeast
-07/30/2025,Total Demand - Southeast - Florida ,5790.082,Southeast
-07/31/2025,Total Demand - Southeast - Florida ,5770.2734,Southeast
-08/01/2025,Total Demand - Southeast - Florida ,5828.8223,Southeast
-08/02/2025,Total Demand - Southeast - Florida ,5306.7007,Southeast
-08/03/2025,Total Demand - Southeast - Florida ,5304.658,Southeast
-08/04/2025,Total Demand - Southeast - Florida ,5734.043,Southeast
-08/05/2025,Total Demand - Southeast - Florida ,5595.2134,Southeast
-07/22/2025,Total Demand - Southeast - Other,7661.289,Southeast
-07/23/2025,Total Demand - Southeast - Other,7179.021,Southeast
-07/24/2025,Total Demand - Southeast - Other,7143.1577,Southeast
-07/25/2025,Total Demand - Southeast - Other,7181.7056,Southeast
-07/26/2025,Total Demand - Southeast - Other,6617.691,Southeast
-07/27/2025,Total Demand - Southeast - Other,6759.571,Southeast
-07/28/2025,Total Demand - Southeast - Other,7830.868,Southeast
-07/29/2025,Total Demand - Southeast - Other,7944.4917,Southeast
-07/30/2025,Total Demand - Southeast - Other,8073.5586,Southeast
-07/31/2025,Total Demand - Southeast - Other,7978.7275,Southeast
-08/01/2025,Total Demand - Southeast - Other,7635.2705,Southeast
-08/02/2025,Total Demand - Southeast - Other,6658.3706,Southeast
-08/03/2025,Total Demand - Southeast - Other,6452.975,Southeast
-08/04/2025,Total Demand - Southeast - Other,7006.6787,Southeast
-08/05/2025,Total Demand - Southeast - Other,7058.4883,Southeast
-07/22/2025,West - Balance,0.0,West
-07/23/2025,West - Balance,0.0,West
-07/24/2025,West - Balance,0.0,West
-07/25/2025,West - Balance,0.0,West
-07/26/2025,West - Balance,0.0,West
+08/06/2025,SouthEast - Balance,0.0,SouthEast
+08/07/2025,SouthEast - Balance,0.0,SouthEast
+08/08/2025,SouthEast - Balance,0.0,SouthEast
+08/09/2025,SouthEast - Balance,0.0,SouthEast
+08/10/2025,SouthEast - Balance,0.0,SouthEast
+07/27/2025,Total Demand - California ,4464.856,California
+07/28/2025,Total Demand - California ,4987.2236,California
+07/29/2025,Total Demand - California ,5036.1494,California
+07/30/2025,Total Demand - California ,5101.788,California
+07/31/2025,Total Demand - California ,5158.2603,California
+08/01/2025,Total Demand - California ,5164.304,California
+08/02/2025,Total Demand - California ,4537.477,California
+08/03/2025,Total Demand - California ,4596.582,California
+08/04/2025,Total Demand - California ,5174.5737,California
+08/05/2025,Total Demand - California ,5126.168,California
+08/06/2025,Total Demand - California ,5147.0654,California
+08/07/2025,Total Demand - California ,5306.5874,California
+08/08/2025,Total Demand - California ,5502.9976,California
+08/09/2025,Total Demand - California ,4956.4346,California
+08/10/2025,Total Demand - California ,4939.7134,California
+07/27/2025,Total Demand - Lower 48 ,71337.73,Lower 48
+07/28/2025,Total Demand - Lower 48 ,82672.016,Lower 48
+07/29/2025,Total Demand - Lower 48 ,83809.89,Lower 48
+07/30/2025,Total Demand - Lower 48 ,83802.47,Lower 48
+07/31/2025,Total Demand - Lower 48 ,79658.375,Lower 48
+08/01/2025,Total Demand - Lower 48 ,77124.19,Lower 48
+08/02/2025,Total Demand - Lower 48 ,67892.29,Lower 48
+08/03/2025,Total Demand - Lower 48 ,67145.04,Lower 48
+08/04/2025,Total Demand - Lower 48 ,75581.16,Lower 48
+08/05/2025,Total Demand - Lower 48 ,76801.0,Lower 48
+08/06/2025,Total Demand - Lower 48 ,77861.77,Lower 48
+08/07/2025,Total Demand - Lower 48 ,78607.87,Lower 48
+08/08/2025,Total Demand - Lower 48 ,79233.92,Lower 48
+08/09/2025,Total Demand - Lower 48 ,71384.31,Lower 48
+08/10/2025,Total Demand - Lower 48 ,71480.7,Lower 48
+07/27/2025,Total Demand - Midwest,11314.15,Midwest
+07/28/2025,Total Demand - Midwest,12920.676,Midwest
+07/29/2025,Total Demand - Midwest,12793.446,Midwest
+07/30/2025,Total Demand - Midwest,11862.456,Midwest
+07/31/2025,Total Demand - Midwest,11382.346,Midwest
+08/01/2025,Total Demand - Midwest,11492.745,Midwest
+08/02/2025,Total Demand - Midwest,10359.819,Midwest
+08/03/2025,Total Demand - Midwest,10261.305,Midwest
+08/04/2025,Total Demand - Midwest,11727.285,Midwest
+08/05/2025,Total Demand - Midwest,12089.8545,Midwest
+08/06/2025,Total Demand - Midwest,12215.539,Midwest
+08/07/2025,Total Demand - Midwest,12172.274,Midwest
+08/08/2025,Total Demand - Midwest,12138.534,Midwest
+08/09/2025,Total Demand - Midwest,10930.187,Midwest
+08/10/2025,Total Demand - Midwest,10992.589,Midwest
+07/27/2025,Total Demand - Northeast,15809.2,Northeast
+07/28/2025,Total Demand - Northeast,19164.219,Northeast
+07/29/2025,Total Demand - Northeast,19977.107,Northeast
+07/30/2025,Total Demand - Northeast,21123.025,Northeast
+07/31/2025,Total Demand - Northeast,17569.525,Northeast
+08/01/2025,Total Demand - Northeast,15599.844,Northeast
+08/02/2025,Total Demand - Northeast,13934.693,Northeast
+08/03/2025,Total Demand - Northeast,14158.354,Northeast
+08/04/2025,Total Demand - Northeast,16272.726,Northeast
+08/05/2025,Total Demand - Northeast,16815.285,Northeast
+08/06/2025,Total Demand - Northeast,17367.156,Northeast
+08/07/2025,Total Demand - Northeast,17657.97,Northeast
+08/08/2025,Total Demand - Northeast,17915.547,Northeast
+08/09/2025,Total Demand - Northeast,16179.483,Northeast
+08/10/2025,Total Demand - Northeast,16361.4375,Northeast
+07/27/2025,Total Demand - Pacific Northwest ,1227.3534,West
+07/28/2025,Total Demand - Pacific Northwest ,1404.3401,West
+07/29/2025,Total Demand - Pacific Northwest ,1458.7772,West
+07/30/2025,Total Demand - Pacific Northwest ,1500.2758,West
+07/31/2025,Total Demand - Pacific Northwest ,1417.164,West
+08/01/2025,Total Demand - Pacific Northwest ,1407.1938,West
+08/02/2025,Total Demand - Pacific Northwest ,1254.1627,West
+08/03/2025,Total Demand - Pacific Northwest ,1231.9025,West
+08/04/2025,Total Demand - Pacific Northwest ,1374.9666,West
+08/05/2025,Total Demand - Pacific Northwest ,1396.6232,West
+08/06/2025,Total Demand - Pacific Northwest ,1417.2472,West
+08/07/2025,Total Demand - Pacific Northwest ,1440.0166,West
+08/08/2025,Total Demand - Pacific Northwest ,1448.2646,West
+08/09/2025,Total Demand - Pacific Northwest ,1322.9634,West
+08/10/2025,Total Demand - Pacific Northwest ,1346.0304,West
+07/27/2025,Total Demand - Rockies,4669.2886,Rockies
+07/28/2025,Total Demand - Rockies,5298.7944,Rockies
+07/29/2025,Total Demand - Rockies,5246.8276,Rockies
+07/30/2025,Total Demand - Rockies,5122.9175,Rockies
+07/31/2025,Total Demand - Rockies,5103.2573,Rockies
+08/01/2025,Total Demand - Rockies,5120.85,Rockies
+08/02/2025,Total Demand - Rockies,4644.9585,Rockies
+08/03/2025,Total Demand - Rockies,4644.493,Rockies
+08/04/2025,Total Demand - Rockies,5089.823,Rockies
+08/05/2025,Total Demand - Rockies,5088.4487,Rockies
+08/06/2025,Total Demand - Rockies,5156.169,Rockies
+08/07/2025,Total Demand - Rockies,5230.227,Rockies
+08/08/2025,Total Demand - Rockies,5260.675,Rockies
+08/09/2025,Total Demand - Rockies,4725.561,Rockies
+08/10/2025,Total Demand - Rockies,4725.561,Rockies
+07/27/2025,Total Demand - Rockies - SW,2086.72,Rockies
+07/28/2025,Total Demand - Rockies - SW,2370.3748,Rockies
+07/29/2025,Total Demand - Rockies - SW,2410.021,Rockies
+07/30/2025,Total Demand - Rockies - SW,2397.5083,Rockies
+07/31/2025,Total Demand - Rockies - SW,2382.1318,Rockies
+08/01/2025,Total Demand - Rockies - SW,2396.7964,Rockies
+08/02/2025,Total Demand - Rockies - SW,2196.1206,Rockies
+08/03/2025,Total Demand - Rockies - SW,2174.1433,Rockies
+08/04/2025,Total Demand - Rockies - SW,2333.882,Rockies
+08/05/2025,Total Demand - Rockies - SW,2306.6467,Rockies
+08/06/2025,Total Demand - Rockies - SW,2348.396,Rockies
+08/07/2025,Total Demand - Rockies - SW,2398.8777,Rockies
+08/08/2025,Total Demand - Rockies - SW,2430.3584,Rockies
+08/09/2025,Total Demand - Rockies - SW,2174.781,Rockies
+08/10/2025,Total Demand - Rockies - SW,2149.3618,Rockies
+07/27/2025,Total Demand - Rockies - Upper,2582.5684,Rockies
+07/28/2025,Total Demand - Rockies - Upper,2928.4197,Rockies
+07/29/2025,Total Demand - Rockies - Upper,2836.807,Rockies
+07/30/2025,Total Demand - Rockies - Upper,2725.409,Rockies
+07/31/2025,Total Demand - Rockies - Upper,2721.1255,Rockies
+08/01/2025,Total Demand - Rockies - Upper,2724.0535,Rockies
+08/02/2025,Total Demand - Rockies - Upper,2448.8376,Rockies
+08/03/2025,Total Demand - Rockies - Upper,2470.35,Rockies
+08/04/2025,Total Demand - Rockies - Upper,2755.9412,Rockies
+08/05/2025,Total Demand - Rockies - Upper,2781.802,Rockies
+08/06/2025,Total Demand - Rockies - Upper,2807.773,Rockies
+08/07/2025,Total Demand - Rockies - Upper,2831.3496,Rockies
+08/08/2025,Total Demand - Rockies - Upper,2830.3162,Rockies
+08/09/2025,Total Demand - Rockies - Upper,2550.78,Rockies
+08/10/2025,Total Demand - Rockies - Upper,2530.8118,Rockies
+07/27/2025,Total Demand - South Central ,21341.012,South Central
+07/28/2025,Total Demand - South Central ,24272.334,South Central
+07/29/2025,Total Demand - South Central ,24873.287,South Central
+07/30/2025,Total Demand - South Central ,25387.275,South Central
+07/31/2025,Total Demand - South Central ,25442.613,South Central
+08/01/2025,Total Demand - South Central ,24777.66,South Central
+08/02/2025,Total Demand - South Central ,21318.346,South Central
+08/03/2025,Total Demand - South Central ,20911.887,South Central
+08/04/2025,Total Demand - South Central ,23464.914,South Central
+08/05/2025,Total Demand - South Central ,23694.324,South Central
+08/06/2025,Total Demand - South Central ,23911.814,South Central
+08/07/2025,Total Demand - South Central ,24115.92,South Central
+08/08/2025,Total Demand - South Central ,24212.047,South Central
+08/09/2025,Total Demand - South Central ,21728.457,South Central
+08/10/2025,Total Demand - South Central ,21577.996,South Central
+07/27/2025,Total Demand - Southeast - Florida ,5478.889,Southeast
+07/28/2025,Total Demand - Southeast - Florida ,6312.697,Southeast
+07/29/2025,Total Demand - Southeast - Florida ,6213.1504,Southeast
+07/30/2025,Total Demand - Southeast - Florida ,6045.176,Southeast
+07/31/2025,Total Demand - Southeast - Florida ,6125.757,Southeast
+08/01/2025,Total Demand - Southeast - Florida ,6236.9956,Southeast
+08/02/2025,Total Demand - Southeast - Florida ,5687.484,Southeast
+08/03/2025,Total Demand - Southeast - Florida ,5467.343,Southeast
+08/04/2025,Total Demand - Southeast - Florida ,5905.42,Southeast
+08/05/2025,Total Demand - Southeast - Florida ,5817.6807,Southeast
+08/06/2025,Total Demand - Southeast - Florida ,5635.2417,Southeast
+08/07/2025,Total Demand - Southeast - Florida ,5530.886,Southeast
+08/08/2025,Total Demand - Southeast - Florida ,5541.1797,Southeast
+08/09/2025,Total Demand - Southeast - Florida ,5028.16,Southeast
+08/10/2025,Total Demand - Southeast - Florida ,5062.197,Southeast
+07/27/2025,Total Demand - Southeast - Other,7032.9766,Southeast
+07/28/2025,Total Demand - Southeast - Other,8311.734,Southeast
+07/29/2025,Total Demand - Southeast - Other,8211.148,Southeast
+07/30/2025,Total Demand - Southeast - Other,7659.5513,Southeast
+07/31/2025,Total Demand - Southeast - Other,7459.4526,Southeast
+08/01/2025,Total Demand - Southeast - Other,7324.5923,Southeast
+08/02/2025,Total Demand - Southeast - Other,6155.35,Southeast
+08/03/2025,Total Demand - Southeast - Other,5873.174,Southeast
+08/04/2025,Total Demand - Southeast - Other,6571.449,Southeast
+08/05/2025,Total Demand - Southeast - Other,6772.6167,Southeast
+08/06/2025,Total Demand - Southeast - Other,7011.5386,Southeast
+08/07/2025,Total Demand - Southeast - Other,7153.9805,Southeast
+08/08/2025,Total Demand - Southeast - Other,7214.6772,Southeast
+08/09/2025,Total Demand - Southeast - Other,6513.0635,Southeast
+08/10/2025,Total Demand - Southeast - Other,6520.567,Southeast
 07/27/2025,West - Balance,0.0,West
 07/28/2025,West - Balance,0.0,West
 07/29/2025,West - Balance,0.0,West
@@ -269,11 +264,11 @@ Date,item,value,region
 08/03/2025,West - Balance,0.0,West
 08/04/2025,West - Balance,0.0,West
 08/05/2025,West - Balance,0.0,West
-07/22/2025,West - Ind,0.0,West
-07/23/2025,West - Ind,0.0,West
-07/24/2025,West - Ind,0.0,West
-07/25/2025,West - Ind,0.0,West
-07/26/2025,West - Ind,0.0,West
+08/06/2025,West - Balance,0.0,West
+08/07/2025,West - Balance,0.0,West
+08/08/2025,West - Balance,0.0,West
+08/09/2025,West - Balance,0.0,West
+08/10/2025,West - Balance,0.0,West
 07/27/2025,West - Ind,0.0,West
 07/28/2025,West - Ind,0.0,West
 07/29/2025,West - Ind,0.0,West
@@ -284,11 +279,11 @@ Date,item,value,region
 08/03/2025,West - Ind,0.0,West
 08/04/2025,West - Ind,0.0,West
 08/05/2025,West - Ind,0.0,West
-07/22/2025,West - Power,0.0,West
-07/23/2025,West - Power,0.0,West
-07/24/2025,West - Power,0.0,West
-07/25/2025,West - Power,0.0,West
-07/26/2025,West - Power,0.0,West
+08/06/2025,West - Ind,0.0,West
+08/07/2025,West - Ind,0.0,West
+08/08/2025,West - Ind,0.0,West
+08/09/2025,West - Ind,0.0,West
+08/10/2025,West - Ind,0.0,West
 07/27/2025,West - Power,0.0,West
 07/28/2025,West - Power,0.0,West
 07/29/2025,West - Power,0.0,West
@@ -299,11 +294,11 @@ Date,item,value,region
 08/03/2025,West - Power,0.0,West
 08/04/2025,West - Power,0.0,West
 08/05/2025,West - Power,0.0,West
-07/22/2025,West - ResCom,0.0,West
-07/23/2025,West - ResCom,0.0,West
-07/24/2025,West - ResCom,0.0,West
-07/25/2025,West - ResCom,0.0,West
-07/26/2025,West - ResCom,0.0,West
+08/06/2025,West - Power,0.0,West
+08/07/2025,West - Power,0.0,West
+08/08/2025,West - Power,0.0,West
+08/09/2025,West - Power,0.0,West
+08/10/2025,West - Power,0.0,West
 07/27/2025,West - ResCom,0.0,West
 07/28/2025,West - ResCom,0.0,West
 07/29/2025,West - ResCom,0.0,West
@@ -314,3 +309,8 @@ Date,item,value,region
 08/03/2025,West - ResCom,0.0,West
 08/04/2025,West - ResCom,0.0,West
 08/05/2025,West - ResCom,0.0,West
+08/06/2025,West - ResCom,0.0,West
+08/07/2025,West - ResCom,0.0,West
+08/08/2025,West - ResCom,0.0,West
+08/09/2025,West - ResCom,0.0,West
+08/10/2025,West - ResCom,0.0,West
