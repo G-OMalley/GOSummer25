@@ -7,262 +7,124 @@ import webbrowser
 import time
 import plotly.graph_objs as go
 import plotly.colors
-import re # Import regex module
-from collections import defaultdict # Import defaultdict
-import ast # Import ast for literal_eval
+import re 
+from collections import defaultdict 
+import ast # Import ast for literal_eval (this import is already there, but reiterating its importance)
 
 # --- Setup ---
-# Determine the base directory of the script dynamically
-# This makes the script portable across different systems.
-# It assumes the script is located within the 'GOScripts' folder,
-# and your 'INFO' and 'Criterion' folders are siblings to 'GOScripts'
-# within your 'GitHub' directory (or whatever the project root is).
-
 script_dir = Path(__file__).resolve().parent
 project_root = script_dir.parent
-
-# Define the base data folder relative to the project root
 data_folder = project_root / "INFO"
-
-# Define the GOScripts folder relative to the project root (it's where this script is!)
 goscripts_folder = project_root / "GOScripts"
-
-# Define the output path for the generated HTML report relative to the project root
-output_path = project_root / "EIA_Dashboard.html" # Renamed for clarity
-
+output_path = project_root / "EIA_Dashboard.html"
 
 print(f"Data folder resolved to: {data_folder.resolve()}")
 print(f"Output path resolved to: {output_path.resolve()}")
 print(f"GOScripts folder resolved to: {goscripts_folder.resolve()}")
 
-
-# Standard base temperature for CDD/HDD in natural gas markets
 BASE_TEMP_CDD_HDD = 65
 
 # --- City Name Standardization Map (for Basis Analysis and Weather Report) ---
-# IMPORTANT: Keys here must EXACTLY match the raw city names found in your CSV files
-# after basic stripping, but BEFORE any custom space normalization.
-# The `standardize_city_name` function will handle the conversion of various
-# whitespace characters to a single space before looking up in this map.
 CITY_STANDARDIZATION_MAP = {
-    'JFK': 'John F. Kennedy NY',
-    'Houston IAH': 'Houston TX',
-    'Ok. City': 'Oklahoma City OK',
-    'Chicago OHare': 'Chicago IL',
-    'Washington': 'Washington National DC',
-    'Ral-Durham': 'Raleigh/Durham NC',
-    'Atlanta': 'Atlanta GA',
-    'Boston': 'Boston MA',
-    'Buffalo': 'Buffalo NY',
-    'Denver': 'Denver CO',
-    'Detroit': 'Detroit MI',
-    'Los Angeles': 'Los Angeles CA',
-    'Little Rock': 'Little Rock AR',
-    'New Orleans': 'New Orleans LA',
-    'Philadelphia': 'Philadelphia PA',
-    'Pittsburgh': 'Pittsburgh PA',
-    'Seattle': 'Seattle WA',
-    'San Francisco': 'San Francisco CA',
-    'Tampa': 'Tampa FL',
+    'JFK': 'John F. Kennedy NY', 'Houston IAH': 'Houston TX', 'Ok. City': 'Oklahoma City OK',
+    'Chicago OHare': 'Chicago IL', 'Washington': 'Washington National DC', 'Ral-Durham': 'Raleigh/Durham NC',
+    'Atlanta': 'Atlanta GA', 'Boston': 'Boston MA', 'Buffalo': 'Buffalo NY', 'Denver': 'Denver CO',
+    'Detroit': 'Detroit MI', 'Los Angeles': 'Los Angeles CA', 'Little Rock': 'Little Rock AR',
+    'New Orleans': 'New Orleans LA', 'Philadelphia': 'Philadelphia PA', 'Pittsburgh': 'Pittsburgh PA',
+    'Seattle': 'Seattle WA', 'San Francisco': 'San Francisco CA', 'Tampa': 'Tampa FL',
 }
 
 def standardize_city_name(city_name):
-    """
-    Applies common standardization by replacing all whitespace characters
-    (including narrow no-break space) with a single ASCII space,
-    stripping, and then using the hardcoded map.
-    """
     city_name = str(city_name)
-    # Replace all whitespace characters (including non-breaking ones like U+202F)
-    # with a single ASCII space. This is crucial for matching map keys.
     city_name = re.sub(r'\s+', ' ', city_name).strip()
-    
-    # Apply the hardcoded map using the cleaned name
     return CITY_STANDARDIZATION_MAP.get(city_name, city_name)
 
 # --- Hardcoded Component to City Mapping (for Basis Analysis) ---
 COMPONENT_TO_CITY_MAP_HARDCODED = {
-    'AGT-CG (non-G)': 'John F. Kennedy NY',
-    'ANR-SE-T': 'Houston TX',
-    'ANR-SW': 'Oklahoma City OK',
-    'APC-ACE': 'Chicago IL',
-    'CG-Mainline': 'New Orleans LA',
-    'CG-Onshore': 'New Orleans LA',
-    'Carthage': 'Oklahoma City OK',
-    'Chicago': 'Chicago IL',
-    'Dracut': 'Boston MA',
-    'Eastern Gas-South': 'Pittsburgh PA',
-    'FGT-Z3': 'Tampa FL',
-    'HSC-HPL Pool': 'Houston TX',
-    'Henry': 'Henry Hub',
-    'Iroquois (into)': 'Buffalo NY',
-    'Iroquois-Z2': 'John F. Kennedy NY',
-    'Leidy-Transco': 'Philadelphia PA',
-    'Michcon': 'Detroit MI',
-    'NBPL-Vector': 'Chicago IL',
-    'NGPL-Midcont Pool': 'Oklahoma City OK',
-    'NGPL-STX': 'Houston TX',
-    'NGPL-TXOK East': 'Houston TX',
-    'NNG-Demarc': 'Chicago IL',
-    'NNG-Ventura': 'Chicago IL',
-    'Panhandle': 'Oklahoma City OK',
-    'Pine Prairie': 'Atlanta GA',
-    'REX E-NGPL': 'Chicago IL',
-    'REX-Z3 (receipt)': 'Philadelphia PA',
-    'Sonat-Z0 South': 'Atlanta GA',
-    'TCO': 'Pittsburgh PA',
-    'TETCO-ELA': 'Houston TX',
-    'TETCO-M2 (receipt)': 'Pittsburgh PA',
-    'TETCO-M3': 'John F. Kennedy NY',
-    'TETCO-STX': 'Houston TX',
-    'TETCO-WLA': 'Houston TX',
-    'TGP-500L': 'Houston TX',
-    'TGP-800L': 'Houston TX',
-    'TGP-Z0 South': 'Houston TX',
-    'TGP-Z1 100L': 'Houston TX',
-    'TGP-Z1 Sta-87': 'Houston TX',
-    'TGP-Z4 Marcellus': 'Pittsburgh PA',
-    'TGP-Z4 Sta-219': 'Pittsburgh PA',
-    'TGP-Z4 Sta-313': 'Pittsburgh PA',
-    'TGT-Mainline': 'Houston TX',
-    'Transco Zn3': 'Atlanta GA',
-    'Transco-165': 'Raleigh/Durham NC',
-    'Transco-30': 'Houston TX',
-    'Transco-45': 'Atlanta GA',
-    'Transco-65': 'Atlanta GA',
-    'Transco-85': 'Atlanta GA',
-    'Transco-Z5 South': 'Washington National DC',
-    'Transco-Z6 (NY)': 'John F. Kennedy NY',
-    'Transco-Z6 (non-NY north)': 'Philadelphia PA',
-    'Transco-Z6 (non-NY)': 'Philadelphia PA',
-    'Transco-Z6 Sta-210': 'Philadelphia PA',
-    'Trunkline-Z1A': 'Houston TX',
-    'Union-Dawn': 'Buffalo NY',
-    'Waha': 'Waha',
+    'AGT-CG (non-G)': 'John F. Kennedy NY', 'ANR-SE-T': 'Houston TX', 'ANR-SW': 'Oklahoma City OK',
+    'APC-ACE': 'Chicago IL', 'CG-Mainline': 'New Orleans LA', 'CG-Onshore': 'New Orleans LA',
+    'Carthage': 'Oklahoma City OK', 'Chicago': 'Chicago IL', 'Dracut': 'Boston MA',
+    'Eastern Gas-South': 'Pittsburgh PA', 'FGT-Z3': 'Tampa FL', 'HSC-HPL Pool': 'Houston TX',
+    'Henry': 'Henry Hub', 'Iroquois (into)': 'Buffalo NY', 'Iroquois-Z2': 'John F. Kennedy NY',
+    'Leidy-Transco': 'Philadelphia PA', 'Michcon': 'Detroit MI', 'NBPL-Vector': 'Chicago IL',
+    'NGPL-Midcont Pool': 'Oklahoma City OK', 'NGPL-STX': 'Houston TX', 'NGPL-TXOK East': 'Houston TX',
+    'NNG-Demarc': 'Chicago IL', 'NNG-Ventura': 'Chicago IL', 'Panhandle': 'Oklahoma City OK',
+    'Pine Prairie': 'Atlanta GA', 'REX E-NGPL': 'Chicago IL', 'REX-Z3 (receipt)': 'Philadelphia PA',
+    'Sonat-Z0 South': 'Atlanta GA', 'TCO': 'Pittsburgh PA', 'TETCO-ELA': 'Houston TX',
+    'TETCO-M2 (receipt)': 'Pittsburgh PA', 'TETCO-M3': 'John F. Kennedy NY', 'TETCO-STX': 'Houston TX',
+    'TETCO-WLA': 'Houston TX', 'TGP-500L': 'Houston TX', 'TGP-800L': 'Houston TX',
+    'TGP-Z0 South': 'Houston TX', 'TGP-Z1 100L': 'Houston TX', 'TGP-Z1 Sta-87': 'Houston TX',
+    'TGP-Z4 Marcellus': 'Pittsburgh PA', 'TGP-Z4 Sta-219': 'Pittsburgh PA', 'TGP-Z4 Sta-313': 'Pittsburgh PA',
+    'TGT-Mainline': 'Houston TX', 'Transco Zn3': 'Atlanta GA', 'Transco-165': 'Raleigh/Durham NC',
+    'Transco-30': 'Houston TX', 'Transco-45': 'Atlanta GA', 'Transco-65': 'Atlanta GA',
+    'Transco-85': 'Atlanta GA', 'Transco-Z5 South': 'Washington National DC', 'Transco-Z6 (NY)': 'John F. Kennedy NY',
+    'Transco-Z6 (non-NY north)': 'Philadelphia PA', 'Transco-Z6 (non-NY)': 'Philadelphia PA', 'Transco-Z6 Sta-210': 'Philadelphia PA',
+    'Trunkline-Z1A': 'Houston TX', 'Union-Dawn': 'Buffalo NY', 'Waha': 'Waha',
 }
 
 # --- Step 1: Hardcoded city lists per region and integrate into WEATHER_REGION_CITY_MAP ---
-EAST_CITIES = [
-    "Boston MA", "Buffalo NY", "John F. Kennedy NY",
-    "Philadelphia PA", "Pittsburgh PA", "Washington National DC",
-    "Raleigh/Durham NC"
-]
-
-MIDWEST_CITIES = [
-    "Chicago IL", "Detroit MI"
-]
-
-SALT_SC_CITIES = [
-    "Houston TX", "New Orleans LA"
-]
-
-NONSALT_SC_CITIES = [
-    "Little Rock AR", "Oklahoma City OK", "Atlanta GA"
-]
-
+EAST_CITIES = ["Boston MA", "Buffalo NY", "John F. Kennedy NY", "Philadelphia PA", "Pittsburgh PA", "Washington National DC", "Raleigh/Durham NC"]
+MIDWEST_CITIES = ["Chicago IL", "Detroit MI"]
+SALT_SC_CITIES = ["Houston TX", "New Orleans LA"]
+NONSALT_SC_CITIES = ["Little Rock AR", "Oklahoma City OK", "Atlanta GA"]
 SOUTH_CENTRAL_CITIES = SALT_SC_CITIES + NONSALT_SC_CITIES
+PACIFIC_CITIES = ["Los Angeles CA", "San Francisco CA", "Seattle WA"]
+MOUNTAIN_CITIES = ["Denver CO"]
+ALL_CITIES = sorted(list(set(EAST_CITIES + MIDWEST_CITIES + SOUTH_CENTRAL_CITIES + PACIFIC_CITIES + MOUNTAIN_CITIES)))
 
-PACIFIC_CITIES = [
-    "Los Angeles CA", "San Francisco CA", "Seattle WA"
-]
-
-MOUNTAIN_CITIES = [
-    "Denver CO"
-]
-
-ALL_CITIES = sorted(list(set(
-    EAST_CITIES + MIDWEST_CITIES + SOUTH_CENTRAL_CITIES + PACIFIC_CITIES + MOUNTAIN_CITIES
-)))
-
-# The main mapping dictionary, using the lists defined above
 WEATHER_REGION_CITY_MAP = {
-    "East Region Storage (Bcf)": EAST_CITIES,
-    "Midwest Region Storage (Bcf)": MIDWEST_CITIES,
-    "Salt Region SC Storage (Bcf)": SALT_SC_CITIES,
-    "Nonsalt Region SC Storage (Bcf)": NONSALT_SC_CITIES,
-    "South Central Region Storage (Bcf)": SOUTH_CENTRAL_CITIES,
-    "Pacific Region Storage (Bcf)": PACIFIC_CITIES,
-    "Mountain Region Storage (Bcf)": MOUNTAIN_CITIES,
-    "Lower 48 States Storage (Bcf)": ALL_CITIES
+    "East Region Storage (Bcf)": EAST_CITIES, "Midwest Region Storage (Bcf)": MIDWEST_CITIES,
+    "Salt Region SC Storage (Bcf)": SALT_SC_CITIES, "Nonsalt Region SC Storage (Bcf)": NONSALT_SC_CITIES,
+    "South Central Region Storage (Bcf)": SOUTH_CENTRAL_CITIES, "Pacific Region Storage (Bcf)": PACIFIC_CITIES,
+    "Mountain Region Storage (Bcf)": MOUNTAIN_CITIES, "Lower 48 States Storage (Bcf)": ALL_CITIES
 }
 
-# --- Step 2: Define representative cities for other regions ---
-# This new map will be used specifically for calculating weather stats for the report tab
 WEATHER_REGION_CITY_REP = {
-    "East Region Storage (Bcf)": "Philadelphia PA",
-    "Midwest Region Storage (Bcf)": "Chicago IL",
-    "Salt Region SC Storage (Bcf)": "Houston TX",
-    "Nonsalt Region SC Storage (Bcf)": "Atlanta GA",
-    "South Central Region Storage (Bcf)": SOUTH_CENTRAL_CITIES, # This region uses multiple cities for its rep
-    "Pacific Region Storage (Bcf)": "Los Angeles CA",
-    "Mountain Region Storage (Bcf)": "Denver CO",
-    "Lower 48 States Storage (Bcf)": ALL_CITIES # This region uses all cities for its rep
+    "East Region Storage (Bcf)": "Washington National DC", "Midwest Region Storage (Bcf)": "Chicago IL",
+    "Salt Region SC Storage (Bcf)": "Houston TX", "Nonsalt Region SC Storage (Bcf)": "Atlanta GA",
+    "South Central Region Storage (Bcf)": SOUTH_CENTRAL_CITIES, "Pacific Region Storage (Bcf)": "Los Angeles CA",
+    "Mountain Region Storage (Bcf)": "Denver CO", "Lower 48 States Storage (Bcf)": ALL_CITIES
 }
-
 
 region_map = {
-    "Lower 48 States Storage (Bcf)": "lower_48_states_storage",
-    "East Region Storage (Bcf)": "east_region_storage",
-    "Midwest Region Storage (Bcf)": "midwest_region_storage",
-    "South Central Region Storage (Bcf)": "south_central_region_storage",
-    "Salt Region SC Storage (Bcf)": "salt_region_sc_storage",
-    "Nonsalt Region SC Storage (Bcf)": "nonsalt_region_sc_storage",
-    "Mountain Region Storage (Bcf)": "mountain_region_storage",
-    "Pacific Region Storage (Bcf)": "pacific_region_storage"
+    "Lower 48 States Storage (Bcf)": "lower_48_states_storage", "East Region Storage (Bcf)": "east_region_storage",
+    "Midwest Region Storage (Bcf)": "midwest_region_storage", "South Central Region Storage (Bcf)": "south_central_region_storage",
+    "Salt Region SC Storage (Bcf)": "salt_region_sc_storage", "Nonsalt Region SC Storage (Bcf)": "nonsalt_region_sc_storage",
+    "Mountain Region Storage (Bcf)": "mountain_region_storage", "Pacific Region Storage (Bcf)": "pacific_region_storage"
 }
-# DEFAULT_REGION_DISPLAY_NAME is now used as the fixed default for the Report tab.
 DEFAULT_REGION_DISPLAY_NAME = "Lower 48 States Storage (Bcf)"
 
-# Consolidated file definitions
 files = {
-    "eia_totals": "EIAtotals.csv",
-    "eia_changes": "EIAchanges.csv",
-    "weather": "WEATHER.csv",
-    "prices": "PRICES.csv",
-    "fundy": "Fundy.csv",
-    "forecast": "FundyForecast.csv",
-    "criterion_storage_change": "CriterionStorageChange.csv",
-    "criterion_nuclear_hist": "criterionnuclearhist.csv",
-    "plant_group_mapping": "Plant_Group_Mapping.csv",
-    "lng_outage_report": "LNG_Outage_Report.csv",
-    "weather_forecast_basis": "WEATHERforecast.csv" # Explicitly define for basis analysis
+    "eia_totals": "EIAtotals.csv", "eia_changes": "EIAchanges.csv", "weather": "WEATHER.csv",
+    "prices": "PRICES.csv", "fundy": "Fundy.csv", "forecast": "FundyForecast.csv",
+    "criterion_storage_change": "CriterionStorageChange.csv", "criterion_nuclear_hist": "criterionnuclearhist.csv",
+    "plant_group_mapping": "Plant_Group_Mapping.csv", "lng_outage_report": "LNG_Outage_Report.csv",
+    "weather_forecast_basis": "WEATHERforecast.csv"
 }
 
-# --- BASIS ANALYSIS SPECIFIC CONFIGURATION ---
 PRICES_FILE_BASIS = data_folder / files["prices"]
 WEATHER_HISTORICAL_FILE_BASIS = data_folder / files["weather"]
 WEATHER_FORECAST_FILE_BASIS = data_folder / files["weather_forecast_basis"]
-
-HENRY_HUB_NAME = 'Henry' # The column name for Henry Hub in PRICES.csv
-
+HENRY_HUB_NAME = 'Henry'
 
 # --- Data Loading and Cleaning (Original Dashboard) ---
 def load_clean_df(file_key, fname, data_path):
     fpath = data_path / fname
-    # print(f"Attempting to load file: {fpath}") # Keep for initial path debugging if issues return
     if not fpath.exists():
         print(f"❌ Error: Required file '{fname}' not found at {fpath}. Skipping this file.")
         return None
     try:
         if file_key == "lng_outage_report":
             df = pd.read_csv(fpath)
-            # print(f"Raw columns for {fname}: {df.columns.tolist()}") # Debug for column names
-
             df = df.rename(columns={
-                'LNG_Name': 'LNG Name',
-                'start_date': 'Start Date',
-                'end_date': 'End Date',
-                'outage_start_value': 'Outage Start Value',
-                'outage_end_value': 'Outage End Value'
+                'LNG_Name': 'LNG Name', 'start_date': 'Start Date', 'end_date': 'End Date',
+                'outage_start_value': 'Outage Start Value', 'outage_end_value': 'Outage End Value'
             })
-
             if 'Start Date' in df.columns and 'End Date' in df.columns:
                 df['Start Date'] = pd.to_datetime(df['Start Date'], errors='coerce')
                 df['End Date'] = pd.to_datetime(df['End Date'], errors='coerce')
-
                 df['Duration (Days)'] = (df['End Date'] - df['Start Date']).dt.days + 1
                 df['Duration (Days)'] = df['Duration (Days)'].fillna(0).astype(int)
-
                 df['Start Date_display'] = df['Start Date'].dt.strftime('%Y-%m-%d').replace('NaT', 'N/A')
                 df['End Date_display'] = df['End Date'].dt.strftime('%Y-%m-%d').replace('NaT', 'N/A')
             else:
@@ -270,99 +132,81 @@ def load_clean_df(file_key, fname, data_path):
                 if 'Start Date_display' not in df.columns: df['Start Date_display'] = 'N/A'
                 if 'End Date_display' not in df.columns: df['End Date_display'] = 'N/A'
                 df['Duration (Days)'] = 'N/A'
-            # print(f"{fname} processed. Head:\n{df.head()}") # Debug for processed data
-            # print(f"{fname} info:\n{df.info()}") # Debug for processed data info
             return df
 
         elif file_key == "plant_group_mapping":
             df = pd.read_csv(fpath)
-            # print(f"Raw columns for {fname}: {df.columns.tolist()}") # Debug for column names
+            print(f"DEBUG: Raw columns for {fname}: {df.columns.tolist()}")
             df.columns = df.columns.str.strip()
             df.columns = [col.lower() for col in df.columns]
+            print(f"DEBUG: Lowercased columns for {fname}: {df.columns.tolist()}")
 
-            if 'unit' in df.columns and 'group' in df.columns:
-                df = df[['unit', 'group']].copy()
-                # print(f"Successfully loaded '{fname}' with 'unit' and 'group' columns. Head:\n{df.head()}") # Debug
+            if 'units' in df.columns and 'group' in df.columns:
+                # NEW: Convert string representation of list to actual list
+                # Use errors='coerce' to turn unparseable strings into NaN
+                df['units'] = df['units'].apply(lambda x: ast.literal_eval(x) if isinstance(x, str) and x.startswith('[') else x)
+                
+                # NEW: Explode the 'units' column so each unit gets its own row
+                df = df.explode('units')
+                
+                # After explode, 'units' column now contains single unit names
+                df = df.rename(columns={'units': 'unit'}) # Rename to singular 'unit' for consistency with downstream merge
+                
+                print(f"DEBUG: Successfully loaded and exploded '{fname}' with 'unit' and 'group' columns. Head:\n{df.head()}")
             else:
-                print(f"❌ Error: '{fname}' missing expected 'unit' or 'group' columns. Found: {df.columns.tolist()}. Nuclear outage grouping will not be applied.")
+                print(f"❌ Error: '{fname}' missing expected 'units' or 'group' columns. Found: {df.columns.tolist()}. Nuclear outage grouping will not be applied.")
                 return None
             return df
 
-        # General CSV loading for other files
         df = pd.read_csv(fpath)
     except Exception as e:
         print(f"❌ Error reading CSV file '{fname}' at {fpath}: {e}. Skipping this file.")
         return None
 
-    # print(f"Raw columns for {fname} after initial read: {df.columns.tolist()}") # Debug
-
     if file_key in ["eia_totals", "eia_changes"]:
         df.columns = df.columns.str.lower().str.replace(" (bcf)", "", regex=False).str.replace(" ", "_").str.replace(":", "").str.strip()
         if "period" in df.columns:
             df["period"] = pd.to_datetime(df["period"], errors="coerce")
-        # print(f"{fname} processed. Head:\n{df.head()}") # Debug
-        # print(f"{fname} info:\n{df.info()}") # Debug
     elif file_key == "weather":
         df.columns = df.columns.str.strip()
         if 'Date' in df.columns:
             df = df.rename(columns={'Date': 'date'})
             df['date'] = pd.to_datetime(df['date'], errors='coerce')
-        # print(f"{fname} after date parsing. Head:\n{df.head()}") # Debug
-        # print(f"{fname} after date parsing. Info:\n{df.info()}") # Debug
-
         if 'City Title' in df.columns:
             df = df.rename(columns={'City Title': 'city_title'})
             df['city_title'] = df['city_title'].astype(str).apply(standardize_city_name)
-            # unique_cities = df['city_title'].dropna().unique().tolist() # Kept the diagnostic for unique cities for general info
-            # print(f"\n--- Unique cities parsed from {fname} AFTER STANDARDIZATION: {len(unique_cities)} ---")
-            # print(f"Cities: {unique_cities}")
-            # print("---------------------------------------------------\n")
         else:
             print(f"⚠️ Warning: 'City Title' column not found in {fname}.")
-
         if 'Avg Temp' in df.columns:
             df = df.rename(columns={'Avg Temp': 'avg_temp'})
         if 'avg_temp' in df.columns:
             df['avg_temp'] = pd.to_numeric(df['avg_temp'], errors='coerce')
             if df['avg_temp'].isnull().any():
                 print(f"⚠️ Warning: NaN values found in 'avg_temp' column of {fname} after numeric conversion.")
-        # print(f"{fname} after city standardization and avg_temp conversion. Head:\n{df.head()}") # Debug
-        # print(f"{fname} after city standardization and avg_temp conversion. Info:\n{df.info()}") # Debug
-
     elif file_key == "prices":
         df.columns = df.columns.str.strip()
         if 'Date' in df.columns:
             df = df.rename(columns={'Date': 'date'})
             df['date'] = pd.to_datetime(df['date'], errors='coerce')
-
         henry_col_found = False
         potential_henry_cols = [col for col in df.columns if HENRY_HUB_NAME.lower() in col.lower()]
         if potential_henry_cols:
             df = df.rename(columns={potential_henry_cols[0]: HENRY_HUB_NAME.lower()})
             henry_col_found = True
-            # print(f"Renamed '{potential_henry_cols[0]}' to '{HENRY_HUB_NAME.lower()}' in {fname}.") # Debug
         else:
             print(f"⚠️ Warning: Henry Hub column ('{HENRY_HUB_NAME}' or similar) not found in {fname}. Columns: {df.columns.tolist()}")
-
         if henry_col_found:
             df[HENRY_HUB_NAME.lower()] = pd.to_numeric(df[HENRY_HUB_NAME.lower()], errors='coerce')
-        # print(f"{fname} processed. Head:\n{df.head()}") # Debug
-        # print(f"{fname} info:\n{df.info()}") # Debug
-
     elif file_key in ["fundy", "forecast"]:
         df.columns = df.columns.str.strip()
         if 'Date' in df.columns:
             df['Date'] = pd.to_datetime(df['Date'], errors="coerce")
-        # print(f"{fname} processed. Head:\n{df.head()}") # Debug
-        # print(f"{fname} info:\n{df.info()}") # Debug
-
     elif file_key == "criterion_storage_change":
         df.columns = df.columns.str.strip()
         if 'eff_gas_day' in df.columns:
             df['eff_gas_day'] = pd.to_datetime(df['eff_gas_day'], errors="coerce")
         if 'daily_storage_change' in df.columns:
             df['daily_storage_change'] = pd.to_numeric(df['daily_storage_change'], errors="coerce")
-
             df_cleaned = pd.DataFrame()
             if not df.empty:
                 for (storage_name, year), group in df.groupby([df['storage_name'], df['eff_gas_day'].dt.year]):
@@ -370,17 +214,11 @@ def load_clean_df(file_key, fname, data_path):
                     if not group['daily_storage_change'].dropna().empty:
                         min_val_group_year = group['daily_storage_change'].min()
                         group['daily_storage_change'] = group['daily_storage_change'] - min_val_group_year
-                    # else: # No need for this warning unless actual data is missing
-                    #     print(f"⚠️ Warning: No valid 'daily_storage_change' data found for '{storage_name}' in year {year} for normalization.")
                     df_cleaned = pd.concat([df_cleaned, group])
                 df = df_cleaned.sort_values(by=['storage_name', 'eff_gas_day']).reset_index(drop=True)
-            
-            # current_year = datetime.now().year # Not needed here, as it's hardcoded to 2025
-            df = df[df['eff_gas_day'].dt.year == 2025].copy() # Filter for 2025
-            print(f"✅ Filtered 'daily_storage_change' data to show only year 2025.")
-        # print(f"{fname} processed. Head:\n{df.head()}") # Debug
-        # print(f"{fname} info:\n{df.info()}") # Debug
-
+            current_year = datetime.now().year 
+            df = df[df['eff_gas_day'].dt.year == current_year].copy()
+            print(f"✅ Filtered 'daily_storage_change' data to show only year {current_year}.")
     elif file_key in ["criterion_nuclear_hist", "nuclear_forecast"]:
         df.columns = df.columns.str.strip()
         if 'Date' in df.columns:
@@ -393,25 +231,20 @@ def load_clean_df(file_key, fname, data_path):
         else:
             print(f"⚠️ Warning: '{fname}' does not contain a 'Value' or 'value' column for nuclear generation. Skipping this file.")
             return None
-
         if 'mw_generated' in df.columns:
             df['mw_generated'] = pd.to_numeric(df['mw_generated'], errors='coerce')
-
         if 'Type' in df.columns:
             df['type'] = df['Type'].str.strip()
         if 'Item' in df.columns:
-            df['item'] = df['Item'].str.strip()
+            df = df.rename(columns={'Item': 'item'})
+            df['item'] = df['item'].str.strip()
         elif 'item' not in df.columns:
             df['item'] = 'Unknown Nuclear Plant'
-        # print(f"{fname} processed. Head:\n{df.head()}") # Debug
-        # print(f"{fname} info:\n{df.info()}") # Debug
-
     return df
 
 # --- MODIFIED BLOCK: Adjusted path for specific files within raw_data loading ---
 raw_data = {}
 for key, fname in files.items():
-    # plant_group_mapping and lng_outage_report are expected to be in GOScripts/INFO
     if key == "plant_group_mapping" or key == "lng_outage_report":
         raw_data[key] = load_clean_df(key, fname, goscripts_folder / "INFO")
     else:
@@ -448,7 +281,6 @@ print(f"EIA report date for weather lookup: {latest_eia_report_date}")
 
 # --- Region Data Processing ---
 def process_region_data(display_name, internal_column_name, raw_data, eia_report_date):
-    # print(f"\n--- Processing region data for: {display_name} ---") # Keep only if regional debugging needed
     try:
         merged = pd.DataFrame()
         if "eia_totals" in raw_data and "eia_changes" in raw_data:
@@ -541,8 +373,6 @@ def process_region_data(display_name, internal_column_name, raw_data, eia_report
         else:
             cities_to_process_for_weather = []
             weather_cities_display = "N/A"
-
-        # print(f"Weather cities for {display_name}: {cities_to_process_for_weather}") # Keep if needing to debug specific city lists
 
         weather_df_copy = raw_data.get("weather")
 
@@ -794,12 +624,9 @@ def load_basis_data(prices_path, weather_hist_path, weather_forecast_path):
         actual_henry_col = next((col for col in prices_df_basis.columns if HENRY_HUB_NAME.lower() in col.lower() or HENRY_HUB_NAME == col), None)
         if actual_henry_col:
             prices_df_basis.rename(columns={actual_henry_col: HENRY_HUB_NAME.lower()}, inplace=True)
-            # print(f"Renamed '{actual_henry_col}' to '{HENRY_HUB_NAME.lower()}' in {prices_path.name}.") # Debug
         else:
             print(f"WARNING: Henry Hub column ('{HENRY_HUB_NAME}' or similar) not found in {prices_path.name}. Columns: {prices_df_basis.columns.tolist()}")
 
-        # print(f"Loaded {prices_path.name} for Basis Analysis successfully. Head:\n{prices_df_basis.head()}") # Debug
-        # print(f"{prices_path.name} info:\n{prices_df_basis.info()}") # Debug
     except Exception as e:
         print(f"❌ ERROR: Failed to load PRICES.csv for Basis Analysis from {prices_path}: {e}")
 
@@ -808,8 +635,6 @@ def load_basis_data(prices_path, weather_hist_path, weather_forecast_path):
         weather_df_basis['Date'] = pd.to_datetime(weather_df_basis['Date'], errors='coerce')
         if 'City Title' in weather_df_basis.columns:
             weather_df_basis['City Title'] = weather_df_basis['City Title'].astype(str).apply(standardize_city_name)
-            # print(f"Loaded {weather_hist_path.name} for Basis Analysis successfully. Head:\n{weather_df_basis.head()}") # Debug
-            # print(f"{weather_hist_path.name} info:\n{weather_df_basis.info()}") # Debug
         else:
             print(f"WARNING: '{weather_hist_path.name}' is missing 'City Title' column. Basis analysis might be affected.")
             weather_df_basis = pd.DataFrame()
@@ -826,8 +651,6 @@ def load_basis_data(prices_path, weather_hist_path, weather_forecast_path):
             current_datetime_local = datetime.now()
             forecast_start_date = current_datetime_local.date() + timedelta(days=1)
             forecast_df_basis = forecast_df_basis[forecast_df_basis['Date'].dt.date >= forecast_start_date].copy()
-            # print(f"Loaded and filtered {weather_forecast_path.name} for Basis Analysis. Head:\n{forecast_df_basis.head()}") # Debug
-            # print(f"{weather_forecast_path.name} info:\n{forecast_df_basis.info()}") # Debug
         else:
             print(f"WARNING: '{weather_forecast_path.name}' is missing 'City Title' column. Basis forecast might be affected.")
             forecast_df_basis = pd.DataFrame()
@@ -855,7 +678,6 @@ def prepare_basis_dashboard_data(prices_df, weather_df, forecast_df, component_t
     else:
         print("WARNING: Insufficient primary data (prices_df, Henry Hub, or city map) to identify valid components for Basis Analysis.")
         return {}
-    # print(f"Valid components for Basis Analysis: {valid_components}") # Debug
 
     basis_data_js = {}
     colors = plotly.colors.qualitative.Plotly
@@ -864,34 +686,24 @@ def prepare_basis_dashboard_data(prices_df, weather_df, forecast_df, component_t
 
     for comp in valid_components:
         city = component_to_city.get(comp)
-        # print(f"Processing component '{comp}' mapped to city '{city}'") # Debug
         if not city:
             print(f"WARNING: Skipping component '{comp}': No city mapping found in hardcoded map for Basis Analysis.")
             basis_data_js[comp] = {
-                'city': 'N/A',
-                'overall_x': [], 'overall_y': [], 'overall_fit_x': [], 'overall_fit_y': [],
-                'overall_formula': "N/A (No city mapping)",
-                'per_year_data': [],
-                'forecast_table_data': []
+                'city': 'N/A', 'overall_x': [], 'overall_y': [], 'overall_fit_x': [], 'overall_fit_y': [],
+                'overall_formula': "N/A (No city mapping)", 'per_year_data': [], 'forecast_table_data': []
             }
             continue
 
         if weather_df is None or 'City Title' not in weather_df.columns or 'Avg Temp' not in weather_df.columns:
             print(f"WARNING: Skipping {comp} for Basis Analysis: Weather historical data is invalid or missing critical columns.")
             basis_data_js[comp] = {
-                'city': city,
-                'overall_x': [], 'overall_y': [], 'overall_fit_x': [], 'overall_fit_y': [],
-                'overall_formula': "N/A (Weather data missing)",
-                'per_year_data': [],
-                'forecast_table_data': []
+                'city': city, 'overall_x': [], 'overall_y': [], 'overall_fit_x': [], 'overall_fit_y': [],
+                'overall_formula': "N/A (Weather data missing)", 'per_year_data': [], 'forecast_table_data': []
             }
             continue
 
         city_weather = weather_df[weather_df['City Title'].astype(str).str.strip() == city].copy()
-        # print(f"City weather for '{city}' (head):\n{city_weather.head()}") # Debug
-        # print(f"City weather for '{city}' (info):\n{city_weather.info()}") # Debug
-
-
+        
         hist_merged_all = pd.merge(
             prices_df[['Date', comp, henry_hub_col_lower]],
             city_weather[['Date', 'Avg Temp']],
@@ -899,18 +711,12 @@ def prepare_basis_dashboard_data(prices_df, weather_df, forecast_df, component_t
         ).dropna(subset=[comp, henry_hub_col_lower, 'Avg Temp'])
 
         hist_merged_all = hist_merged_all[hist_merged_all['Date'].dt.year >= start_year_for_analysis].copy()
-        # print(f"Historical merged data for '{comp}' (head):\n{hist_merged_all.head()}") # Debug
-        # print(f"Historical merged data for '{comp}' (info):\n{hist_merged_all.info()}") # Debug
-
-
+        
         if hist_merged_all.empty or hist_merged_all['Avg Temp'].isnull().all() or hist_merged_all[comp].isnull().all():
             print(f"WARNING: Skipping {comp} for Basis Analysis: Not enough historical data for plotting in the last 4 years or critical columns are empty.")
             basis_data_js[comp] = {
-                'city': city,
-                'overall_x': [], 'overall_y': [], 'overall_fit_x': [], 'overall_fit_y': [],
-                'overall_formula': "N/A (Insufficient historical data)",
-                'per_year_data': [],
-                'forecast_table_data': []
+                'city': city, 'overall_x': [], 'overall_y': [], 'overall_fit_x': [], 'overall_fit_y': [],
+                'overall_formula': "N/A (Insufficient historical data)", 'per_year_data': [], 'forecast_table_data': []
             }
             continue
 
@@ -919,10 +725,7 @@ def prepare_basis_dashboard_data(prices_df, weather_df, forecast_df, component_t
         hist_merged_all['Basis'] = hist_merged_all[comp] - hist_merged_all[henry_hub_col_lower]
 
         overall_data_for_fit = hist_merged_all.dropna(subset=['Avg Temp', 'Basis']).copy()
-        # print(f"Overall data for fit for '{comp}' (head):\n{overall_data_for_fit.head()}") # Debug
-        # print(f"Overall data for fit for '{comp}' (info):\n{overall_data_for_fit.info()}") # Debug
-
-
+        
         overall_formula_str = "N/A (Insufficient data for overall quadratic fit)"
         overall_fit_x_smooth = np.array([])
         overall_fit_y_smooth = np.array([])
@@ -940,8 +743,6 @@ def prepare_basis_dashboard_data(prices_df, weather_df, forecast_df, component_t
                 overall_fit_x_smooth = np.linspace(overall_temp_min, overall_temp_max, 100)
                 overall_poly_func = np.poly1d(overall_coeffs)
                 overall_fit_y_smooth = overall_poly_func(overall_fit_x_smooth)
-                # print(f"Overall quadratic fit calculated for '{comp}'. Formula: {overall_formula_str}") # Debug
-
             except Exception as e:
                 print(f"WARNING: Error calculating overall quadratic fit for {comp}: {e}. Formula will be N/A.")
                 pass
@@ -977,7 +778,6 @@ def prepare_basis_dashboard_data(prices_df, weather_df, forecast_df, component_t
                     year_fit_x_smooth = np.linspace(year_temp_min, year_temp_max, 50)
                     year_poly_func = np.poly1d(year_coeffs)
                     year_fit_y_smooth = year_poly_func(year_fit_x_smooth)
-                    # print(f"Quadratic fit calculated for '{comp}' year {year}. Formula: {year_formula_str}") # Debug
                 except Exception as e:
                     print(f"WARNING: Error calculating quadratic fit for {comp} year {year}: {e}. Formula will be N/A.")
                     pass
@@ -992,23 +792,16 @@ def prepare_basis_dashboard_data(prices_df, weather_df, forecast_df, component_t
 
 
             per_year_data.append({
-                'year': year,
-                'x': clean_x_year,
-                'y': clean_y_year,
-                'fit_x': clean_x_year_for_fit,
-                'fit_y': clean_y_year_for_fit_line,
-                'formula': year_formula_str,
-                'color': plotly.colors.qualitative.Plotly[i % len(plotly.colors.qualitative.Plotly)]
+                'year': year, 'x': clean_x_year, 'y': clean_y_year,
+                'fit_x': clean_x_year_for_fit, 'fit_y': clean_y_year_for_fit_line,
+                'formula': year_formula_str, 'color': plotly.colors.qualitative.Plotly[i % len(plotly.colors.qualitative.Plotly)]
             })
 
         forecast_table_data = []
         if overall_coeffs is not None and forecast_df is not None and not forecast_df.empty and 'City Title' in forecast_df.columns:
             city_forecast = forecast_df[forecast_df['City Title'].astype(str).str.strip() == city].copy()
             city_forecast = city_forecast.sort_values(by='Date').head(15).copy()
-            # print(f"Forecast data for '{city}' (head):\n{city_forecast.head()}") # Debug
-            # print(f"Forecast data for '{city}' (info):\n{city_forecast.info()}") # Debug
-
-
+            
             if not city_forecast.empty:
                 overall_poly_func_for_forecast = np.poly1d(overall_coeffs)
                 city_forecast['Predicted Basis'] = city_forecast['Avg Temp'].apply(
@@ -1022,7 +815,6 @@ def prepare_basis_dashboard_data(prices_df, weather_df, forecast_df, component_t
                         'Avg Temp': round(row['Avg Temp'], 1),
                         'Predicted Basis': round(row['Predicted Basis'], 3)
                     })
-                # print(f"Generated {len(forecast_table_data)} forecast rows for '{comp}'.") # Debug
             else:
                 print(f"WARNING: No 7-day forecast data found for city '{city}' in WEATHERforecast.csv starting from the specified forecast start date.")
 
@@ -1035,45 +827,43 @@ def prepare_basis_dashboard_data(prices_df, weather_df, forecast_df, component_t
         clean_hist_y_all = hist_merged_all['Basis'].values[~np.isnan(hist_merged_all['Basis'].values) & ~np.isnan(hist_merged_all['Avg Temp'].values)].tolist()
 
         basis_data_js[comp] = {
-            'city': city,
-            'overall_x': clean_hist_x_all,
-            'overall_y': clean_hist_y_all,
-            'overall_fit_x': clean_overall_x_for_fit,
-            'overall_fit_y': clean_overall_y_for_fit,
-            'overall_formula': overall_formula_str,
-            'per_year_data': per_year_data,
+            'city': city, 'overall_x': clean_hist_x_all, 'overall_y': clean_hist_y_all,
+            'overall_fit_x': clean_overall_x_for_fit, 'overall_fit_y': clean_overall_y_for_fit,
+            'overall_formula': overall_formula_str, 'per_year_data': per_year_data,
             'forecast_table_data': forecast_table_data
         }
     print("--- Basis Data Preparation Complete ---")
     return basis_data_js
 
 def process_nuclear_outage_data_for_dashboard(nuclear_hist_df, prices_df, plant_group_df):
-    """
-    Detects and summarizes nuclear outages, providing both overall average impact per group
-    and details for the last 3 qualifying outages per group.
-    """
     print("\n--- Starting Nuclear Outage Data Processing ---")
     if nuclear_hist_df is None or nuclear_hist_df.empty:
         print("⚠️ Warning: Nuclear historical data is not available for outage detection.")
         return {}, '<option value="">No Nuclear Data</option>'
 
+    print(f"DEBUG: Initial nuclear_hist_df columns: {nuclear_hist_df.columns.tolist()}")
+    print(f"DEBUG: Initial nuclear_hist_df head:\n{nuclear_hist_df.head()}")
+    print(f"DEBUG: Initial nuclear_hist_df info:\n{nuclear_hist_df.info()}")
+
     prices_df_processed = pd.DataFrame()
+    components_for_basis = []
     if prices_df is not None and not prices_df.empty:
         prices_df_processed = prices_df.copy()
         prices_df_processed['date'] = pd.to_datetime(prices_df_processed['date'])
+        print(f"DEBUG: Prices_df_processed columns: {prices_df_processed.columns.tolist()}")
         if HENRY_HUB_NAME.lower() not in prices_df_processed.columns:
             print(f"⚠️ Warning: Henry Hub column '{HENRY_HUB_NAME}' (or its lowercase) not found in prices data. Basis calculations will be skipped.")
-            components_for_basis = []
         else:
             prices_df_processed[HENRY_HUB_NAME.lower()] = pd.to_numeric(prices_df_processed[HENRY_HUB_NAME.lower()], errors='coerce')
-            components_for_basis = [col for col in prices_df_processed.columns if col not in ['date', HENRY_HUB_NAME.lower()]]
-
+            components_for_basis = [col for col in prices_df_processed.columns if col not in ['date', HENRY_HUB_NAME.lower()] and f'{col}_basis' not in prices_df_processed.columns]
+            
             new_basis_cols_data = {}
             for comp in components_for_basis:
                 prices_df_processed[comp] = pd.to_numeric(prices_df_processed[comp], errors='coerce')
                 new_basis_cols_data[f'{comp}_basis'] = prices_df_processed[comp] - prices_df_processed[HENRY_HUB_NAME.lower()]
             prices_df_processed = prices_df_processed.assign(**new_basis_cols_data)
-        # print(f"Prices data processed for nuclear outage basis. Head:\n{prices_df_processed.head()}") # Debug
+            print(f"DEBUG: Prices data processed for nuclear outage basis. Head:\n{prices_df_processed.head()}")
+            print(f"DEBUG: New basis columns added: {[col for col in prices_df_processed.columns if '_basis' in col]}")
     else:
         print("⚠️ Warning: Prices data is not available for basis calculation during outages.")
         components_for_basis = []
@@ -1083,43 +873,61 @@ def process_nuclear_outage_data_for_dashboard(nuclear_hist_df, prices_df, plant_
         print("⚠️ Warning: Plant group mapping is not available. Using individual plants as groups for outage detection.")
         unique_units = nuclear_hist_df['item'].dropna().unique()
         expanded_group_map = [{"Group": unit, "Unit": unit} for unit in unique_units]
+        print(f"DEBUG: Using {len(expanded_group_map)} individual units as groups (no mapping file).")
     else:
-        if 'unit' in plant_group_df.columns and 'group' in plant_group_df.columns:
+        print(f"DEBUG: Plant group mapping DataFrame columns: {plant_group_df.columns.tolist()}")
+        if 'unit' in plant_group_df.columns and 'group' in plant_group_df.columns: # 'unit' is now singular due to explode in load_clean_df
             for _, row in plant_group_df.iterrows():
                 group = row["group"]
-                unit = row["unit"]
+                unit = row["unit"] # 'unit' is now singular
                 expanded_group_map.append({"Group": group, "Unit": unit})
-            # print(f"Plant group mapping loaded from CSV: {len(expanded_group_map)} mappings found.") # Debug
+            print(f"DEBUG: Plant group mapping loaded from CSV: {len(expanded_group_map)} mappings found.")
         else:
-            print("❌ Error: Plant group mapping DataFrame does not have 'unit' and 'group' columns as expected. Falling back to individual units.")
+            print(f"❌ Error: Plant group mapping DataFrame does not have 'unit' and 'group' columns as expected after processing. Found: {plant_group_df.columns.tolist()}. Falling back to individual units.")
             unique_units = nuclear_hist_df['item'].dropna().unique()
             expanded_group_map = [{"Group": unit, "Unit": unit} for unit in unique_units]
+            print(f"DEBUG: Using {len(expanded_group_map)} individual units as groups (mapping file error).")
     group_unit_df = pd.DataFrame(expanded_group_map)
-    # print(f"Group unit DataFrame head:\n{group_unit_df.head()}") # Debug
+    print(f"DEBUG: Group unit DataFrame head:\n{group_unit_df.head()}")
 
     nuclear_df_grouped = nuclear_hist_df.rename(columns={"item": "Unit", "mw_generated": "Output"})
-    nuclear_df_grouped = nuclear_df_grouped.merge(group_unit_df, on="Unit", how="left")
+    print(f"DEBUG: nuclear_df_grouped after initial rename (item to Unit, mw_generated to Output):\n{nuclear_df_grouped.head()}")
+
+    # Perform the merge. The 'Unit' column in nuclear_df_grouped should now match the 'Unit' column in group_unit_df
+    nuclear_df_grouped = pd.merge(nuclear_df_grouped, group_unit_df, on="Unit", how="left")
+    print(f"DEBUG: nuclear_df_grouped after merging with group_unit_df (added 'Group' column). Shape: {nuclear_df_grouped.shape}")
+    print(f"DEBUG: nuclear_df_grouped head after merge:\n{nuclear_df_grouped.head()}")
+    print(f"DEBUG: Unique 'Unit' values before filtering aggregates: {nuclear_df_grouped['Unit'].dropna().unique().tolist()[:5]}...")
+    # Check if the merge was successful
+    print(f"DEBUG: Unique 'Group' values after merge: {nuclear_df_grouped['Group'].dropna().unique().tolist()[:5]}...")
+    if nuclear_df_grouped['Group'].isnull().all():
+        print("WARNING: All 'Group' values are NaN after merge! This means no units from nuclear_hist_df matched the plant_group_mapping. Check unit names consistency.")
 
     nuclear_df_grouped = nuclear_df_grouped[
         ~nuclear_df_grouped['Unit'].astype(str).str.contains('total|all', case=False, na=False)
     ].copy()
+    print(f"DEBUG: nuclear_df_grouped after filtering out 'total'/'all' units. Shape: {nuclear_df_grouped.shape}")
+    print(f"DEBUG: nuclear_df_grouped head after filtering aggregates:\n{nuclear_df_grouped.head()}")
+    print(f"DEBUG: Unique 'Unit' values after filtering aggregates: {nuclear_df_grouped['Unit'].dropna().unique().tolist()[:5]}...")
 
     nuclear_df_grouped = nuclear_df_grouped.dropna(subset=["Group"])
-    # print(f"Nuclear data after grouping and filtering (head):\n{nuclear_df_grouped.head()}") # Debug
-    # print(f"Nuclear data after grouping and filtering (info):\n{nuclear_df_grouped.info()}") # Debug
+    print(f"DEBUG: nuclear_df_grouped after dropping NaNs in 'Group' column. Shape: {nuclear_df_grouped.shape}")
+    print(f"DEBUG: nuclear_df_grouped head after dropping NaNs:\n{nuclear_df_grouped.head()}")
+    print(f"DEBUG: Unique 'Group' values after dropping NaNs: {nuclear_df_grouped['Group'].dropna().unique().tolist()[:5]}...")
 
     if nuclear_df_grouped.empty:
-        print("No grouped nuclear data available after filtering. Cannot detect outages.")
+        print("ERROR: No grouped nuclear data available after filtering. Cannot detect outages.")
         return {}, '<option value="">No Grouped Nuclear Data</option>'
 
     group_daily_output = nuclear_df_grouped.groupby(["date", "Group"])["Output"].sum().reset_index()
     group_daily_output = group_daily_output.sort_values(["Group", "date"])
-    # print(f"Group daily output (head):\n{group_daily_output.head()}") # Debug
+    print(f"DEBUG: Group daily output (sum of 'Output' by date and Group). Head:\n{group_daily_output.head()}")
 
     group_daily_output["Baseline"] = (
         group_daily_output.groupby("Group")["Output"]
         .transform(lambda x: x.shift(1).rolling(window=7, min_periods=1).mean())
     )
+    print(f"DEBUG: Group daily output with calculated 'Baseline'. Head:\n{group_daily_output.head()}")
 
     group_daily_output["Drop %"] = np.where(
         (group_daily_output["Baseline"] != 0) & (~group_daily_output["Baseline"].isna()),
@@ -1132,31 +940,40 @@ def process_nuclear_outage_data_for_dashboard(nuclear_hist_df, prices_df, plant_
         group_daily_output["Drop %"]
     )
     group_daily_output["Drop %"] = group_daily_output["Drop %"].fillna(0)
-    # print(f"Group daily output with baseline and drop % (head):\n{group_daily_output.head()}") # Debug
+    print(f"DEBUG: Group daily output with calculated 'Drop %'. Head:\n{group_daily_output.head()}")
 
     group_daily_output["Outage_Flag"] = group_daily_output["Drop %"] > 5
     group_daily_output['block'] = (group_daily_output.groupby("Group")['Outage_Flag'].transform(lambda x: (x != x.shift()).cumsum()))
     outage_periods = group_daily_output[group_daily_output["Outage_Flag"]].copy()
-    # print(f"Detected outage periods (head):\n{outage_periods.head()}") # Debug
-    # print(f"Detected outage periods (info):\n{outage_periods.info()}") # Debug
+    print(f"DEBUG: Detected outage periods (Outage_Flag = True). Shape: {outage_periods.shape}")
+    print(f"DEBUG: Detected outage periods head:\n{outage_periods.head()}")
 
 
     all_outages_detailed = defaultdict(list)
     grouped_summary_data = defaultdict(lambda: {"total_delta_basis": 0, "total_basis_outage": 0, "total_basis_before": 0, "outage_count": 0, "most_sensitive_comp_overall": "N/A", "max_individual_delta": -float('inf')})
 
     if not outage_periods.empty:
+        print(f"DEBUG: Processing {outage_periods['block'].nunique()} potential outage blocks across {outage_periods['Group'].nunique()} groups.")
         for (group, block_id), df_block in outage_periods.groupby(["Group", "block"]):
             start_date = df_block["date"].min()
             end_date = df_block["date"].max()
             duration = (end_date - start_date).days + 1
-            avg_drop_percent = df_block["Drop %"].mean()
+            
+            actual_outputs_in_block = df_block['Output'].mean()
+            baseline_for_block = df_block['Baseline'].mean()
+            
+            if baseline_for_block > 0:
+                avg_drop_percent = ((baseline_for_block - actual_outputs_in_block) / baseline_for_block) * 100
+            elif actual_outputs_in_block == 0:
+                avg_drop_percent = 100
+            else:
+                avg_drop_percent = np.nan
 
             if duration <= 3:
-                # This specific print indicates intended skipping, so it's a good informational message
-                print(f"INFO: Skipping outage for {group} from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')} due to short duration ({duration} days).")
                 continue
 
             day_before_outage_date = start_date - timedelta(days=1)
+            print(f"DEBUG: Analyzing qualifying outage for Group: {group}, Start: {start_date.strftime('%Y-%m-%d')}, End: {end_date.strftime('%Y-%m-%d')}, Duration: {duration} days, Avg Drop: {avg_drop_percent:.2f}%")
 
             delta_basis_val = "N/A"
             most_sensitive_comp_for_this_outage = "N/A"
@@ -1172,7 +989,8 @@ def process_nuclear_outage_data_for_dashboard(nuclear_hist_df, prices_df, plant_
 
                 if not outage_prices_df.empty and not day_before_prices.empty:
                     max_delta_for_this_outage = -float('inf')
-
+                    print(f"DEBUG: Calculating basis impact for outage of {group}. Day Before Prices shape: {day_before_prices.shape}, Outage Prices shape: {outage_prices_df.shape}")
+                    
                     for comp in components_for_basis:
                         comp_basis_col = f'{comp}_basis'
                         if comp_basis_col in outage_prices_df.columns and comp_basis_col in day_before_prices.columns:
@@ -1181,6 +999,7 @@ def process_nuclear_outage_data_for_dashboard(nuclear_hist_df, prices_df, plant_
 
                             if pd.notna(outage_avg_comp_basis) and pd.notna(day_before_comp_basis):
                                 current_delta = outage_avg_comp_basis - day_before_comp_basis
+                                print(f"DEBUG:   Component {comp}: Day Before Basis={day_before_comp_basis:.3f}, Outage Avg Basis={outage_avg_comp_basis:.3f}, Delta={current_delta:.3f}")
 
                                 try:
                                     if (
@@ -1190,7 +1009,8 @@ def process_nuclear_outage_data_for_dashboard(nuclear_hist_df, prices_df, plant_
                                     ):
                                         grouped_summary_data[group]["max_individual_delta"] = current_delta
                                         grouped_summary_data[group]["most_sensitive_comp_overall"] = comp
-                                except Exception:
+                                except Exception as e_inner:
+                                    print(f"DEBUG: Error updating overall sensitive component for {group}: {e_inner}")
                                     pass
 
                                 if current_delta > max_delta_for_this_outage:
@@ -1199,8 +1019,12 @@ def process_nuclear_outage_data_for_dashboard(nuclear_hist_df, prices_df, plant_
                                     most_sensitive_comp_for_this_outage = comp
                                     avg_basis_outage_for_this_outage = round(outage_avg_comp_basis, 3)
                                     avg_basis_day_before_for_this_outage = round(day_before_comp_basis, 3)
-                # else: # Keep this debug if prices data lookup during outage period is problematic
-                #     print(f"DEBUG: No price data for outage period or day before for {group} from {start_date} to {end_date}.")
+                        else:
+                            print(f"DEBUG:   Component {comp} basis column '{comp_basis_col}' not found in prices data for this outage period or day before. Skipping basis calc for this component.")
+                else: 
+                    print(f"DEBUG: No price data available for the outage period ({start_date} to {end_date}) or the day before ({day_before_outage_date}) for {group}. Basis calculations for this outage will be N/A.")
+            else:
+                print(f"DEBUG: Prices data or components for basis are not available for {group}. Skipping basis calculations for this outage.")
 
             all_outages_detailed[group].append({
                 "Start Date": start_date.strftime("%Y-%m-%d"),
@@ -1212,14 +1036,16 @@ def process_nuclear_outage_data_for_dashboard(nuclear_hist_df, prices_df, plant_
                 "Avg Basis During Outage": avg_basis_outage_for_this_outage,
                 "Avg Basis Day Before": avg_basis_day_before_for_this_outage
             })
+            print(f"DEBUG: Added outage details for {group}: {all_outages_detailed[group][-1]}")
 
             if pd.notna(delta_basis_val) and delta_basis_val != "N/A":
-                grouped_summary_data[group]["total_delta_basis"] += delta_basis_val
+                grouped_summary_data[group]["total_delta_basis"] += (delta_basis_val if isinstance(delta_basis_val, (int, float)) else 0)
                 grouped_summary_data[group]["total_basis_outage"] += (avg_basis_outage_for_this_outage if pd.notna(avg_basis_outage_for_this_outage) and avg_basis_outage_for_this_outage != "N/A" else 0)
                 grouped_summary_data[group]["total_basis_before"] += (avg_basis_day_before_for_this_outage if pd.notna(avg_basis_day_before_for_this_outage) and avg_basis_day_before_for_this_outage != "N/A" else 0)
                 grouped_summary_data[group]["outage_count"] += 1
-    # else: # Only print this if genuinely no outages found, not just short ones
-    #     print("No qualifying outage periods found.")
+                print(f"DEBUG: Updated summary for {group}. Current total_delta_basis: {grouped_summary_data[group]['total_delta_basis']:.3f}, Count: {grouped_summary_data[group]['outage_count']}")
+    else:
+        print("DEBUG: No qualifying outage periods found after initial filtering. No further outage analysis performed.")
 
     final_structured_data = {}
     for group_name in sorted(all_outages_detailed.keys()):
@@ -1240,7 +1066,7 @@ def process_nuclear_outage_data_for_dashboard(nuclear_hist_df, prices_df, plant_
             },
             "recent_outages": sorted_recent_outages
         }
-    print(f"Final structured nuclear outage data for {len(final_structured_data)} groups.")
+    print(f"DEBUG: Final structured nuclear outage data for {len(final_structured_data)} groups.")
 
     plant_options_html_parts = []
     plant_options_html_parts.append('<option value="">-- Select a Plant Group --</option>')
@@ -1248,6 +1074,7 @@ def process_nuclear_outage_data_for_dashboard(nuclear_hist_df, prices_df, plant_
         plant_options_html_parts.append(f'<option value="{plant_group_name}">{plant_group_name}</option>')
 
     plant_options_html = "\n".join(plant_options_html_parts)
+    print(f"DEBUG: Generated nuclear plant group options HTML: {plant_options_html}")
 
     print("--- Finished Nuclear Outage Data Processing ---")
     return dict(final_structured_data), plant_options_html
@@ -1284,10 +1111,8 @@ def generate_lng_outage_tab_html(lng_df):
 
 # --- Main Execution ---
 if __name__ == "__main__":
-    # --- Load and Process Original Dashboard Data ---
     raw_data = {}
     for key, fname in files.items():
-        # plant_group_mapping and lng_outage_report are expected to be in GOScripts/INFO
         if key == "plant_group_mapping" or key == "lng_outage_report":
             raw_data[key] = load_clean_df(key, fname, goscripts_folder / "INFO")
         else:
@@ -1307,8 +1132,6 @@ if __name__ == "__main__":
 
     basis_data_json_str = json.dumps(basis_data_for_js, indent=2)
 
-    # Extract Report Data for Initial HTML Render for default region
-    # This assumes DEFAULT_REGION_DISPLAY_NAME will always be in region_outputs if data is present
     report_data_for_default = region_outputs.get(DEFAULT_REGION_DISPLAY_NAME, {}).get("report", {})
     report_latest_date = report_data_for_default.get("latest_date", "N/A")
     report_current_storage = report_data_for_default.get("current_storage", "N/A")
@@ -1353,15 +1176,10 @@ if __name__ == "__main__":
     nuclear_generation_chart_data_json = json.dumps(nuclear_generation_chart_data)
 
     chart_palette_json = json.dumps({
-        'shaded_area': 'rgba(200, 200, 200, 0.3)',
-        'current_year': '#2ecc71',
-        'min_max_line': '#cccccc',
-        'mean_line': '#666666',
-        'historical_balance': '#2980b9',
-        'forecast_balance': '#e67e22',
-        'daily_change': '#17a2b8',
-        'nuclear_mw': '#f39c12',
-        'nuclear_price': '#9b59b6'
+        'shaded_area': 'rgba(200, 200, 200, 0.3)', 'current_year': '#2ecc71',
+        'min_max_line': '#cccccc', 'mean_line': '#666666', 'historical_balance': '#2980b9',
+        'forecast_balance': '#e67e22', 'daily_change': '#17a2b8',
+        'nuclear_mw': '#f39c12', 'nuclear_price': '#9b59b6'
     }, indent=4)
 
 
@@ -2335,10 +2153,10 @@ if __name__ == "__main__":
 </body>
 </html>
 """
-try:
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html_template_raw)
-    print(f"\n✅ Dashboard successfully saved to: {output_path.name}")
-    webbrowser.open_new_tab(output_path.as_uri())
-except Exception as e:
-    print(f"❌ Error writing or opening HTML dashboard: {e}")
+    try:
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(html_template_raw)
+        print(f"\n✅ Dashboard successfully saved to: {output_path.name}")
+        webbrowser.open_new_tab(output_path.as_uri())
+    except Exception as e:
+        print(f"❌ Error writing or opening HTML dashboard: {e}")

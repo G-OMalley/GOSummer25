@@ -785,13 +785,43 @@ def main():
             current_fcst *= model_scale
             print(f"[{r}] Raw Forecast: {original_fcst:.2f} Bcf, Scaled Forecast: {current_fcst:.2f} Bcf (Scale: {model_scale:.2f})")
 
+        # Display 4-week backtest (prediction vs actual) - NEW ADDITION
+        if current_preds_history is not None and current_actuals_history is not None:
+            print(f"\n[{r}] 4-Week Backtest:")
+
+            # Ensure we have enough data for the last 4 weeks
+            num_weeks_to_show = min(4, len(current_actuals_history))
+            if num_weeks_to_show > 0:
+                # Build DataFrame
+                bt_df = pd.DataFrame({
+                    "Date": current_actuals_history.index[-num_weeks_to_show:],
+                    "Region": r,
+                    "Predicted": (current_preds_history[-num_weeks_to_show:] * model_scale).round(2),
+                    "Actual": current_actuals_history.iloc[-num_weeks_to_show:].round(2)
+                })
+                bt_df["Error"] = (bt_df["Predicted"] - bt_df["Actual"]).round(2)
+
+                # Show table
+                print(tabulate(bt_df, headers="keys", tablefmt="github", showindex=False))
+            else:
+                print(f"Not enough data to show 4-week backtest for {r}.")
+
         # --- 796 INTEGRATION: Retrieve previous week's actual and forecast ---
         prev_wk_actual = _get_regional_actual(chg_full, latest_eia_date, r)
         prev_wk_fcst = np.nan
         if current_preds_history is not None and len(current_preds_history) >= 2:
-            prev_wk_fcst = current_preds_history[-2] # Second to last prediction
-            if not np.isnan(prev_wk_fcst):
-                prev_wk_fcst *= model_scale # Apply scale to previous week's forecast as well
+            # We want the prediction for the week whose actual is latest_eia_date
+            # The last prediction in current_preds_history is for current_forecast_date
+            # So the one before that is for latest_eia_date
+            prev_wk_fcst_raw = current_preds_history[-1] # This would be the prediction for current_forecast_date
+            if len(current_preds_history) > 1:
+                # The second to last prediction is for latest_eia_date
+                prev_wk_fcst_raw = current_preds_history[-2] 
+            else: # If there's only one prediction, it's for current_forecast_date, so prev_wk_fcst is NaN
+                prev_wk_fcst_raw = np.nan
+
+            if not np.isnan(prev_wk_fcst_raw):
+                prev_wk_fcst = prev_wk_fcst_raw * model_scale # Apply scale to previous week's forecast as well
         # --- 796 INTEGRATION END ---
 
         # Append results to output_rows
@@ -852,4 +882,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-# --- 796 INTEGRATION END: Main function ---
