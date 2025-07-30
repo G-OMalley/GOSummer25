@@ -16,8 +16,9 @@ __pycache__/
 Scripts/MarketAnalysis_Report_Output/
 Weather/Outputs/
 EIAGuesser/output
+EIAGuesser/model_outputs    
 Criterion/CriterionInfo
-
+ICE/Outputs
 
 # Specific directory file types
 Fundy/*.xlsx
